@@ -2,9 +2,12 @@
   "name": "nickel",
   "version": "0.1.0",
   "description": "Handle tasks on multiple local SCM repositories",
-  "main": "nickel.js",
   "scripts": {
+    "build": "tsc",
     "test": "jasmine"
+  },
+  "bin": {
+    "nickel": "./dist/nickel.js"
   },
   "keywords": [
     "git"
@@ -13,5 +16,8 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^2.8.4"
+  },
+  "dependencies": {
+    "commander": "^2.15.1"
   }
 }
