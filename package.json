@@ -1,0 +1,17 @@
+{
+  "name": "nickel",
+  "version": "0.1.0",
+  "description": "Handle tasks on multiple local SCM repositories",
+  "main": "nickel.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "keywords": [
+    "git"
+  ],
+  "author": "Aaron Goldstein",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^2.8.4"
+  }
+}
