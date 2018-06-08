@@ -15,9 +15,12 @@
   "author": "Aaron Goldstein",
   "license": "MIT",
   "devDependencies": {
+    "@types/table": "^4.0.5",
     "typescript": "^2.8.4"
   },
   "dependencies": {
-    "commander": "^2.15.1"
+    "@types/node": "^10.1.4",
+    "commander": "^2.15.1",
+    "table": "^4.0.3"
   }
 }
