@@ -83,7 +83,7 @@ function syncAllProjects(actions: string[], projects: NickelProject[]): Promise<
             let report = new NickelReport({
                 'project.name': 'Project',
                 'branch': 'Branch',
-                'updateCount': 'Count',
+                'updateCount': 'Updated',
                 'status': 'Status'
             });
             console.log(report.buildReport(syncReports));
