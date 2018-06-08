@@ -8,8 +8,9 @@ import {NickelProject} from "./nickel-project";
 import {SyncResult} from "./sync";
 import {NickelReport} from "./nickel-report";
 import {NickelTimer} from "./nickel-timer";
+import {ReportResult} from "./report";
 
-const ALL_COMMANDS = ['sync'];
+const ALL_COMMANDS = ['sync', 'report'];
 
 /*
 Global controls
@@ -70,15 +71,40 @@ vm.runInContext(configScriptBytes, configContext);
 Action implementations
  */
 
+function reportAllProjects(actions: string[], projects: NickelProject[]): Promise<any> {
+    let idx = actions.findIndex(a => a === 'report');
+    if (idx >= 0) {
+        // Report
+        let timer = new NickelTimer();
+        let reportPromises: Promise<ReportResult>[] = [];
+        projects.forEach(project => {
+            reportPromises.push(project.report());
+        });
+        return Promise.all(reportPromises).then(reports => {
+            let report = new NickelReport({
+                'project.name': 'Project',
+                'branch': 'Branch',
+                'modified': '# Mod',
+                'commit': 'Commit',
+            });
+            console.log(report.buildReport(reports));
+            console.log(`${timer.elapsed()}ms elapsed`);
+        });
+    } else {
+        // Do nothing
+        return Promise.resolve();
+    }
+}
+
 function syncAllProjects(actions: string[], projects: NickelProject[]): Promise<any> {
     let idx = actions.findIndex(a => a === 'sync');
     if (idx >= 0) {
         // Sync
+        let timer = new NickelTimer();
         let syncPromises: Promise<SyncResult>[] = [];
         projects.forEach(project => {
             syncPromises.push(project.sync());
         });
-        let timer = new NickelTimer();
         return Promise.all(syncPromises).then(syncReports => {
             let report = new NickelReport({
                 'project.name': 'Project',
@@ -102,4 +128,5 @@ Initialize the project list
 let projects = ConfigContext.projects;
 
 Promise.resolve()
+    .then(() => reportAllProjects(actions, projects))
     .then(() => syncAllProjects(actions, projects));
