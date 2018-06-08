@@ -54,6 +54,8 @@ export class NickelReport {
             // Value transformations
             if (value === SyncStatus.Success) {
                 value = c.green(value);
+            } else if (value === SyncStatus.Failure) {
+                value = c.red(value);
             }
 
             dataRow.push(value);
