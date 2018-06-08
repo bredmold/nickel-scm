@@ -1,4 +1,6 @@
 import {table} from "table";
+import * as c from 'ansi-colors';
+import {SyncResult, SyncStatus} from "./sync";
 
 /**
  * Build a report after running some task on each project
@@ -21,7 +23,7 @@ export class NickelReport {
         let headerRow = [];
         for (let key in this.header) {
             let value = this.header[key];
-            headerRow.push(value);
+            headerRow.push(c.bold(value));
         }
         data.push(headerRow);
 
@@ -44,11 +46,17 @@ export class NickelReport {
     private processRow(row: any, data: any[]) {
         let dataRow = [];
         for (let key in this.header) {
-            let context = row;
+            let value = row;
             key.split(/\./).forEach(keySegment => {
-                context = context[keySegment];
+                value = value[keySegment];
             });
-            dataRow.push(context);
+
+            // Value transformations
+            if (value === SyncStatus.Success) {
+                value = c.green(value);
+            }
+
+            dataRow.push(value);
         }
 
         data.push(dataRow);
