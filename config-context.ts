@@ -18,8 +18,13 @@ export class ConfigContext {
      * Register a project definition
      *
      * @param {string} name The name of the project, or a full path
+     * @param c Configuration
      */
-    project(name: string) {
-        ConfigContext.projects.push(new NickelProject(name, ConfigContext.root));
+    project(name: string, c: any) {
+        ConfigContext.projects.push(new NickelProject({
+            name: name,
+            path: ConfigContext.root,
+            build: (c && c.build) || undefined,
+        }));
     }
 }

@@ -16,7 +16,7 @@ The content of this file is a series of project declarations. For example:
 ```javascript
 root = 'c:/Dev/Lexipol';
 
-project('kms-parent-child-agency-base');
+project('kms-parent-child-agency-base', {build: true});
 project('kms-agency-commons');
 project('kms-agency-service');
 project('kms-parent-child-agency-commons');
@@ -100,3 +100,35 @@ Here are the meanings of the status values:
 | sync-failure | Failure |
 | sync-new     | Nothing happened - this indicates a bug in nickel |
 
+### build
+
+Build all projects that have a defined build system:
+
+```
+╔═════════════════════════════════╤══════╤════════════════════╤═════════╤═══════════════╤══════════════════════════╗
+║ Project                         │ Type │ Branch             │ Commit  │ Status        │ Message                  ║
+╟─────────────────────────────────┼──────┼────────────────────┼─────────┼───────────────┼──────────────────────────╢
+║ kms-parent-child-agency-base    │ mvn  │ Feature/NEXGEN-892 │ ca14608 │ build-failure │ There are test failures. ║
+║ kms-agency-commons              │ none │ Feature/NEXGEN-892 │ 661cc1d │ build-nope    │                          ║
+║ kms-agency-service              │ none │ Feature/NEXGEN-892 │ fa053ca │ build-nope    │                          ║
+║ kms-parent-child-agency-commons │ none │ Feature/NEXGEN-892 │ 263be7c │ build-nope    │                          ║
+║ kms-parent-child-agency-service │ none │ Feature/NEXGEN-892 │ 4998a09 │ build-nope    │                          ║
+╚═════════════════════════════════╧══════╧════════════════════╧═════════╧═══════════════╧══════════════════════════╝
+```
+
+| Column Name | Description |
+| ---         | --- |
+| Project     | The name of the project |
+| Type        | What kind of build system (`none` or `mvn`) |
+| Branch      | Current branch for the project |
+| Commit      | Latest commit ID on the current branch |
+| Status      | Overall result of the build for this project |
+| Message     | For build failures, an indicator of what happened |
+
+Here are the meanings of the status values:
+
+| Status | Description |
+| ---    | --- |
+| build-success | Success |
+| build-failure | Failure |
+| build-nope    | Project has no build step |

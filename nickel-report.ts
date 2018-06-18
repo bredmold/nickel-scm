@@ -1,6 +1,7 @@
 import {table} from "table";
 import * as c from 'ansi-colors';
 import {SyncResult, SyncStatus} from "./sync";
+import {BuildStatus} from "./build";
 
 /**
  * Build a report after running some task on each project
@@ -41,7 +42,7 @@ export class NickelReport {
      * Process a single data row, generating an appropriate report value
      *
      * @param row Data row in object form
-     * @param {any[]} data table data to build
+     * @param {any[]} data table data to buildSystem
      */
     private processRow(row: any, data: any[]) {
         let dataRow = [];
@@ -52,9 +53,9 @@ export class NickelReport {
             });
 
             // Value transformations
-            if (value === SyncStatus.Success) {
+            if (value === SyncStatus.Success || value === BuildStatus.Success) {
                 value = c.green(value);
-            } else if (value === SyncStatus.Failure) {
+            } else if (value === SyncStatus.Failure || value === BuildStatus.Failure) {
                 value = c.red(value);
             }
 

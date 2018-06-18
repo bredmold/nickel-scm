@@ -9,8 +9,9 @@ import {SyncResult} from "./sync";
 import {NickelReport} from "./nickel-report";
 import {NickelTimer} from "./nickel-timer";
 import {ReportResult} from "./report";
+import {BuildResult} from "./build";
 
-const ALL_COMMANDS = ['sync', 'report'];
+const ALL_COMMANDS = ['sync', 'report', 'build'];
 
 /*
 Global controls
@@ -88,7 +89,7 @@ function reportAllProjects(actions: string[], projects: NickelProject[]): Promis
                 'commit': 'Commit',
             });
             console.log(report.buildReport(reports));
-            console.log(`${timer.elapsed()}ms elapsed`);
+            console.log(`${timer.elapsed() / 1000}s elapsed`);
         });
     } else {
         // Do nothing
@@ -113,7 +114,34 @@ function syncAllProjects(actions: string[], projects: NickelProject[]): Promise<
                 'status': 'Status'
             });
             console.log(report.buildReport(syncReports));
-            console.log(`${timer.elapsed()}ms elapsed`);
+            console.log(`${timer.elapsed() / 1000}s elapsed`);
+        });
+    } else {
+        // Do nothing
+        return Promise.resolve();
+    }
+}
+
+function buildAllProjects(actions: string[], projects: NickelProject[]): Promise<any> {
+    let idx = actions.findIndex(a => a === 'build');
+    if (idx >= 0) {
+        // Build
+        let timer = new NickelTimer();
+        let buildPromises: Promise<BuildResult>[] = [];
+        projects.forEach(project => {
+            buildPromises.push(project.build());
+        });
+        return Promise.all(buildPromises).then(buildReports => {
+            let report = new NickelReport({
+                'project.name': 'Project',
+                'type': 'Type',
+                'branch': 'Branch',
+                'commit': 'Commit',
+                'status': 'Status',
+                'error': 'Message',
+            });
+            console.log(report.buildReport(buildReports));
+            console.log(`${timer.elapsed() / 1000}s elapsed`);
         });
     } else {
         // Do nothing
@@ -129,4 +157,5 @@ let projects = ConfigContext.projects;
 
 Promise.resolve()
     .then(() => reportAllProjects(actions, projects))
-    .then(() => syncAllProjects(actions, projects));
+    .then(() => syncAllProjects(actions, projects))
+    .then(() => buildAllProjects(actions, projects));
