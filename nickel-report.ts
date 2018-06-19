@@ -3,6 +3,12 @@ import {SyncStatus} from "./sync";
 import {BuildStatus} from "./build";
 import chalk, {Level} from "chalk";
 
+interface ColumnConfig {
+    path: string;
+    title: string;
+    maxWidth: number;
+}
+
 /**
  * Build a report after running some task on each project
  *
@@ -11,9 +17,28 @@ import chalk, {Level} from "chalk";
  *   values = Printable header value
  */
 export class NickelReport {
-    constructor(private header: any) {
+    private columns: ColumnConfig[] = [];
+
+    constructor(header: any) {
         chalk.enabled = true;
         chalk.level = Level.Basic;
+
+        for (let key in header) {
+            let title: string;
+            let maxWidth: number = -1;
+
+            let value = header[key];
+            if ((typeof value) === 'string') {
+                title = value;
+            } else {
+                title = value.header;
+                if ((typeof value.width) === 'number') {
+                    maxWidth = value.width;
+                }
+            }
+
+            this.columns.push({path: key, title: title, maxWidth: maxWidth});
+        }
     }
 
     /**
@@ -31,26 +56,25 @@ export class NickelReport {
 
         let data: any[] = [];
 
-        let headerRow = [];
-        let idx = 0;
-        for (let key in this.header) {
-            let value = this.header[key];
-            if ((typeof value) === 'string') {
-                headerRow.push(chalk.bold(value));
-            } else {
-                headerRow.push(chalk.bold(value.header));
-                if ((typeof value.width) === 'number') {
+        data.push(this.columns.map(col => chalk.bold(col.title)));
+
+        rows.forEach(row => this.processRow(row, data));
+
+        for (let rowIdx in data) {
+            let row = data[rowIdx];
+            for (let colIdx in this.columns) {
+                let cell = row[colIdx];
+                let config = this.columns[colIdx];
+
+                if (config.maxWidth > 0 && cell.length > config.maxWidth) {
                     if (options.columns === undefined) {
                         options.columns = {};
                     }
-                    options.columns[idx] = {width: value.width};
+                    options.columns[colIdx] = {width: config.maxWidth};
                 }
-            }
-            ++idx;
-        }
-        data.push(headerRow);
 
-        rows.forEach(row => this.processRow(row, data));
+            }
+        }
 
         return table(data, options);
     }
@@ -63,7 +87,8 @@ export class NickelReport {
      */
     private processRow(row: any, data: any[]) {
         let dataRow = [];
-        for (let key in this.header) {
+        for (let colIdx in this.columns) {
+            let key = this.columns[colIdx].path;
             let value = row;
             key.split(/\./).forEach(keySegment => {
                 value = value[keySegment];

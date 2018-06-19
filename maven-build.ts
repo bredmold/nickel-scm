@@ -38,7 +38,7 @@ export class MavenBuild implements BuildSystem {
                 } else {
                     resolve({
                         status: BuildStatus.Success,
-                        error: `mvn -f ${this.pom} clean install`,
+                        error: ''
                     });
                 }
             });
