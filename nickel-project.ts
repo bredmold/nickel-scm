@@ -61,23 +61,25 @@ export class NickelProject {
 
     sync(): Promise<SyncResult> {
         return new Promise<SyncResult>((resolve, reject) => {
-            this.repository.branch().then(
-                branch => {
-                    this.repository.pull().then(
-                        pullResult => {
-                            resolve({
-                                status: SyncStatus.Success,
-                                updateCount: pullResult.updatedFiles.length,
-                                project: this,
-                                branch: branch,
-                            });
-                        },
-                        e => resolve({status: SyncStatus.Failure, updateCount: 0, project: this, branch: ''})
-                    );
+            this.repository.status().then(
+                status => {
+                    if (status.modifiedFiles.length > 0) {
+                        resolve({status: SyncStatus.Dirty, updateCount: 0, project: this, branch: status.branch});
+                    } else {
+                        this.repository.pull().then(
+                            pullResult => {
+                                resolve({
+                                    status: SyncStatus.Success,
+                                    updateCount: pullResult.updatedFiles.length,
+                                    project: this,
+                                    branch: status.branch,
+                                });
+                            },
+                            e => resolve({status: SyncStatus.Failure, updateCount: 0, project: this, branch: ''})
+                        );
+                    }
                 },
-                e => {
-                    resolve({status: SyncStatus.Failure, updateCount: 0, project: this, branch: ''});
-                }
+                e => resolve({status: SyncStatus.Failure, updateCount: 0, project: this, branch: ''})
             );
         });
     }

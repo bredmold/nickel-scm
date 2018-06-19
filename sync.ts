@@ -4,6 +4,7 @@ export enum SyncStatus {
     New = 'sync-new',
     Success = 'sync-success',
     Failure = 'sync-fail',
+    Dirty = 'sync-dirty',
 }
 
 export interface SyncResult {

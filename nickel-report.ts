@@ -1,7 +1,7 @@
 import {table, TableUserConfig} from "table";
-import * as c from 'ansi-colors';
 import {SyncStatus} from "./sync";
 import {BuildStatus} from "./build";
+import chalk, {Level} from "chalk";
 
 /**
  * Build a report after running some task on each project
@@ -12,6 +12,8 @@ import {BuildStatus} from "./build";
  */
 export class NickelReport {
     constructor(private header: any) {
+        chalk.enabled = true;
+        chalk.level = Level.Basic;
     }
 
     /**
@@ -34,9 +36,9 @@ export class NickelReport {
         for (let key in this.header) {
             let value = this.header[key];
             if ((typeof value) === 'string') {
-                headerRow.push(c.bold(value));
+                headerRow.push(chalk.bold(value));
             } else {
-                headerRow.push(c.bold(value.header));
+                headerRow.push(chalk.bold(value.header));
                 if ((typeof value.width) === 'number') {
                     if (options.columns === undefined) {
                         options.columns = {};
@@ -69,9 +71,11 @@ export class NickelReport {
 
             // Value transformations
             if (value === SyncStatus.Success || value === BuildStatus.Success) {
-                value = c.green(value);
+                value = chalk.green(value);
             } else if (value === SyncStatus.Failure || value === BuildStatus.Failure) {
-                value = c.red(value);
+                value = chalk.red(value);
+            } else if (value === SyncStatus.Dirty) {
+                value = chalk.bgYellow.black(value);
             }
 
             dataRow.push(value);
