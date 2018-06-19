@@ -4,6 +4,7 @@
 import {NickelProject} from "./nickel-project";
 
 export class ConfigContext {
+    static separators: number[] = [];
     static projects: NickelProject[] = [];
     static root: string = '';
 
@@ -26,5 +27,9 @@ export class ConfigContext {
             path: ConfigContext.root,
             build: (c && c.build) || undefined,
         }));
+    }
+
+    separator() {
+        ConfigContext.separators.push(ConfigContext.projects.length);
     }
 }

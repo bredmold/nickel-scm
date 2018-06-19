@@ -18,10 +18,13 @@ interface ColumnConfig {
  */
 export class NickelReport {
     private columns: ColumnConfig[] = [];
+    private separators: number[] = [0, 1];
 
-    constructor(header: any) {
+    constructor(header: any, separators: number[]) {
         chalk.enabled = true;
         chalk.level = Level.Basic;
+
+        separators.forEach(idx => this.separators.push(idx + 1));
 
         for (let key in header) {
             let title: string;
@@ -50,7 +53,8 @@ export class NickelReport {
         let dataCount = rows.length + 1;
         let options: TableUserConfig = {
             drawHorizontalLine: (index: number, size: number) => {
-                return index === 0 || index === 1 || index === dataCount;
+                let sepIdx = this.separators.findIndex(sIdx => sIdx === index);
+                return (sepIdx >= 0) || (index === dataCount);
             }
         };
 

@@ -72,7 +72,7 @@ vm.runInContext(configScriptBytes, configContext);
 Action implementations
  */
 
-function reportAllProjects(actions: string[], projects: NickelProject[]): Promise<any> {
+function reportAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
     let idx = actions.findIndex(a => a === 'report');
     if (idx >= 0) {
         // Report
@@ -87,7 +87,7 @@ function reportAllProjects(actions: string[], projects: NickelProject[]): Promis
                 'branch': 'Branch',
                 'modified': '# Mod',
                 'commit': 'Commit',
-            });
+            }, separators);
             console.log(report.buildReport(reports));
             console.log(`${timer.elapsed() / 1000}s elapsed`);
         });
@@ -97,7 +97,7 @@ function reportAllProjects(actions: string[], projects: NickelProject[]): Promis
     }
 }
 
-function syncAllProjects(actions: string[], projects: NickelProject[]): Promise<any> {
+function syncAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
     let idx = actions.findIndex(a => a === 'sync');
     if (idx >= 0) {
         // Sync
@@ -112,7 +112,7 @@ function syncAllProjects(actions: string[], projects: NickelProject[]): Promise<
                 'branch': 'Branch',
                 'updateCount': 'Updated',
                 'status': 'Status'
-            });
+            }, separators);
             console.log(report.buildReport(syncReports));
             console.log(`${timer.elapsed() / 1000}s elapsed`);
         });
@@ -122,7 +122,7 @@ function syncAllProjects(actions: string[], projects: NickelProject[]): Promise<
     }
 }
 
-function buildAllProjects(actions: string[], projects: NickelProject[]): Promise<any> {
+function buildAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
     let idx = actions.findIndex(a => a === 'build');
     if (idx >= 0) {
         // Build
@@ -139,7 +139,7 @@ function buildAllProjects(actions: string[], projects: NickelProject[]): Promise
                 'commit': 'Commit',
                 'status': 'Status',
                 'error': {header: 'Message', width: 120},
-            });
+            }, separators);
             console.log(report.buildReport(buildReports));
             console.log(`${timer.elapsed() / 1000}s elapsed`);
         });
@@ -154,8 +154,9 @@ Initialize the project list
  */
 
 let projects = ConfigContext.projects;
+let separators = ConfigContext.separators;
 
 Promise.resolve()
-    .then(() => reportAllProjects(actions, projects))
-    .then(() => syncAllProjects(actions, projects))
-    .then(() => buildAllProjects(actions, projects));
+    .then(() => reportAllProjects(actions, projects, separators))
+    .then(() => syncAllProjects(actions, projects, separators))
+    .then(() => buildAllProjects(actions, projects, separators));

@@ -16,11 +16,14 @@ The content of this file is a series of project declarations. For example:
 ```javascript
 root = 'c:/Dev/Lexipol';
 
-project('kms-parent-child-agency-base', {build: true});
-project('kms-agency-commons');
-project('kms-agency-service');
-project('kms-parent-child-agency-commons');
-project('kms-parent-child-agency-service');
+project('project-base', {build: true});
+project('project-commons');
+project('project-service');
+
+separator(); // Draw a horizontal line in all reports
+project('thing-base', {build: true});
+project('thing-commons');
+project('thing-service');
 ```
 
 The first line declares where the projects live. If you have projects in multiple locations,
