@@ -1,6 +1,6 @@
-import {table} from "table";
+import {table, TableUserConfig} from "table";
 import * as c from 'ansi-colors';
-import {SyncResult, SyncStatus} from "./sync";
+import {SyncStatus} from "./sync";
 import {BuildStatus} from "./build";
 
 /**
@@ -11,7 +11,8 @@ import {BuildStatus} from "./build";
  *   values = Printable header value
  */
 export class NickelReport {
-    constructor(private header: any) {}
+    constructor(private header: any) {
+    }
 
     /**
      * Generate a report string, based on the header structure
@@ -19,22 +20,36 @@ export class NickelReport {
      * @param {any[]} rows Report rows, structure determined by the header
      */
     buildReport(rows: any[]): string {
+        let dataCount = rows.length + 1;
+        let options: TableUserConfig = {
+            drawHorizontalLine: (index: number, size: number) => {
+                return index === 0 || index === 1 || index === dataCount;
+            }
+        };
+
         let data: any[] = [];
 
         let headerRow = [];
+        let idx = 0;
         for (let key in this.header) {
             let value = this.header[key];
-            headerRow.push(c.bold(value));
+            if ((typeof value) === 'string') {
+                headerRow.push(c.bold(value));
+            } else {
+                headerRow.push(c.bold(value.header));
+                if ((typeof value.width) === 'number') {
+                    if (options.columns === undefined) {
+                        options.columns = {};
+                    }
+                    options.columns[idx] = {width: value.width};
+                }
+            }
+            ++idx;
         }
         data.push(headerRow);
 
         rows.forEach(row => this.processRow(row, data));
 
-        let options = {
-            drawHorizontalLine: (index: number, size: number) => {
-                return index === 0 || index === 1 || index === size;
-            }
-        };
         return table(data, options);
     }
 

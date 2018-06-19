@@ -138,7 +138,7 @@ function buildAllProjects(actions: string[], projects: NickelProject[]): Promise
                 'branch': 'Branch',
                 'commit': 'Commit',
                 'status': 'Status',
-                'error': 'Message',
+                'error': {header: 'Message', width: 120},
             });
             console.log(report.buildReport(buildReports));
             console.log(`${timer.elapsed() / 1000}s elapsed`);

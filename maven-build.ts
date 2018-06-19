@@ -1,6 +1,7 @@
 import {BuildStatus, BuildSystem, BuildSystemType, ShortBuildResult} from "./build";
 import {NickelProject} from "./nickel-project";
 import * as child_process from "child_process";
+import {WriteStream} from "tty";
 
 export class MavenBuild implements BuildSystem {
     type: BuildSystemType;
@@ -21,7 +22,7 @@ export class MavenBuild implements BuildSystem {
         const mvnCmd = `mvn ${pomOption} clean install`;
 
         return new Promise<any>((resolve, reject) => {
-            const summaryRe = /^\[ERROR] Failed to execute goal on project [a-zA-Z0-9.\-_]+:\s*(.*)/;
+            const summaryRe = /^\[ERROR] Failed to execute goal ([a-zA-Z0-9:._\- ()]+)?on project [a-zA-Z0-9.\-_]+:\s*(.*)/;
             child_process.exec(mvnCmd, {cwd: this.path, encoding: 'utf8'}, (error, stdout, stderr) => {
                 if (error) {
                     let lines = stdout.split(/\n/);
@@ -29,7 +30,8 @@ export class MavenBuild implements BuildSystem {
                     lines.forEach(line => {
                         let m = line.trim().match(summaryRe);
                         if (m) {
-                            summary = m[1];
+                            summary = m[2];
+                            summary = summary.replace(' -> [Help 1]', '');
                         }
                     });
                     reject(summary);
