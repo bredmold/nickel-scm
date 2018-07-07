@@ -2,6 +2,7 @@ import {table, TableUserConfig} from "table";
 import {SyncStatus} from "./sync";
 import {BuildStatus} from "./build";
 import chalk, {Level} from "chalk";
+import {CleanupStatus} from "./cleanup";
 
 interface ColumnConfig {
     path: string;
@@ -99,11 +100,11 @@ export class NickelReport {
             });
 
             // Value transformations
-            if (value === SyncStatus.Success || value === BuildStatus.Success) {
+            if (value === SyncStatus.Success || value === BuildStatus.Success || value === CleanupStatus.Success) {
                 value = chalk.green(value);
-            } else if (value === SyncStatus.Failure || value === BuildStatus.Failure) {
+            } else if (value === SyncStatus.Failure || value === BuildStatus.Failure || value == CleanupStatus.Failure) {
                 value = chalk.red(value);
-            } else if (value === SyncStatus.Dirty) {
+            } else if (value === SyncStatus.Dirty || value === CleanupStatus.Dirty) {
                 value = chalk.bgYellow.black(value);
             }
 

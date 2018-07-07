@@ -10,8 +10,9 @@ import {NickelReport} from "./nickel-report";
 import {NickelTimer} from "./nickel-timer";
 import {ReportResult} from "./report";
 import {BuildResult} from "./build";
+import {CleanupResult} from "./cleanup";
 
-const ALL_COMMANDS = ['sync', 'report', 'build'];
+const ALL_COMMANDS = ['sync', 'report', 'build', 'cleanup'];
 
 /*
 Global controls
@@ -97,6 +98,30 @@ function reportAllProjects(actions: string[], projects: NickelProject[], separat
     }
 }
 
+function cleanupAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
+    let idx = actions.findIndex(a => a === 'cleanup');
+    if (idx >= 0) {
+        // Cleanup
+        let timer = new NickelTimer();
+        let cleanupPromises: Promise<CleanupResult>[] = [];
+        projects.forEach(project => {
+            cleanupPromises.push(project.cleanup());
+        });
+        return Promise.all(cleanupPromises).then(reports => {
+            let report = new NickelReport({
+                'project.name': 'Project',
+                'branch': 'Branch',
+                'status': 'Status',
+            }, separators);
+            console.log(report.buildReport(reports));
+            console.log(`${timer.elapsed() / 1000}s elapsed`);
+        });
+    } else {
+        // Do nothing
+        return Promise.resolve();
+    }
+}
+
 function syncAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
     let idx = actions.findIndex(a => a === 'sync');
     if (idx >= 0) {
@@ -158,5 +183,6 @@ let separators = ConfigContext.separators;
 
 Promise.resolve()
     .then(() => reportAllProjects(actions, projects, separators))
+    .then(() => cleanupAllProjects(actions, projects, separators))
     .then(() => syncAllProjects(actions, projects, separators))
     .then(() => buildAllProjects(actions, projects, separators));

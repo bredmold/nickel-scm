@@ -2,6 +2,7 @@ import {SyncResult, SyncStatus} from "./sync";
 import {GitRepository} from "./git-repository";
 import {ReportResult} from "./report";
 import {BuildResult, BuildStatus, BuildSystem, inferBuildSystem, NoBuildSystem} from "./build";
+import {CleanupResult, CleanupStatus} from "./cleanup";
 
 /** Configuration values that can be passed in for a project */
 export interface NickelProjectConfig {
@@ -13,17 +14,22 @@ export interface NickelProjectConfig {
 
     /** Build system to use - if none is specified, the project is skipped during builds */
     build: string | boolean;
+
+    /** Name of the default branch (used during cleanup) */
+    defaultBranch: string;
 }
 
 export class NickelProject {
     name: string;
     path: string;
+    defaultBranch: string;
     buildSystem: BuildSystem;
     repository: GitRepository;
 
     constructor(c: NickelProjectConfig) {
         this.name = c.name;
         this.path = c.path ? `${c.path}/${c.name}` : c.name;
+        this.defaultBranch = c.defaultBranch;
         this.repository = new GitRepository(this.path);
 
         if (c.build === true) {
@@ -131,6 +137,75 @@ export class NickelProject {
                         error: 'Unable to find branch',
                     });
                 }
+            );
+        });
+    }
+
+    cleanup(): Promise<CleanupResult> {
+        return new Promise<CleanupResult>((resolve, reject) => {
+            this.repository.status().then(
+                status => {
+                    if (this.defaultBranch === status.branch) {
+                        resolve({
+                            project: this,
+                            status: CleanupStatus.Skipped,
+                            branch: status.branch,
+                        });
+                    } else if (status.modifiedFiles.length > 0) {
+                        resolve({
+                            project: this,
+                            status: CleanupStatus.Dirty,
+                            branch: status.branch,
+                        });
+                    } else {
+                        this.repository.selectBranch(this.defaultBranch).then(
+                            () => {
+                                this.repository.pull().then(
+                                    pull => {
+                                        this.repository.deleteLocalBranch(status.branch).then(
+                                            () => {
+                                                this.repository.prune('origin').then(
+                                                    pruned => {
+                                                        resolve({
+                                                            project: this,
+                                                            status: CleanupStatus.Success,
+                                                            branch: status.branch,
+                                                        });
+                                                    },
+                                                    e => resolve({
+                                                        project: this,
+                                                        status: CleanupStatus.Failure,
+                                                        branch: status.branch,
+                                                    })
+                                                );
+                                            },
+                                            e => resolve({
+                                                project: this,
+                                                status: CleanupStatus.Failure,
+                                                branch: status.branch,
+                                            })
+                                        );
+                                    },
+                                    e => resolve({
+                                        project: this,
+                                        status: CleanupStatus.Failure,
+                                        branch: status.branch,
+                                    })
+                                );
+                            },
+                            e => resolve({
+                                project: this,
+                                status: CleanupStatus.Failure,
+                                branch: status.branch,
+                            })
+                        );
+                    }
+                },
+                e => resolve({
+                    project: this,
+                    status: CleanupStatus.Failure,
+                    branch: '',
+                })
             );
         });
     }

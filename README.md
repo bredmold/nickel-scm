@@ -15,6 +15,7 @@ The content of this file is a series of project declarations. For example:
 
 ```javascript
 root = 'c:/Dev/Lexipol';
+defaultBranch = 'develop';
 
 project('project-base', {build: true});
 project('project-commons');
@@ -24,6 +25,10 @@ separator(); // Draw a horizontal line in all reports
 project('thing-base', {build: true});
 project('thing-commons');
 project('thing-service');
+
+separator();
+defaultBranch = 'master';
+project('ops-project');
 ```
 
 The first line declares where the projects live. If you have projects in multiple locations,
@@ -102,6 +107,39 @@ Here are the meanings of the status values:
 | sync-success | Success |
 | sync-failure | Failure |
 | sync-new     | Nothing happened - this indicates a bug in nickel |
+
+### cleanup
+
+Cleanup all projects that are not on their "default" branch:
+
+```
+╔════════════════════════════════════╤═════════════════════╤═══════════════╗
+║ Project                            │ Branch              │ Status        ║
+╟────────────────────────────────────┼─────────────────────┼───────────────╢
+║ service-project-a-base             │ Feature/FOOBAR-1111 │ clean-success ║
+║ service-project-a-commons          │ Feature/FOOBAR-1111 │ clean-success ║
+║ service-project-a-service          │ Feature/FOOBAR-1111 │ clean-success ║
+╟────────────────────────────────────┼─────────────────────┼───────────────╢
+║ prj-client-web                     │ develop             │ clean-skip    ║
+║ ops-kubernetes-clusters            │ develop             │ clean-skip    ║
+║ ops-jenkins-docker                 │ master              │ clean-skip    ║
+╚════════════════════════════════════╧═════════════════════╧═══════════════╝
+```
+
+| Column Name | Description |
+| ---         | --- |
+| Project     | The name of the project |
+| Branch      | Current branch for the project, before cleanup |
+| Status      | Overall result for the cleanup operation |
+
+Here are the meanings of the status values:
+
+| Status | Description |
+| ---    | --- |
+| clean-skip | The project was not cleaned (already on the default branch) |
+| clean-dirty | The project is not on the default branch, but the repository is dirty |
+| clean-success | Cleanup operation succeeded |
+| clean-failure | Cleanup operation was attempted, but failed |
 
 ### build
 

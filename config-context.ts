@@ -7,12 +7,17 @@ export class ConfigContext {
     static separators: number[] = [];
     static projects: NickelProject[] = [];
     static root: string = '';
+    static defaultBranch: string = 'master';
 
     /**
      * Set the root for the config context
      */
     set root(root: string) {
         ConfigContext.root = root;
+    }
+
+    set defaultBranch(defaultBranch: string) {
+        ConfigContext.defaultBranch = defaultBranch;
     }
 
     /**
@@ -22,9 +27,11 @@ export class ConfigContext {
      * @param c Configuration
      */
     project(name: string, c: any) {
+        let defaultBranch: string = (c && c.defaultBranch) || ConfigContext.defaultBranch;
         ConfigContext.projects.push(new NickelProject({
             name: name,
             path: ConfigContext.root,
+            defaultBranch: defaultBranch,
             build: (c && c.build) || undefined,
         }));
     }

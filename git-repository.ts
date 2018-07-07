@@ -42,6 +42,54 @@ export class GitRepository {
     }
 
     /**
+     * Checkout a git branch
+     *
+     * @param {string} branch Name of the branch to check out
+     * @returns {Promise<any>} Promise that resolves (or rejects) with the command
+     */
+    selectBranch(branch: string): Promise<any> {
+        return this.run(`git checkout ${branch}`).then(() => true);
+    }
+
+    /**
+     * Delete a local branch
+     *
+     * @param {string} branch Name of the local branch to delete
+     * @returns {Promise<any>} Promise that resolves (or rejects) with the command
+     */
+    deleteLocalBranch(branch: string): Promise<any> {
+        return this.run(`git branch -d ${branch}`).then(() => true);
+    }
+
+    /**
+     * Prune the given remote (remove local branches that no longer correspond to remote branches)
+     *
+     * @param {string} remote Name of the remote to prune
+     * @returns {Promise<string[]>} List of branches that were pruned
+     */
+    prune(remote: string): Promise<string[]> {
+        let pruneRegex = /^ * \[pruned] (.*)$/;
+        return this.run(`git remote prune ${remote}`).then(stdout => {
+            let lines: string[] = stdout.split(/\n/);
+
+            if (lines.length <= 0) {
+                return [];
+            } else {
+                let pruned: string[] = [];
+
+                lines.forEach(line => {
+                    let pruneMatch = line.match(pruneRegex);
+                    if (pruneMatch) {
+                        pruned.push(pruneMatch[1]);
+                    }
+                });
+
+                return pruned;
+            }
+        });
+    }
+
+    /**
      * Get the current branch for this repository
      */
     branch(): Promise<string> {
