@@ -107,12 +107,17 @@ export class GitRepository {
 
     status(): Promise<StatusResult> {
         let fileRegex = /^.. ([a-zA-Z0-9-._/]+)/;
-        let branchRegex = /^## ([a-zA-Z0-9-_/]+)(\.\.\.([a-zA-Z0-9-_/]+))?/;
+        let threeDots = /(.+)\.\.\.(.+)/;
+        let branchRegex = /^## ([a-zA-Z0-9-_/.]+)/;
 
         return this.run('git status -s -b').then(stdout => {
             let lines: string[] = stdout.split(/\n/);
             let firstLine = lines[0];
-            let branchMatch = firstLine.match(branchRegex);
+
+            let threeDotsMatch = firstLine.match(threeDots);
+            let branchSpec = threeDotsMatch ? threeDotsMatch[1] : firstLine;
+
+            let branchMatch = branchSpec.match(branchRegex);
             let branch = branchMatch ? branchMatch[1] : '';
 
             let files: string[] = [];
