@@ -44,8 +44,9 @@ Here's the standard help message.
 
   Options:
 
-    --config <config>  Configuration file
-    -h, --help         output usage information
+    --config <config>      Configuration file
+    --projects <projects>  List of projects
+    -h, --help             output usage information
 ```
 
 The most common form of the command is `nickel sync`. This will sync all the repositories listed
