@@ -11,8 +11,15 @@ import {NickelTimer} from "./nickel-timer";
 import {ReportResult} from "./report";
 import {BuildResult} from "./build";
 import {CleanupResult} from "./cleanup";
+import {NickelInstigator} from "./nickel-instigator";
+import {BUILD_ACTION, CLEANUP_ACTION, REPORT_ACTION, SYNC_ACTION} from "./nickel-action";
 
-const ALL_COMMANDS = ['sync', 'report', 'build', 'cleanup'];
+const ALL_ACTIONS = [
+    SYNC_ACTION,
+    REPORT_ACTION,
+    BUILD_ACTION,
+    CLEANUP_ACTION,
+];
 
 /*
 Global controls
@@ -21,12 +28,14 @@ Global controls
  */
 let actions: string[] = [];
 let configScript: string = `${process.env['HOME']}/nickel.js`;
+let selectedProjects: string[] = [];
 
 /*
 Command-line parsing
  */
 program
     .option('--config <config>', 'Configuration file')
+    .option('--projects <projects>', 'List of projects')
     .arguments('<cmd...>')
     .action(commands => {
         if (Array.isArray(commands)) {
@@ -41,19 +50,22 @@ if (program.config) {
     configScript = program.config;
 }
 
+if (program.projects) {
+    selectedProjects = program.projects.replace(/\s+/, '').split(',');
+}
+
 if (actions.length < 1) {
     console.log('No actions were specified');
     process.exit(1);
 }
 
-const commands = actions.map(action => {
+actions.forEach(action => {
     let na = action.trim().toLowerCase();
-    const idx = ALL_COMMANDS.findIndex(a => a === na);
+    const idx = ALL_ACTIONS.findIndex(a => a.token() === na);
     if (idx < 0) {
         console.log(`Invalid command: ${action}`);
         process.exit(1);
     }
-    return na;
 });
 
 /*
@@ -70,119 +82,28 @@ vm.createContext(configContext);
 vm.runInContext(configScriptBytes, configContext);
 
 /*
-Action implementations
- */
-
-function reportAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
-    let idx = actions.findIndex(a => a === 'report');
-    if (idx >= 0) {
-        // Report
-        let timer = new NickelTimer();
-        let reportPromises: Promise<ReportResult>[] = [];
-        projects.forEach(project => {
-            reportPromises.push(project.report());
-        });
-        return Promise.all(reportPromises).then(reports => {
-            let report = new NickelReport({
-                'project.name': 'Project',
-                'branch': 'Branch',
-                'modified': '# Mod',
-                'commit': 'Commit',
-            }, separators);
-            console.log(report.buildReport(reports));
-            console.log(`${timer.elapsed() / 1000}s elapsed`);
-        });
-    } else {
-        // Do nothing
-        return Promise.resolve();
-    }
-}
-
-function cleanupAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
-    let idx = actions.findIndex(a => a === 'cleanup');
-    if (idx >= 0) {
-        // Cleanup
-        let timer = new NickelTimer();
-        let cleanupPromises: Promise<CleanupResult>[] = [];
-        projects.forEach(project => {
-            cleanupPromises.push(project.cleanup());
-        });
-        return Promise.all(cleanupPromises).then(reports => {
-            let report = new NickelReport({
-                'project.name': 'Project',
-                'branch': 'Branch',
-                'status': 'Status',
-            }, separators);
-            console.log(report.buildReport(reports));
-            console.log(`${timer.elapsed() / 1000}s elapsed`);
-        });
-    } else {
-        // Do nothing
-        return Promise.resolve();
-    }
-}
-
-function syncAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
-    let idx = actions.findIndex(a => a === 'sync');
-    if (idx >= 0) {
-        // Sync
-        let timer = new NickelTimer();
-        let syncPromises: Promise<SyncResult>[] = [];
-        projects.forEach(project => {
-            syncPromises.push(project.sync());
-        });
-        return Promise.all(syncPromises).then(syncReports => {
-            let report = new NickelReport({
-                'project.name': 'Project',
-                'branch': 'Branch',
-                'updateCount': 'Updated',
-                'status': 'Status'
-            }, separators);
-            console.log(report.buildReport(syncReports));
-            console.log(`${timer.elapsed() / 1000}s elapsed`);
-        });
-    } else {
-        // Do nothing
-        return Promise.resolve();
-    }
-}
-
-function buildAllProjects(actions: string[], projects: NickelProject[], separators: number[]): Promise<any> {
-    let idx = actions.findIndex(a => a === 'build');
-    if (idx >= 0) {
-        // Build
-        let timer = new NickelTimer();
-        let buildPromises: Promise<BuildResult>[] = [];
-        projects.forEach(project => {
-            buildPromises.push(project.build());
-        });
-        return Promise.all(buildPromises).then(buildReports => {
-            let report = new NickelReport({
-                'project.name': 'Project',
-                'type': 'Type',
-                'branch': 'Branch',
-                'commit': 'Commit',
-                'status': 'Status',
-                'error': {header: 'Message', width: 120},
-            }, separators);
-            console.log(report.buildReport(buildReports));
-            console.log(`${timer.elapsed() / 1000}s elapsed`);
-        });
-    } else {
-        // Do nothing
-        return Promise.resolve();
-    }
-}
-
-/*
 Initialize the project list
  */
 
 let projects = ConfigContext.projects;
 let separators = ConfigContext.separators;
 
+if (selectedProjects.length > 0) {
+    selectedProjects.forEach(selected => {
+        const idx = projects.findIndex(p => p.name === selected);
+        if (idx < 0) {
+            console.error(`No such project: ${selected}`);
+            process.exit(1);
+        }
+    });
+} else {
+    // If no projects are selected, then implicitly, all projects are selected
+    selectedProjects = projects.map(p => p.name);
+}
+
+let instigator = new NickelInstigator(projects, separators, actions, selectedProjects);
 Promise.resolve()
-    .then(() => reportAllProjects(actions, projects, separators))
-    .then(() => cleanupAllProjects(actions, projects, separators))
-    .then(() => syncAllProjects(actions, projects, separators))
-    .then(() => buildAllProjects(actions, projects, separators));
+    .then(() => instigator.doIt(REPORT_ACTION))
+    .then(() => instigator.doIt(CLEANUP_ACTION))
+    .then(() => instigator.doIt(SYNC_ACTION))
+    .then(() => instigator.doIt(BUILD_ACTION));

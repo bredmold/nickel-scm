@@ -97,6 +97,9 @@ export class NickelReport {
             let value = row;
             key.split(/\./).forEach(keySegment => {
                 value = value[keySegment];
+                if (value === undefined) {
+                    value = ' ';
+                }
             });
 
             // Value transformations
