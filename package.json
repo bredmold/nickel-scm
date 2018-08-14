@@ -1,6 +1,6 @@
 {
   "name": "nickel-scm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Handle tasks on multiple local Git repositories",
   "repository": {
     "type": "git",
