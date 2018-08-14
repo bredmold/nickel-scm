@@ -1,7 +1,11 @@
 {
-  "name": "nickel",
+  "name": "nickel-scm",
   "version": "0.1.0",
-  "description": "Handle tasks on multiple local SCM repositories",
+  "description": "Handle tasks on multiple local Git repositories",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bredmold/nickel.git"
+  },
   "scripts": {
     "build": "tsc",
     "test": "jasmine"

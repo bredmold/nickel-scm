@@ -5,6 +5,18 @@ maintenance operations across those repositories.
 
 ## Install
 
+```bash
+npm install -g nickel-scm
+```
+
+### Test
+
+```bash
+nickel --help
+```
+
+This should give the standard help message for nickel.
+
 ### Configure
 
 Configuration is done using a JS configuration file. The default location of this file is
