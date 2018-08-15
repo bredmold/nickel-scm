@@ -72,15 +72,15 @@ command-line order.
 Generates a project report. Here's an example:
 
 ```
-╔═════════════════════════════════╤════════════════════╤═══════╤═════════╗
-║ Project                         │ Branch             │ # Mod │ Commit  ║
-╟─────────────────────────────────┼────────────────────┼───────┼─────────╢
-║ kms-parent-child-agency-base    │ Feature/NEXGEN-892 │ 0     │ ca14608 ║
-║ kms-agency-commons              │ Feature/NEXGEN-892 │ 0     │ 661cc1d ║
-║ kms-agency-service              │ Feature/NEXGEN-892 │ 0     │ 1a85852 ║
-║ kms-parent-child-agency-commons │ Feature/NEXGEN-892 │ 0     │ 7f5784a ║
-║ kms-parent-child-agency-service │ Feature/NEXGEN-892 │ 0     │ 5c5e360 ║
-╚═════════════════════════════════╧════════════════════╧═══════╧═════════╝
+╔═══════════════════════════╤════════════════════╤═══════╤═════════╗
+║ Project                   │ Branch             │ # Mod │ Commit  ║
+╟───────────────────────────┼────────────────────┼───────┼─────────╢
+║ service-project-b-base    │ Feature/FOOBAR-456 │ 0     │ ca14608 ║
+║ project-a-commons         │ Feature/FOOBAR-456 │ 0     │ 661cc1d ║
+║ project-a-service         │ Feature/FOOBAR-456 │ 0     │ 1a85852 ║
+║ service-project-b-commons │ Feature/FOOBAR-456 │ 0     │ 7f5784a ║
+║ service-project-b-service │ Feature/FOOBAR-456 │ 0     │ 5c5e360 ║
+╚═══════════════════════════╧════════════════════╧═══════╧═════════╝
 ```
 
 | Column Name | Description |
@@ -95,15 +95,15 @@ Generates a project report. Here's an example:
 Sync all projects and report on the results:
 
 ```
-╔═════════════════════════════════╤════════════════════╤═════════╤══════════════╗
-║ Project                         │ Branch             │ Updated │ Status       ║
-╟─────────────────────────────────┼────────────────────┼─────────┼──────────────╢
-║ kms-parent-child-agency-base    │ Feature/NEXGEN-892 │ 0       │ sync-success ║
-║ kms-agency-commons              │ Feature/NEXGEN-892 │ 0       │ sync-success ║
-║ kms-agency-service              │ Feature/NEXGEN-892 │ 2       │ sync-success ║
-║ kms-parent-child-agency-commons │ Feature/NEXGEN-892 │ 0       │ sync-success ║
-║ kms-parent-child-agency-service │ Feature/NEXGEN-892 │ 0       │ sync-success ║
-╚═════════════════════════════════╧════════════════════╧═════════╧══════════════╝
+╔═══════════════════════════╤════════════════════╤═════════╤══════════════╗
+║ Project                   │ Branch             │ Updated │ Status       ║
+╟───────────────────────────┼────────────────────┼─────────┼──────────────╢
+║ service-project-b-base    │ Feature/FOOBAR-456 │ 0       │ sync-success ║
+║ project-a-commons         │ Feature/FOOBAR-456 │ 0       │ sync-success ║
+║ project-a-service         │ Feature/FOOBAR-456 │ 2       │ sync-success ║
+║ service-project-b-commons │ Feature/FOOBAR-456 │ 0       │ sync-success ║
+║ service-project-b-service │ Feature/FOOBAR-456 │ 0       │ sync-success ║
+╚═══════════════════════════╧════════════════════╧═════════╧══════════════╝
 ```
 
 | Column Name | Description |
@@ -126,17 +126,17 @@ Here are the meanings of the status values:
 Cleanup all projects that are not on their "default" branch:
 
 ```
-╔════════════════════════════════════╤═════════════════════╤═══════════════╗
-║ Project                            │ Branch              │ Status        ║
-╟────────────────────────────────────┼─────────────────────┼───────────────╢
-║ service-project-a-base             │ Feature/FOOBAR-1111 │ clean-success ║
-║ service-project-a-commons          │ Feature/FOOBAR-1111 │ clean-success ║
-║ service-project-a-service          │ Feature/FOOBAR-1111 │ clean-success ║
-╟────────────────────────────────────┼─────────────────────┼───────────────╢
-║ prj-client-web                     │ develop             │ clean-skip    ║
-║ ops-kubernetes-clusters            │ develop             │ clean-skip    ║
-║ ops-jenkins-docker                 │ master              │ clean-skip    ║
-╚════════════════════════════════════╧═════════════════════╧═══════════════╝
+╔═══════════════════════════╤═════════════════════╤═══════════════╗
+║ Project                   │ Branch              │ Status        ║
+╟───────────────────────────┼─────────────────────┼───────────────╢
+║ service-project-a-base    │ Feature/FOOBAR-1111 │ clean-success ║
+║ service-project-a-commons │ Feature/FOOBAR-1111 │ clean-success ║
+║ service-project-a-service │ Feature/FOOBAR-1111 │ clean-success ║
+╟───────────────────────────┼─────────────────────┼───────────────╢
+║ prj-client-web            │ develop             │ clean-skip    ║
+║ ops-kubernetes-clusters   │ develop             │ clean-skip    ║
+║ ops-jenkins-docker        │ master              │ clean-skip    ║
+╚═══════════════════════════╧═════════════════════╧═══════════════╝
 ```
 
 | Column Name | Description |
@@ -159,15 +159,15 @@ Here are the meanings of the status values:
 Build all projects that have a defined build system:
 
 ```
-╔═════════════════════════════════╤══════╤════════════════════╤═════════╤═══════════════╤══════════════════════════╗
-║ Project                         │ Type │ Branch             │ Commit  │ Status        │ Message                  ║
-╟─────────────────────────────────┼──────┼────────────────────┼─────────┼───────────────┼──────────────────────────╢
-║ kms-parent-child-agency-base    │ mvn  │ Feature/NEXGEN-892 │ ca14608 │ build-failure │ There are test failures. ║
-║ kms-agency-commons              │ none │ Feature/NEXGEN-892 │ 661cc1d │ build-nope    │                          ║
-║ kms-agency-service              │ none │ Feature/NEXGEN-892 │ fa053ca │ build-nope    │                          ║
-║ kms-parent-child-agency-commons │ none │ Feature/NEXGEN-892 │ 263be7c │ build-nope    │                          ║
-║ kms-parent-child-agency-service │ none │ Feature/NEXGEN-892 │ 4998a09 │ build-nope    │                          ║
-╚═════════════════════════════════╧══════╧════════════════════╧═════════╧═══════════════╧══════════════════════════╝
+╔═══════════════════════════╤══════╤════════════════════╤═════════╤═══════════════╤══════════════════════════╗
+║ Project                   │ Type │ Branch             │ Commit  │ Status        │ Message                  ║
+╟───────────────────────────┼──────┼────────────────────┼─────────┼───────────────┼──────────────────────────╢
+║ service-project-a-base    │ mvn  │ Feature/FOOBAR-456 │ ca14608 │ build-failure │ There are test failures. ║
+║ project-b-commons         │ none │ Feature/FOOBAR-456 │ 661cc1d │ build-nope    │                          ║
+║ project-b-service         │ none │ Feature/FOOBAR-456 │ fa053ca │ build-nope    │                          ║
+║ service-project-a-commons │ none │ Feature/FOOBAR-456 │ 263be7c │ build-nope    │                          ║
+║ service-project-a-service │ none │ Feature/FOOBAR-456 │ 4998a09 │ build-nope    │                          ║
+╚═══════════════════════════╧══════╧════════════════════╧═════════╧═══════════════╧══════════════════════════╝
 ```
 
 | Column Name | Description |
