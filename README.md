@@ -58,6 +58,7 @@ Here's the standard help message.
 
     --config <config>      Configuration file
     --projects <projects>  List of projects
+    --level <level>        Log level
     -h, --help             output usage information
 ```
 
