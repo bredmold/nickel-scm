@@ -1,7 +1,6 @@
 import {BuildStatus, BuildSystem, BuildSystemType, ShortBuildResult} from "./build";
 import {NickelProject} from "./nickel-project";
 import * as child_process from "child_process";
-import {WriteStream} from "tty";
 
 export class MavenBuild implements BuildSystem {
     type: BuildSystemType;

@@ -2,6 +2,7 @@ import {NickelProject} from "./nickel-project";
 import {NickelTimer} from "./nickel-timer";
 import {NickelAction} from "./nickel-action";
 import {NickelReport} from "./nickel-report";
+import {logger} from "./nickel";
 
 /**
  * Nickel Instigator - perform actions across all projects
@@ -29,7 +30,7 @@ export class NickelInstigator {
             return Promise.all(promises).then(reports => {
                 const report = new NickelReport(action.reportHeader(), this.separators);
                 console.log(report.buildReport(reports));
-                console.log(`${timer.elapsed() / 1000}s elapsed`);
+                logger.info(`${timer.elapsed() / 1000}s elapsed`);
             });
         } else {
             // Do nothing

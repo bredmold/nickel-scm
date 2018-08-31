@@ -13,6 +13,7 @@ import {BuildResult} from "./build";
 import {CleanupResult} from "./cleanup";
 import {NickelInstigator} from "./nickel-instigator";
 import {BUILD_ACTION, CLEANUP_ACTION, REPORT_ACTION, SYNC_ACTION} from "./nickel-action";
+import * as winston from "winston";
 
 const ALL_ACTIONS = [
     SYNC_ACTION,
@@ -36,6 +37,7 @@ Command-line parsing
 program
     .option('--config <config>', 'Configuration file')
     .option('--projects <projects>', 'List of projects')
+    .option('--level <level>', 'Log level')
     .arguments('<cmd...>')
     .action(commands => {
         if (Array.isArray(commands)) {
@@ -46,6 +48,21 @@ program
     })
     .parse(process.argv);
 
+let logLevel = 'info';
+if (program.level) {
+    logLevel = program.level;
+}
+
+export const logger = winston.createLogger({
+    level: logLevel,
+    format: winston.format.simple(),
+    transports: [
+        new winston.transports.Console(),
+    ],
+});
+logger.info(`logLevel = ${logLevel}`);
+logger.info(`Log level: ${logger.level}`);
+
 if (program.config) {
     configScript = program.config;
 }
@@ -55,7 +72,7 @@ if (program.projects) {
 }
 
 if (actions.length < 1) {
-    console.log('No actions were specified');
+    logger.error('No actions were specified');
     process.exit(1);
 }
 
@@ -63,7 +80,7 @@ actions.forEach(action => {
     let na = action.trim().toLowerCase();
     const idx = ALL_ACTIONS.findIndex(a => a.token() === na);
     if (idx < 0) {
-        console.log(`Invalid command: ${action}`);
+        logger.error(`Invalid command: ${action}`);
         process.exit(1);
     }
 });
@@ -74,7 +91,7 @@ Parse the configuration file
 
 let configScriptBytes = fs.readFileSync(configScript, {encoding: 'utf-8'});
 if (!configScriptBytes) {
-    console.log(`Unable to read config script at ${configScript}`);
+    logger.warn(`Unable to read config script at ${configScript}`);
 }
 
 let configContext = new ConfigContext();
@@ -92,7 +109,7 @@ if (selectedProjects.length > 0) {
     selectedProjects.forEach(selected => {
         const idx = projects.findIndex(p => p.name === selected);
         if (idx < 0) {
-            console.error(`No such project: ${selected}`);
+            logger.error(`No such project: ${selected}`);
             process.exit(1);
         }
     });

@@ -1,4 +1,5 @@
 import * as child_process from "child_process";
+import {logger} from "./nickel";
 
 /** Results of a pull */
 export interface PullResult {
@@ -138,9 +139,11 @@ export class GitRepository {
     }
 
     private run(command: string): Promise<string> {
+        logger.debug(`${command} [${this.path}]`);
         return new Promise<any>((resolve, reject) => {
             child_process.exec(command, {cwd: this.path, encoding: 'utf8'}, (error, stdout, stderr) => {
                 if (error) {
+                    logger.warn(error.message);
                     reject(error);
                 } else {
                     resolve(stdout);
