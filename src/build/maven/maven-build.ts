@@ -1,5 +1,5 @@
-import {BuildStatus, BuildSystem, BuildSystemType, ShortBuildResult} from "./build";
-import {NickelProject} from "./nickel-project";
+import {BuildStatus, BuildSystem, BuildSystemType, ShortBuildResult} from "../../actions/build";
+import {NickelProject} from "../../nickel-project";
 import * as child_process from "child_process";
 
 export class MavenBuild implements BuildSystem {

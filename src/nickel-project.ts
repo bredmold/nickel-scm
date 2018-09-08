@@ -1,8 +1,8 @@
-import {SyncResult, SyncStatus} from "./sync";
-import {GitRepository} from "./git-repository";
-import {ReportResult} from "./report";
-import {BuildResult, BuildStatus, BuildSystem, inferBuildSystem, NoBuildSystem} from "./build";
-import {CleanupResult, CleanupStatus} from "./cleanup";
+import {SyncResult, SyncStatus} from "./actions/sync";
+import {GitRepository} from "./scm/git/git-repository";
+import {ReportResult} from "./actions/report";
+import {BuildResult, BuildStatus, BuildSystem, inferBuildSystem, NoBuildSystem} from "./actions/build";
+import {CleanupResult, CleanupStatus} from "./actions/cleanup";
 
 /** Configuration values that can be passed in for a project */
 export interface NickelProjectConfig {

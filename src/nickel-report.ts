@@ -1,8 +1,8 @@
 import {table, TableUserConfig} from "table";
-import {SyncStatus} from "./sync";
-import {BuildStatus} from "./build";
+import {SyncStatus} from "./actions/sync";
+import {BuildStatus} from "./actions/build";
 import chalk, {Level} from "chalk";
-import {CleanupStatus} from "./cleanup";
+import {CleanupStatus} from "./actions/cleanup";
 
 interface ColumnConfig {
     path: string;

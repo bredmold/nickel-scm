@@ -5,14 +5,14 @@ import * as vm from 'vm';
 import {ConfigContext} from "./config-context";
 import * as fs from "fs";
 import {NickelProject} from "./nickel-project";
-import {SyncResult} from "./sync";
+import {SyncResult} from "./actions/sync";
 import {NickelReport} from "./nickel-report";
 import {NickelTimer} from "./nickel-timer";
-import {ReportResult} from "./report";
-import {BuildResult} from "./build";
-import {CleanupResult} from "./cleanup";
+import {ReportResult} from "./actions/report";
+import {BuildResult} from "./actions/build";
+import {CleanupResult} from "./actions/cleanup";
 import {NickelInstigator} from "./nickel-instigator";
-import {BUILD_ACTION, CLEANUP_ACTION, REPORT_ACTION, SYNC_ACTION} from "./nickel-action";
+import {BUILD_ACTION, CLEANUP_ACTION, REPORT_ACTION, SYNC_ACTION} from "./actions/nickel-action";
 import * as winston from "winston";
 
 const ALL_ACTIONS = [
@@ -61,7 +61,6 @@ export const logger = winston.createLogger({
     ],
 });
 logger.info(`logLevel = ${logLevel}`);
-logger.info(`Log level: ${logger.level}`);
 
 if (program.config) {
     configScript = program.config;

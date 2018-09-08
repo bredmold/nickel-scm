@@ -1,4 +1,4 @@
-import {NickelProject} from "./nickel-project";
+import {NickelProject} from "../nickel-project";
 
 export enum CleanupStatus {
     Skipped = 'clean-skip',

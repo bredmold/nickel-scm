@@ -1,6 +1,6 @@
 import {NickelProject} from "./nickel-project";
 import {NickelTimer} from "./nickel-timer";
-import {NickelAction} from "./nickel-action";
+import {NickelAction} from "./actions/nickel-action";
 import {NickelReport} from "./nickel-report";
 import {logger} from "./nickel";
 

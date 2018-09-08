@@ -1,4 +1,4 @@
-import {NickelProject} from "./nickel-project";
+import {NickelProject} from "../nickel-project";
 import {ReportResult} from "./report";
 import {CleanupResult} from "./cleanup";
 import {SyncResult} from "./sync";

@@ -1,6 +1,6 @@
-import {NickelProject} from "./nickel-project";
+import {NickelProject} from "../nickel-project";
 import * as fs from "fs";
-import {MavenBuild} from "./maven-build";
+import {MavenBuild} from "../build/maven/maven-build";
 
 export enum BuildSystemType {
     Maven = 'mvn',
