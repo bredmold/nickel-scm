@@ -10,9 +10,11 @@
     "module": "commonjs",
     "outDir": "./dist",
     "sourceMap": false,
-    "strict": true
+    "strict": true,
+    "resolveJsonModule": true
   },
   "include": [
+    "package.json",
     "src/**/*.ts"
   ],
   "exclude": [

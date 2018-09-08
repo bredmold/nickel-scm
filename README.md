@@ -56,6 +56,7 @@ Here's the standard help message.
 
   Options:
 
+    -V, --version          output the version number
     --config <config>      Configuration file
     --projects <projects>  List of projects
     --level <level>        Log level

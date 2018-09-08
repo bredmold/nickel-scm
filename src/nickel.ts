@@ -4,16 +4,11 @@ import * as program from 'commander';
 import * as vm from 'vm';
 import {ConfigContext} from "./config-context";
 import * as fs from "fs";
-import {NickelProject} from "./nickel-project";
-import {SyncResult} from "./actions/sync";
-import {NickelReport} from "./nickel-report";
-import {NickelTimer} from "./nickel-timer";
-import {ReportResult} from "./actions/report";
-import {BuildResult} from "./actions/build";
-import {CleanupResult} from "./actions/cleanup";
 import {NickelInstigator} from "./nickel-instigator";
 import {BUILD_ACTION, CLEANUP_ACTION, REPORT_ACTION, SYNC_ACTION} from "./actions/nickel-action";
 import * as winston from "winston";
+
+const pkg = require('../package.json');
 
 const ALL_ACTIONS = [
     SYNC_ACTION,
@@ -35,6 +30,7 @@ let selectedProjects: string[] = [];
 Command-line parsing
  */
 program
+    .version(pkg.version)
     .option('--config <config>', 'Configuration file')
     .option('--projects <projects>', 'List of projects')
     .option('--level <level>', 'Log level')
