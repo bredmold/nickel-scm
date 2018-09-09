@@ -26,10 +26,19 @@ let actions: string[] = [];
 let configScript: string = `${process.env['HOME']}/nickel.js`;
 let selectedProjects: string[] = [];
 
+export const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.simple(),
+    transports: [
+        new winston.transports.Console(),
+    ],
+});
+
 /*
 Command-line parsing
  */
 program
+    .description('nickel-scm: Manage local Git repositories')
     .version(pkg.version)
     .option('--config <config>', 'Configuration file')
     .option('--projects <projects>', 'List of projects')
@@ -42,29 +51,12 @@ program
             actions.push(commands);
         }
     })
+    .on('option:level', () => logger.level = program.level)
+    .on('option:config', () => configScript = program.config)
+    .on('option:projects', () => selectedProjects = program.projects.replace(/\s+/, '').split(','))
     .parse(process.argv);
 
-let logLevel = 'info';
-if (program.level) {
-    logLevel = program.level;
-}
-
-export const logger = winston.createLogger({
-    level: logLevel,
-    format: winston.format.simple(),
-    transports: [
-        new winston.transports.Console(),
-    ],
-});
-logger.info(`logLevel = ${logLevel}`);
-
-if (program.config) {
-    configScript = program.config;
-}
-
-if (program.projects) {
-    selectedProjects = program.projects.replace(/\s+/, '').split(',');
-}
+logger.info(`Log level is ${logger.level}`);
 
 if (actions.length < 1) {
     logger.error('No actions were specified');

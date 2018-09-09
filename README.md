@@ -52,15 +52,17 @@ root can be changed in the middle of the file and will be picked up by subsequen
 Here's the standard help message.
 
 ```
-  Usage: nickel [options] <cmd...>
+Usage: nickel [options] <cmd...>
 
-  Options:
+nickel-scm: Manage local Git repositories
 
-    -V, --version          output the version number
-    --config <config>      Configuration file
-    --projects <projects>  List of projects
-    --level <level>        Log level
-    -h, --help             output usage information
+Options:
+
+  -V, --version          output the version number
+  --config <config>      Configuration file
+  --projects <projects>  List of projects
+  --level <level>        Log level
+  -h, --help             output usage information
 ```
 
 The most common form of the command is `nickel sync`. This will sync all the repositories listed
