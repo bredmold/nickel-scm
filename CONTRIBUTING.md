@@ -16,21 +16,28 @@ Despite the fact that I have very little automated testing, I use the tool on a 
 of the features are quite well tested. Here's a rough breakdown of the pieces, and how well tested they are
 in the real world.
 
-## sync
+## Testing Breakdown
+
+### sync
 
 This is the core. I use this constantly. It's very well tested.
 
-## report
+### report
 
 Also well tested from routine use.
 
-## cleanup
+### cleanup
 
 Less well tested, but still used frequently.
 
-## build
+### build
 
 This could be broken, for all I know. I almost never use it.
+
+## Jasmine
+
+While the automated tests are woefully inadquate, please do feel free to contribute appropriate unit tests
+with your PR, written against the Jasmine testing API.
 
 # Contribute
 
