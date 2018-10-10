@@ -62,6 +62,7 @@ Options:
   --config <config>      Configuration file
   --projects <projects>  List of projects
   --level <level>        Log level
+  --dryRun <dryRun>      Dry-run only (no destructive commands will be run)
   -h, --help             output usage information
 ```
 
@@ -190,3 +191,29 @@ Here are the meanings of the status values:
 | build-success | Success |
 | build-failure | Failure |
 | build-nope    | Project has no build step |
+
+### merged
+
+Identify merged branches and delete them.
+
+The `--dryRun` option will become very important here.
+
+No example report, in this case, but here are the report columns:
+
+| Column Name | Description |
+| ---         | --- |
+| Project     | The name of the project |
+| Branch      | Current branch for the project |
+| Status      | Overall result of the merge (& delete) operation |
+| Candidates  | List of branches identified as candidates for removal |
+| Removed     | List of branches that were successfully removed (always empty for a dry run) |
+
+Here are the status values:
+
+| Status | Description |
+| ---    | --- |
+| merged-success | Successful merged branch identification |
+| merged-failure | The merge failed - see the log |
+| merged-skip    | This project was skipped |
+| merged-dirty   | The work area for this project was dirty - no merged branch identification was attempted |
+| merged-working | The work area was not on the project's default branch - no merged branch identification was attempted |
