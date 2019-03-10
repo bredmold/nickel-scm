@@ -5,7 +5,14 @@ import * as vm from 'vm';
 import {ConfigContext} from "./config-context";
 import * as fs from "fs";
 import {NickelInstigator} from "./nickel-instigator";
-import {BUILD_ACTION, CLEANUP_ACTION, REPORT_ACTION, SYNC_ACTION, MERGED_ACTION} from "./actions/nickel-action";
+import {
+  BUILD_ACTION,
+  CLEANUP_ACTION,
+  GUIDED_BRANCH_REMOVAL_ACTION,
+  MERGED_BRANCHES_REPORT_ACTION,
+  REPORT_ACTION,
+  SYNC_ACTION
+} from "./actions/nickel-action";
 import * as winston from "winston";
 
 const pkg = require('../package.json');
@@ -15,20 +22,22 @@ const ALL_ACTIONS = [
   REPORT_ACTION,
   BUILD_ACTION,
   CLEANUP_ACTION,
-  MERGED_ACTION,
+  MERGED_BRANCHES_REPORT_ACTION,
+  GUIDED_BRANCH_REMOVAL_ACTION,
 ];
 
 /*
 Global controls
+ command          - the selected command
+ commandArgs      - command arguments
  actions          - list of actions to perform on this run
  configScript     - Location of the configuration script
  selectedProjects - List of projects to select
- dryRun           - If true, only output commands that *would* run, but don't run them
  */
-let actions: string[] = [];
+let command: string = '';
+let commandArgs: any = null;
 let configScript: string = `${process.env['HOME']}/nickel.js`;
 let selectedProjects: string[] = [];
-let dryRun = false;
 
 export const logger = winston.createLogger({
   level: 'info',
@@ -47,46 +56,33 @@ program
   .option('--config <config>', 'Configuration file')
   .option('--projects <projects>', 'List of projects')
   .option('--level <level>', 'Log level')
-  .option('--dryRun <dryRun>', 'Dry-run only (no destructive commands will be run)')
-  .arguments('<cmd...>')
-  .action(commands => {
-    if (Array.isArray(commands)) {
-      commands.forEach(cmd => actions.push(cmd));
-    } else {
-      actions.push(commands);
-    }
-  })
   .on('option:level', () => logger.level = program.level)
   .on('option:config', () => configScript = program.config)
-  .on('option:projects', () => selectedProjects = program.projects.replace(/\s+/, '').split(','))
-  .on('option:dryRun', () => dryRun = (program.dryRun === 'true'))
-  .parse(process.argv);
+  .on('option:projects', () => selectedProjects = program.projects.replace(/\s+/, '').split(','));
+
+ALL_ACTIONS.forEach(nickelAction => {
+  program.command(nickelAction.command)
+    .action(args => {
+      command = nickelAction.command;
+      commandArgs = args;
+    })
+    .description(nickelAction.description);
+});
+
+program.parse(process.argv);
 
 logger.info(`Log level is ${logger.level}`);
 
-if (dryRun) {
-  logger.info('Dry-run only - will not execute destructive commands');
-}
-
-if (actions.length < 1) {
+if (command === '') {
   logger.error('No actions were specified');
   process.exit(1);
 }
-
-actions.forEach(action => {
-  let na = action.trim().toLowerCase();
-  const idx = ALL_ACTIONS.findIndex(a => a.token() === na);
-  if (idx < 0) {
-    logger.error(`Invalid command: ${action}`);
-    process.exit(1);
-  }
-});
 
 /*
 Parse the configuration file
  */
 
-let configScriptBytes = fs.readFileSync(configScript, {encoding: 'utf-8'});
+const configScriptBytes = fs.readFileSync(configScript, {encoding: 'utf-8'});
 if (!configScriptBytes) {
   logger.warn(`Unable to read config script at ${configScript}`);
 }
@@ -99,8 +95,8 @@ vm.runInContext(configScriptBytes, configContext);
 Initialize the project list
  */
 
-let projects = ConfigContext.projects;
-let separators = ConfigContext.separators;
+const projects = ConfigContext.projects;
+const separators = ConfigContext.separators;
 
 if (selectedProjects.length > 0) {
   selectedProjects.forEach(selected => {
@@ -115,10 +111,10 @@ if (selectedProjects.length > 0) {
   selectedProjects = projects.map(p => p.name);
 }
 
-let instigator = new NickelInstigator(projects, separators, actions, selectedProjects, dryRun);
-Promise.resolve()
-  .then(() => instigator.doIt(REPORT_ACTION))
-  .then(() => instigator.doIt(CLEANUP_ACTION))
-  .then(() => instigator.doIt(MERGED_ACTION))
-  .then(() => instigator.doIt(SYNC_ACTION))
-  .then(() => instigator.doIt(BUILD_ACTION));
+const action = ALL_ACTIONS.find(nickelAction => nickelAction.command === command);
+if (action === undefined) {
+  logger.error('this never happens');
+} else {
+  const instigator = new NickelInstigator(projects, separators, selectedProjects);
+  instigator.doIt(action, commandArgs);
+}

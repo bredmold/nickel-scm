@@ -1,77 +1,91 @@
 import {NickelProject} from "../nickel-project";
-import * as fs from "fs";
-import {MavenBuild} from "../build/maven/maven-build";
 
 export enum BuildSystemType {
-    Maven = 'mvn',
-    None = 'none',
+  Maven = 'mvn',
+  None = 'none',
 }
 
 export enum BuildStatus {
-    Success = 'build-success',
-    Failure = 'build-failure',
-    Invalid = 'build-nope',
+  New = 'build-new',
+  Success = 'build-success',
+  Failure = 'build-failure',
+  Invalid = 'build-nope',
 }
 
 export interface BuildResult {
-    /** The project that was built */
-    project: NickelProject;
+  /** The project that was built */
+  project: NickelProject;
 
-    /** Build system type */
-    type: string;
+  /** Build system type */
+  type: string;
 
-    /** Active branch for the buildSystem */
-    branch: string;
+  /** Active branch for the buildSystem */
+  branch: string;
 
-    /** Active commit ID for the buildSystem */
-    commit: string;
+  /** Active commit ID for the buildSystem */
+  commit: string;
 
-    /** Status of the buildSystem */
-    status: BuildStatus;
+  /** Status of the buildSystem */
+  status: BuildStatus;
 
-    /** On an unsuccessful buildSystem, a short message indicating failure reason */
-    error: string;
+  /** On an unsuccessful buildSystem, a short message indicating failure reason */
+  error: string;
 }
 
-export interface ShortBuildResult {
-    status: BuildStatus;
-    error: string;
+export abstract class BuildSystem implements BuildResult {
+  branch: string;
+  commit: string;
+  status: BuildStatus;
+  error: string;
+
+  protected constructor(public project: NickelProject,
+                        public type: BuildSystemType) {
+    this.branch = '';
+    this.commit = '';
+    this.status = BuildStatus.New;
+    this.error = '';
+  }
+
+  manageBuild(): Promise<BuildResult> {
+    return new Promise<BuildResult>(resolve => {
+      const fail = (e: any) => {
+        this.status = BuildStatus.Failure;
+        this.error = e;
+        resolve(this);
+      };
+
+      this.project.repository.branch().then(
+        branch => {
+          this.branch = branch;
+          this.project.repository.commit().then(
+            commitId => {
+              this.commit = commitId;
+              this.build().then(
+                () => {
+                  resolve(this);
+                },
+                e => fail(e)
+              );
+            },
+            e => fail(e)
+          );
+        },
+        () => fail('Unable to find branch')
+      );
+    });
+  }
+
+  abstract build(): Promise<any>;
 }
 
-/**
- * Given a filesystem path, determine the appropriate buildSystem system to use
- *
- * @param project The project that's being built
- * @returns {BuildSystem} Object that knows how to run a buildSystem for this project
- */
-export function inferBuildSystem(project: NickelProject): BuildSystem {
-    const pomPath = `${project.path}/pom.xml`;
-    if (fs.existsSync(pomPath)) {
-        return new MavenBuild(project, pomPath);
-    } else {
-        throw `Unable to identify build system for project ${project.name}`;
-    }
-}
+export class NoBuildSystem extends BuildSystem implements BuildResult {
+  constructor(project: NickelProject) {
+    super(project,
+      BuildSystemType.None);
+  }
 
-export interface BuildSystem {
-    type: BuildSystemType;
-
-    project: NickelProject;
-
-    build(): Promise<ShortBuildResult>;
-}
-
-export class NoBuildSystem implements BuildSystem {
-    type: BuildSystemType;
-
-    constructor(public project: NickelProject) {
-        this.type = BuildSystemType.None;
-    }
-
-    build(): Promise<ShortBuildResult> {
-        return Promise.resolve({
-            status: BuildStatus.Invalid,
-            error: ''
-        });
-    }
+  build(): Promise<BuildResult> {
+    this.status = BuildStatus.Invalid;
+    return Promise.resolve(this);
+  }
 }

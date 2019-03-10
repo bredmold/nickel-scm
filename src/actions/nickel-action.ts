@@ -3,90 +3,124 @@ import {ReportResult} from "./report";
 import {CleanupResult} from "./cleanup";
 import {SyncResult} from "./sync";
 import {BuildResult} from "./build";
-import {RemoveMergedBranchesResult} from "./merged";
+import {GuidedBranchRemovalResult, MergedBranchesInstructions, MergedBranchesResult} from "./merged-branches";
+
+type ReportConfigEntry = string | { [index: string]: string | number };
+type ReportConfig = { [index: string]: ReportConfigEntry };
 
 export interface NickelAction<ResponseType> {
   /**
-   * Name of the action token to search for
+   * Command string template
    */
-  token(): string;
+  readonly command: string;
+
+  /**
+   * Return a brief description of the action
+   */
+  readonly description: string;
 
   /**
    * Perform the action, generating a response
    *
    * @param project The project on which to act
+   * @param args List of command arguments
    */
-  act(project: NickelProject, dryRun: boolean): Promise<ResponseType>;
+  act(project: NickelProject, args?: any): Promise<ResponseType>;
+
+  /**
+   * Perform an action after all other actions have completed
+   *
+   * @param reports List of all reports generated
+   * @param args List of command arguments
+   */
+  post(reports: ResponseType[], args?: any): any;
 
   /**
    * Build the report description that tells the reporter how to assemble a report
    */
-  reportHeader(): object;
+  readonly reportHeader: ReportConfig;
 }
 
 export const REPORT_ACTION: NickelAction<ReportResult> = {
-  token: () => 'report',
+  command: 'report',
+  description: 'Local repository report',
   act: project => project.report(),
-  reportHeader: () => {
-    return {
-      'project.name': 'Project',
-      'branch': 'Branch',
-      'modified': '# Mod',
-      'commit': 'Commit',
-    }
+  post: () => {
+  },
+  reportHeader: {
+    'project.name': 'Project',
+    'branch': 'Branch',
+    'modified': '# Mod',
+    'commit': 'Commit',
   }
 };
 
 export const CLEANUP_ACTION: NickelAction<CleanupResult> = {
-  token: () => 'cleanup',
+  command: 'cleanup',
+  description: 'Retire unused branches',
   act: project => project.cleanup(),
-  reportHeader: () => {
-    return {
-      'project.name': 'Project',
-      'branch': 'Branch',
-      'status': 'Status',
-    }
+  post: () => {
+  },
+  reportHeader: {
+    'project.name': 'Project',
+    'branch': 'Branch',
+    'status': 'Status',
   }
 };
 
 export const SYNC_ACTION: NickelAction<SyncResult> = {
-  token: () => 'sync',
+  command: 'sync',
+  description: 'Sync all projects',
   act: project => project.sync(),
-  reportHeader: () => {
-    return {
-      'project.name': 'Project',
-      'branch': 'Branch',
-      'updateCount': 'Updated',
-      'status': 'Status'
-    }
+  post: () => {
+  },
+  reportHeader: {
+    'project.name': 'Project',
+    'branch': 'Branch',
+    'updateCount': 'Updated',
+    'status': 'Status'
   }
 };
 
 export const BUILD_ACTION: NickelAction<BuildResult> = {
-  token: () => 'build',
+  command: 'build',
+  description: 'Build all projects',
   act: project => project.build(),
-  reportHeader: () => {
-    return {
-      'project.name': 'Project',
-      'type': 'Type',
-      'branch': 'Branch',
-      'commit': 'Commit',
-      'status': 'Status',
-      'error': {header: 'Message', width: 120},
-    }
+  post: () => {
+  },
+  reportHeader: {
+    'project.name': 'Project',
+    'type': 'Type',
+    'branch': 'Branch',
+    'commit': 'Commit',
+    'status': 'Status',
+    'error': {header: 'Message', width: 120},
   }
 };
 
-export const MERGED_ACTION: NickelAction<RemoveMergedBranchesResult> = {
-  token: () => 'merged',
-  act: (project, dryRun) => project.removeMergedBranches(dryRun),
-  reportHeader: () => {
-    return {
-      'project.name': 'Project',
-      'branch': 'Branch',
-      'status': 'Status',
-      'candidateBranches': {header: 'Candidates', width: 120},
-      'removedBranches': {header: 'Removed', width: 120},
-    }
+export const MERGED_BRANCHES_REPORT_ACTION: NickelAction<MergedBranchesResult> = {
+  command: 'mergeReport <reportFile>',
+  description: 'Generate a merged branches report',
+  act: project => project.mergedBranchesReport(),
+  post: (reports, args) => new MergedBranchesInstructions(reports, args).writeReport(),
+  reportHeader: {
+    'project.name': 'Project',
+    'status': 'Status',
+    'candidateBranches.length': '# Candidates',
+  }
+};
+
+export const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResult> = {
+  command: 'guidedRemove <reportFile>',
+  description: 'Remove branches based on a merged branches report',
+  act: (project, args) => project.guidedBranchRemoval(args),
+  post: () => {
+  },
+  reportHeader: {
+    'project.name': 'Project',
+    'branch': 'Branch',
+    'status': 'Status',
+    'branchesKept.length': '# Kept',
+    'removedBranches.length': '# Removed',
   }
 };

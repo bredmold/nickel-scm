@@ -52,18 +52,26 @@ root can be changed in the middle of the file and will be picked up by subsequen
 Here's the standard help message.
 
 ```
-Usage: nickel [options] <cmd...>
+Usage: nickel [options] [command]
 
 nickel-scm: Manage local Git repositories
 
 Options:
 
-  -V, --version          output the version number
-  --config <config>      Configuration file
-  --projects <projects>  List of projects
-  --level <level>        Log level
-  --dryRun <dryRun>      Dry-run only (no destructive commands will be run)
-  -h, --help             output usage information
+  -V, --version              output the version number
+  --config <config>          Configuration file
+  --projects <projects>      List of projects
+  --level <level>            Log level
+  -h, --help                 output usage information
+
+Commands:
+
+  sync                       Sync all projects
+  report                     Local repository report
+  build                      Build all projects
+  cleanup                    Retire unused branches
+  mergeReport <reportFile>   Generate a merged branches report
+  guidedRemove <reportFile>  Remove branches based on a merged branches report
 ```
 
 The most common form of the command is `nickel sync`. This will sync all the repositories listed
@@ -192,28 +200,45 @@ Here are the meanings of the status values:
 | build-failure | Failure |
 | build-nope    | Project has no build step |
 
-### merged
+### mergedReport
 
-Identify merged branches and delete them.
-
-The `--dryRun` option will become very important here.
+Identify merged branches and generate a report.
 
 No example report, in this case, but here are the report columns:
 
-| Column Name | Description |
-| ---         | --- |
-| Project     | The name of the project |
-| Branch      | Current branch for the project |
-| Status      | Overall result of the merge (& delete) operation |
-| Candidates  | List of branches identified as candidates for removal |
-| Removed     | List of branches that were successfully removed (always empty for a dry run) |
+| Column Name  | Description |
+| ---          | --- |
+| Project      | The name of the project |
+| Status       | Overall result of the merge operation |
+| # Candidates | List of branches identified as candidates for removal |
 
 Here are the status values:
 
 | Status | Description |
 | ---    | --- |
-| merged-success | Successful merged branch identification |
-| merged-failure | The merge failed - see the log |
-| merged-skip    | This project was skipped |
-| merged-dirty   | The work area for this project was dirty - no merged branch identification was attempted |
-| merged-working | The work area was not on the project's default branch - no merged branch identification was attempted |
+| merge-report-success | Successful merged branch identification |
+| merge-report-failure | The merge failed - see the log |
+
+### guidedRemove
+
+Based on a merge branch report, remove selected branches.
+
+The report structure looks like this:
+
+| Column Name | Description |
+| --- | --- |
+| Project   | The name of the project |
+| Branch    | Current branch for the project |
+| Status    | Overall status of merging for this project |
+| # Kept    | How many branches from the report were kept |
+| # Removed | How many branches form the report were removed |
+
+Here are the status values:
+
+| Status | Description |
+| --- | --- |
+| guided-merge-success | Successfully completed at least one merge for the project |
+| guided-merge-failure | Unable to merge any branches for this project |
+| guided-merge-skipped | Skipped the project because there was nothing to do |
+| guided-merge-dirty   | The work space was dirty, so no branch manipulation was possible |
+| guided-merge-working | The work space was already on a branch, so no branches were targeted |

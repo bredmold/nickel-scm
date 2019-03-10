@@ -27,10 +27,41 @@ export interface StatusResult {
   behind: number;
 }
 
+/**
+ * Remote branch reference, with origin name and branch name
+ */
+export class RemoteBranch {
+  static fromBranchName(branchName: string) {
+    const normalized = branchName.replace(/^remotes\//, '');
+    const pathElements = normalized.split(/\//, 2);
+    return new RemoteBranch(pathElements[0], pathElements[1]);
+  }
+
+  constructor(public remote: string,
+              public branch: string) {
+  }
+
+  toString(): string {
+    return `${this.remote}/${this.branch}`;
+  }
+}
+
+/**
+ * Results of a branch listing
+ */
+export interface BranchListing {
+  /** Local branches */
+  local: string[];
+
+  /** Remote tracking branches */
+  remote: RemoteBranch[];
+}
+
 interface ProcessResult {
   stdout: string;
   stderr: string;
 }
+
 
 /**
  * Local Git repository
@@ -213,6 +244,37 @@ export class GitRepository {
       });
 
       return branches;
+    });
+  }
+
+  /**
+   * Get a listing of all the branches the repository knows about
+   */
+  allBranches(): Promise<BranchListing> {
+    return this.run('git branch -a').then(out => {
+      const lines: string[] = out.stdout.split(/\n'/);
+      const branchRe = /^..(remotes\/([a-zA-Z0-9_-]+)\/)?([a-zA-Z0-9/_-]+)$/;
+      let localBranches: string[] = [];
+      let remoteBranches: RemoteBranch[] = [];
+
+      lines.forEach(line => {
+        const lineMatch = line.match(branchRe);
+        if (lineMatch) {
+          const remote = lineMatch[1];
+          const remoteName = lineMatch[2];
+          const branchName = lineMatch[3];
+
+          if (remote.length > 0) {
+            remoteBranches.push(new RemoteBranch(remoteName, branchName));
+          } else {
+            localBranches.push(branchName);
+          }
+        }
+      });
+      return {
+        local: localBranches,
+        remote: remoteBranches,
+      };
     });
   }
 
