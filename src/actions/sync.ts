@@ -5,6 +5,7 @@ export enum SyncStatus {
   Success = 'sync-success',
   Failure = 'sync-fail',
   Dirty = 'sync-dirty',
+  Skipped = 'sync-skipped',
 }
 
 export interface SyncResult {

@@ -33,8 +33,11 @@ export interface StatusResult {
 export class RemoteBranch {
   static fromBranchName(branchName: string) {
     const normalized = branchName.replace(/^remotes\//, '');
-    const pathElements = normalized.split(/\//, 2);
-    return new RemoteBranch(pathElements[0], pathElements[1]);
+    const pathElements = normalized.split(/\//);
+    const remote = pathElements[0];
+    const branch = pathElements.slice(1).join('/');
+    logger.debug(`Remote branch: remote=${remote} branch=${branch}`);
+    return new RemoteBranch(remote, branch);
   }
 
   constructor(public remote: string,

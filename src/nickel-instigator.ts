@@ -21,7 +21,10 @@ export class NickelInstigator {
       if (pIdx >= 0) {
         return action.act(project, args);
       } else {
-        return Promise.resolve({project: project});
+        let report: any = {};
+        Object.assign(report, action.skipReport);
+        report.project = project;
+        return Promise.resolve(report);
       }
     });
     Promise.all(promises).then(reports => {

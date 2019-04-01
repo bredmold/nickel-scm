@@ -44,6 +44,7 @@ export enum MergedBranchesStatus {
   New = 'merge-report-new',
   Success = 'merge-report-success',
   Failure = 'merge-report-failure',
+  Skipped = 'merge-report-skip',
 }
 
 export interface MergedBranchesResult {
@@ -195,6 +196,7 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
     this.branchesToRemove = [];
     branchInstructions.forEach(bi => {
       if (bi.project === project.name) {
+        logger.debug(`${JSON.stringify(bi)}`);
         if (bi.keep) {
           this.branchesKept.push(bi.branch);
           logger.info(`${this.project.name}: Keeping branch ${bi.branch}`);
@@ -202,7 +204,9 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
           const branch = bi.branch;
           const safeIdx = safeBranchRes.findIndex(safeBranchRe => (branch.match(safeBranchRe) != null));
           if (safeIdx < 0) {
-            this.branchesToRemove.push(RemoteBranch.fromBranchName(bi.branch));
+            const branchToRemove: RemoteBranch = RemoteBranch.fromBranchName(bi.branch);
+            logger.debug(`${JSON.stringify(branchToRemove)}`);
+            this.branchesToRemove.push(branchToRemove);
             logger.info(`${this.project.name}: Will attempt to remove branch ${bi.branch}`);
           }
         }

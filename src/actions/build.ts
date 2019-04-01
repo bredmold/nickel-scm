@@ -10,6 +10,7 @@ export enum BuildStatus {
   Success = 'build-success',
   Failure = 'build-failure',
   Invalid = 'build-nope',
+  Skipped = 'build-skipped',
 }
 
 export interface BuildResult {

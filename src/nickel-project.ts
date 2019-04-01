@@ -1,7 +1,7 @@
 import {RepositorySync, SyncResult} from "./actions/sync";
 import {GitRepository} from "./scm/git/git-repository";
 import {ReportResult, RepositoryReport} from "./actions/report";
-import {BuildResult} from "./actions/build";
+import {BuildResult, BuildSystem, BuildSystemType} from "./actions/build";
 import {CleanupResult, RepositoryCleaner} from "./actions/cleanup";
 import {
   GuidedBranchRemoval,
@@ -58,3 +58,11 @@ export class NickelProject {
   mergedBranchesReport: () => Promise<MergedBranchesResult> = () => new MergedBranchesReport(this).report();
   guidedBranchRemoval: (instructions: string) => Promise<GuidedBranchRemovalResult> = (instructions: string) => new GuidedBranchRemoval(this, instructions).prune();
 }
+
+export const EMPTY_PROJECT: NickelProject = new NickelProject({
+  name: 'empty',
+  path: 'empty',
+  defaultBranch: 'master',
+  safeBranches: ['master'],
+  build: false,
+});

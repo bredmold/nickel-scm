@@ -1,9 +1,15 @@
-import {NickelProject} from "../nickel-project";
+import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
 import {ReportResult} from "./report";
-import {CleanupResult} from "./cleanup";
-import {SyncResult} from "./sync";
-import {BuildResult} from "./build";
-import {GuidedBranchRemovalResult, MergedBranchesInstructions, MergedBranchesResult} from "./merged-branches";
+import {CleanupResult, CleanupStatus} from "./cleanup";
+import {SyncResult, SyncStatus} from "./sync";
+import {BuildResult, BuildStatus} from "./build";
+import {
+  GuidedBranchRemovalResult,
+  GuidedBranchRemovalStatus,
+  MergedBranchesInstructions,
+  MergedBranchesResult,
+  MergedBranchesStatus
+} from "./merged-branches";
 
 type ReportConfigEntry = string | { [index: string]: string | number };
 type ReportConfig = { [index: string]: ReportConfigEntry };
@@ -36,6 +42,11 @@ export interface NickelAction<ResponseType> {
   post(reports: ResponseType[], args?: any): any;
 
   /**
+   * Generic empty report in case the project was skipped
+   */
+  readonly skipReport: ResponseType;
+
+  /**
    * Build the report description that tells the reporter how to assemble a report
    */
   readonly reportHeader: ReportConfig;
@@ -46,6 +57,12 @@ export const REPORT_ACTION: NickelAction<ReportResult> = {
   description: 'Local repository report',
   act: project => project.report(),
   post: () => {
+  },
+  skipReport: {
+    project: EMPTY_PROJECT,
+    branch: '',
+    modified: 0,
+    commit: '',
   },
   reportHeader: {
     'project.name': 'Project',
@@ -61,6 +78,11 @@ export const CLEANUP_ACTION: NickelAction<CleanupResult> = {
   act: project => project.cleanup(),
   post: () => {
   },
+  skipReport: {
+    project: EMPTY_PROJECT,
+    branch: '',
+    status: CleanupStatus.Skipped,
+  },
   reportHeader: {
     'project.name': 'Project',
     'branch': 'Branch',
@@ -73,6 +95,12 @@ export const SYNC_ACTION: NickelAction<SyncResult> = {
   description: 'Sync all projects',
   act: project => project.sync(),
   post: () => {
+  },
+  skipReport: {
+    project: EMPTY_PROJECT,
+    updateCount: 0,
+    branch: '',
+    status: SyncStatus.Skipped,
   },
   reportHeader: {
     'project.name': 'Project',
@@ -87,6 +115,14 @@ export const BUILD_ACTION: NickelAction<BuildResult> = {
   description: 'Build all projects',
   act: project => project.build(),
   post: () => {
+  },
+  skipReport: {
+    project: EMPTY_PROJECT,
+    type: 'skipped',
+    branch: '',
+    commit: '',
+    status: BuildStatus.Skipped,
+    error: '',
   },
   reportHeader: {
     'project.name': 'Project',
@@ -103,6 +139,11 @@ export const MERGED_BRANCHES_REPORT_ACTION: NickelAction<MergedBranchesResult> =
   description: 'Generate a merged branches report',
   act: project => project.mergedBranchesReport(),
   post: (reports, args) => new MergedBranchesInstructions(reports, args).writeReport(),
+  skipReport: {
+    project: EMPTY_PROJECT,
+    candidateBranches: [],
+    status: MergedBranchesStatus.Skipped,
+  },
   reportHeader: {
     'project.name': 'Project',
     'status': 'Status',
@@ -115,6 +156,13 @@ export const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResul
   description: 'Remove branches based on a merged branches report',
   act: (project, args) => project.guidedBranchRemoval(args),
   post: () => {
+  },
+  skipReport: {
+    project: EMPTY_PROJECT,
+    branch: '',
+    branchesKept: [],
+    removedBranches: [],
+    status: GuidedBranchRemovalStatus.Skipped,
   },
   reportHeader: {
     'project.name': 'Project',
