@@ -164,6 +164,9 @@ export interface GuidedBranchRemovalResult {
   /** List of merged branches that were removed */
   removedBranches: string[];
 
+  /** List of branches that could not be removed for any reason */
+  notRemovedBranches: string[];
+
   /** Status from merging branches */
   status: GuidedBranchRemovalStatus;
 }
@@ -172,6 +175,7 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
   branch: string;
   branchesKept: string[];
   removedBranches: string[];
+  notRemovedBranches: string[];
   branchesToRemove: RemoteBranch[];
   status: GuidedBranchRemovalStatus;
 
@@ -194,6 +198,7 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
     // Filter the branch instructions - selecting only "non-safe" branches for the current project
     this.branchesKept = [];
     this.branchesToRemove = [];
+    this.notRemovedBranches = [];
     branchInstructions.forEach(bi => {
       if (bi.project === project.name) {
         logger.debug(`${JSON.stringify(bi)}`);
@@ -272,6 +277,7 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
                         this.removedBranches.push(remoteBranch.toString());
                       } else {
                         logger.warn(`${this.project.name}: Failed to remove branch ${remoteBranch.remote} ${remoteBranch.branch}`);
+                        this.notRemovedBranches.push(remoteBranch.toString());
                       }
                     });
                     finish(null, GuidedBranchRemovalStatus.Success);

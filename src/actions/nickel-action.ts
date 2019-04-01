@@ -162,6 +162,7 @@ export const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResul
     branch: '',
     branchesKept: [],
     removedBranches: [],
+    notRemovedBranches: [],
     status: GuidedBranchRemovalStatus.Skipped,
   },
   reportHeader: {
@@ -170,5 +171,6 @@ export const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResul
     'status': 'Status',
     'branchesKept.length': '# Kept',
     'removedBranches.length': '# Removed',
+    'notRemovedBranches.length': '# Failed',
   }
 };
