@@ -4,39 +4,6 @@ import * as fs from "fs";
 import {FetchResult, RemoteBranch} from "../scm/git/git-repository";
 
 /*
-Support functions
- */
-
-/**
- * Parse the fetch result to find the list of branches, and account for case corrections that accompany
- * case-insensitive filesystems (e.g. Windows).
- *
- * @param fetchResult Parsed fetch response
- */
-function buildBranchModel(fetchResult: FetchResult) {
-  let deletedBranches: string[] = [];
-  let addedBranches: string[] = [];
-  fetchResult.updatedBranches.forEach(fetchItem => {
-    if (fetchItem.action === 'deleted') {
-      deletedBranches.push(fetchItem.trackingBranch);
-    } else if (fetchItem.action === 'new branch') {
-      addedBranches.push(fetchItem.trackingBranch);
-    }
-  });
-
-  let branchNameMap: { [key: string]: string } = {};
-  deletedBranches.forEach(deletedBranch => {
-    const matchingBranch = addedBranches.find(addedBranch => addedBranch.toLowerCase() === deletedBranch.toLowerCase());
-    if (matchingBranch) {
-      branchNameMap[deletedBranch] = matchingBranch;
-      logger.debug(`Matching branch: ${deletedBranch} => ${matchingBranch}`);
-    }
-  });
-
-  return branchNameMap;
-}
-
-/*
 Merged branches report generation
  */
 
@@ -253,11 +220,23 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
                   }
                 });
 
-                let branchNameMap: { [key: string]: string } = {};
+                // Map from remote name to local branch name to remote branch name
+                let branchNameMap: { [key: string]: { [key: string]: string } } = {};
                 deletedBranches.forEach(localBranch => {
                   const remoteBranch = addedBranches.find(addedBranch => addedBranch.toLowerCase() === localBranch.toLowerCase());
                   if (remoteBranch) {
-                    branchNameMap[localBranch] = remoteBranch;
+                    const remoteBranchParts = remoteBranch.split(/\//);
+                    const remote = remoteBranchParts[0];
+                    const remoteBranchName = remoteBranchParts.slice(1).join('/');
+
+                    const localBranchParts = localBranch.split(/\//);
+                    const localBranchName = localBranchParts.slice(1).join('/');
+
+                    if (!branchNameMap[remote]) {
+                      branchNameMap[remote] = {};
+                    }
+
+                    branchNameMap[remote][localBranchName] = remoteBranchName;
                     logger.debug(`Matching branch: ${localBranch} => ${remoteBranch}`);
                   }
                 });
@@ -269,9 +248,12 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
                 this.project.repository.allBranches().then(
                   () => {
                     this.branchesToRemove.forEach(remoteBranch => {
-                      const deleted = this.project.repository.removeRemoteBranchSync(
-                        remoteBranch.remote,
-                        remoteBranch.branch);
+                      const remote = remoteBranch.remote;
+                      const branch = branchNameMap[remote].hasOwnProperty(remoteBranch.branch)
+                        ? branchNameMap[remote][remoteBranch.branch]
+                        : remoteBranch.branch;
+                      logger.debug(`${this.project.name}: Delete ${remote} ${branch}`);
+                      const deleted = this.project.repository.removeRemoteBranchSync(remote, branch);
                       if (deleted) {
                         logger.info(`${this.project.name}: Deleted ${remoteBranch.remote} ${remoteBranch.branch}`);
                         this.removedBranches.push(remoteBranch.toString());
