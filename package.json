@@ -11,7 +11,7 @@
     "test": "jasmine"
   },
   "files": [
-    "dist/**"
+    "./dist/**"
   ],
   "bin": {
     "nickel": "./dist/src/nickel.js"
