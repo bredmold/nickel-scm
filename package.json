@@ -10,9 +10,6 @@
     "build": "tsc",
     "test": "jasmine"
   },
-  "files": [
-    "./dist/**"
-  ],
   "bin": {
     "nickel": "./dist/src/nickel.js"
   },
