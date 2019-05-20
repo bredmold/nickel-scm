@@ -200,7 +200,7 @@ Here are the meanings of the status values:
 | build-failure | Failure |
 | build-nope    | Project has no build step |
 
-### mergedReport
+### mergeReport
 
 Identify merged branches and generate a report.
 
@@ -242,3 +242,16 @@ Here are the status values:
 | guided-merge-skipped | Skipped the project because there was nothing to do |
 | guided-merge-dirty   | The work space was dirty, so no branch manipulation was possible |
 | guided-merge-working | The work space was already on a branch, so no branches were targeted |
+
+# Develop
+Some handy commands to run when developing and releasing nickel.
+
+## Building Locally
+```bash
+npm run build && npm install -g
+```
+
+## Release
+```bash
+npm version patch && npm run build && npm publish
+```
