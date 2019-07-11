@@ -5,26 +5,10 @@ import * as vm from 'vm';
 import {ConfigContext} from "./config-context";
 import * as fs from "fs";
 import {NickelInstigator} from "./nickel-instigator";
-import {
-  BUILD_ACTION,
-  CLEANUP_ACTION,
-  GUIDED_BRANCH_REMOVAL_ACTION,
-  MERGED_BRANCHES_REPORT_ACTION,
-  REPORT_ACTION,
-  SYNC_ACTION
-} from "./actions/nickel-action";
+import {ALL_ACTIONS} from "./actions/nickel-action";
 import * as winston from "winston";
 
 const pkg = require('../package.json');
-
-const ALL_ACTIONS = [
-  SYNC_ACTION,
-  REPORT_ACTION,
-  BUILD_ACTION,
-  CLEANUP_ACTION,
-  MERGED_BRANCHES_REPORT_ACTION,
-  GUIDED_BRANCH_REMOVAL_ACTION,
-];
 
 /*
 Global controls
@@ -62,9 +46,10 @@ program
 
 ALL_ACTIONS.forEach(nickelAction => {
   program.command(nickelAction.command)
-    .action(args => {
+    .action((...args) => {
       command = nickelAction.command;
       commandArgs = args;
+      logger.debug(`cmd=${nickelAction.command} args=${commandArgs}`);
     })
     .description(nickelAction.description);
 });

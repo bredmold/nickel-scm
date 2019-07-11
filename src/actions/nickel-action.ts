@@ -3,13 +3,8 @@ import {ReportResult} from "./report";
 import {CleanupResult, CleanupStatus} from "./cleanup";
 import {SyncResult, SyncStatus} from "./sync";
 import {BuildResult, BuildStatus} from "./build";
-import {
-  GuidedBranchRemovalResult,
-  GuidedBranchRemovalStatus,
-  MergedBranchesInstructions,
-  MergedBranchesResult,
-  MergedBranchesStatus
-} from "./merged-branches";
+import {GuidedBranchRemovalResult, GuidedBranchRemovalStatus} from "./guided-remove";
+import {BranchReportResult, BranchReportStatus, BranchReportWriter} from "./branch-reports";
 
 type ReportConfigEntry = string | { [index: string]: string | number };
 type ReportConfig = { [index: string]: ReportConfigEntry };
@@ -52,7 +47,7 @@ export interface NickelAction<ResponseType> {
   readonly reportHeader: ReportConfig;
 }
 
-export const REPORT_ACTION: NickelAction<ReportResult> = {
+const REPORT_ACTION: NickelAction<ReportResult> = {
   command: 'report',
   description: 'Local repository report',
   act: project => project.report(),
@@ -72,7 +67,7 @@ export const REPORT_ACTION: NickelAction<ReportResult> = {
   }
 };
 
-export const CLEANUP_ACTION: NickelAction<CleanupResult> = {
+const CLEANUP_ACTION: NickelAction<CleanupResult> = {
   command: 'cleanup',
   description: 'Retire unused branches',
   act: project => project.cleanup(),
@@ -90,7 +85,7 @@ export const CLEANUP_ACTION: NickelAction<CleanupResult> = {
   }
 };
 
-export const SYNC_ACTION: NickelAction<SyncResult> = {
+const SYNC_ACTION: NickelAction<SyncResult> = {
   command: 'sync',
   description: 'Sync all projects',
   act: project => project.sync(),
@@ -110,7 +105,7 @@ export const SYNC_ACTION: NickelAction<SyncResult> = {
   }
 };
 
-export const BUILD_ACTION: NickelAction<BuildResult> = {
+const BUILD_ACTION: NickelAction<BuildResult> = {
   command: 'build',
   description: 'Build all projects',
   act: project => project.build(),
@@ -134,15 +129,15 @@ export const BUILD_ACTION: NickelAction<BuildResult> = {
   }
 };
 
-export const MERGED_BRANCHES_REPORT_ACTION: NickelAction<MergedBranchesResult> = {
+const MERGED_BRANCHES_REPORT_ACTION: NickelAction<BranchReportResult> = {
   command: 'mergeReport <reportFile>',
   description: 'Generate a merged branches report',
   act: project => project.mergedBranchesReport(),
-  post: (reports, args) => new MergedBranchesInstructions(reports, args).writeReport(),
+  post: (reports, args) => new BranchReportWriter(reports, args).writeReport(),
   skipReport: {
     project: EMPTY_PROJECT,
     candidateBranches: [],
-    status: MergedBranchesStatus.Skipped,
+    status: BranchReportStatus.Skipped,
   },
   reportHeader: {
     'project.name': 'Project',
@@ -151,7 +146,7 @@ export const MERGED_BRANCHES_REPORT_ACTION: NickelAction<MergedBranchesResult> =
   }
 };
 
-export const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResult> = {
+const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResult> = {
   command: 'guidedRemove <reportFile>',
   description: 'Remove branches based on a merged branches report',
   act: (project, args) => project.guidedBranchRemoval(args),
@@ -174,3 +169,31 @@ export const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResul
     'notRemovedBranches.length': '# Failed',
   }
 };
+
+const OLD_BRANCHES_REPORT_ACTION: NickelAction<BranchReportResult> = {
+  command: 'oldBranches <reportFile> [age]',
+  description: 'Generate a list of branches older than a certain age',
+  act: (project, args) => project.oldBranchesReport(args),
+  post: (reports, args) => new BranchReportWriter(reports, args).writeReport(),
+  skipReport: {
+    project: EMPTY_PROJECT,
+    candidateBranches: [],
+    status: BranchReportStatus.Skipped,
+  },
+  reportHeader: {
+    'project.name': 'Project',
+    'status': 'Status',
+    'candidateBranches.length': '# Candidates',
+  }
+};
+
+export const ALL_ACTIONS = [
+  SYNC_ACTION,
+  REPORT_ACTION,
+  BUILD_ACTION,
+  CLEANUP_ACTION,
+  MERGED_BRANCHES_REPORT_ACTION,
+  GUIDED_BRANCH_REMOVAL_ACTION,
+  OLD_BRANCHES_REPORT_ACTION,
+];
+

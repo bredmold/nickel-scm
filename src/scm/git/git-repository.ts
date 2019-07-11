@@ -8,6 +8,7 @@ export interface PullResult {
 
 /** Results of a fetch */
 export interface FetchItem {
+  flag: string;
   action: string;
   remoteBranch: string;
   trackingBranch: string;
@@ -93,17 +94,44 @@ export class GitRepository {
   }
 
   fetch(): Promise<FetchResult> {
-    const branchRegex = /^ ([ +-t*!=]) \[([a-zA-Z ]+)]\s+([a-zA-Z0-9-_./]+|\(none\))\s+->\s+([a-zA-Z0-9-_./]+)$/;
+    const branchRegex = /^ ([ +\-t*!=]) (\[?[a-zA-Z0-9 .]+]?)\s+([a-zA-Z0-9-_./]+|\(none\))\s+->\s+([a-zA-Z0-9-_./]+)\s*(.*)?$/;
     return this.run('git fetch --prune').then(out => {
       let lines = out.stderr.split(/\n/);
       let fetchItems: FetchItem[] = [];
       lines.forEach(line => {
         const lineMatch = line.match(branchRegex);
         if (lineMatch) {
+          const rawFlag = lineMatch[1];
+          let flag = 'unknown';
+          switch (rawFlag) {
+            case ' ':
+              flag = 'fast-forward';
+              break;
+            case '+':
+              flag = 'forced update';
+              break;
+            case '-':
+              flag = 'pruned';
+              break;
+            case 't':
+              flag = 'tag update';
+              break;
+            case '*':
+              flag = 'new ref';
+              break;
+            case '!':
+              flag = 'rejected';
+              break;
+            case '=':
+              flag = 'up to date';
+              break;
+          }
+
           const summary = lineMatch[2];
           const remoteBranch = lineMatch[3];
           const localBranch = lineMatch[4];
           fetchItems.push({
+            flag: flag,
             action: summary,
             remoteBranch: remoteBranch,
             trackingBranch: localBranch,
@@ -122,9 +150,6 @@ export class GitRepository {
    * @param branch Name of the branch to remove
    */
   removeRemoteBranchSync(remote: string, branch: string): boolean {
-    const normalizedBranch = branch.replace(/\//, '\/');
-    const deletedRe = new RegExp(`^\s+-\s+\\[deleted]\s+${normalizedBranch}$`);
-
     try {
       this.runSync(`git push --delete ${remote} ${branch}`);
       return true;
@@ -281,6 +306,19 @@ export class GitRepository {
     });
   }
 
+  /**
+   * Get the commit date for the most recent commit on a given branch
+   *
+   * @param branch Branch name to check
+   */
+  committerDate(branch: string): Promise<Date> {
+    return this.run(`git log -n 1 --pretty=format:%cI ${branch}`).then(out => {
+      const trimmed: string = out.stdout.replace(/^\s+/, '')
+        .replace(/\s+$/, '');
+      return new Date(trimmed);
+    });
+  }
+
   private run(command: string): Promise<ProcessResult> {
     logger.debug(`${command} [${this.path}]`);
     return new Promise<any>((resolve, reject) => {
@@ -304,4 +342,5 @@ export class GitRepository {
       throw error;
     }
   }
+
 }
