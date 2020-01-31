@@ -5,6 +5,29 @@ import chalk, {Level} from "chalk";
 import {CleanupStatus} from "./actions/cleanup";
 import {logger} from "./nickel";
 
+/**
+ * An item in a report - either a project or a separator
+ */
+export interface ReportingItem {
+  name: string;
+  selected: boolean;
+}
+
+/**
+ * Models a report separator, including an optional label for the separator
+ */
+export class ReportSeparator implements ReportingItem {
+  selected: boolean = true;
+
+  /**
+   * Build a report separator instance
+   *
+   * @param name Optional label for the separator
+   */
+  constructor(public name: string) {
+  }
+}
+
 interface ColumnConfig {
   path: string;
   title: string;
@@ -22,11 +45,18 @@ export class NickelReport {
   private columns: ColumnConfig[] = [];
   private separators: number[] = [0, 1];
 
-  constructor(header: any, separators: number[]) {
+  constructor(header: any, reportItems: ReportingItem[]) {
     chalk.enabled = true;
     chalk.level = Level.Basic;
 
-    separators.forEach(idx => this.separators.push(idx + 1));
+    let projectIdx = 1;
+    for (let item of reportItems) {
+      if (item instanceof ReportSeparator) {
+        this.separators.push(projectIdx);
+      } else {
+        ++projectIdx;
+      }
+    }
 
     for (let key in header) {
       let title: string;

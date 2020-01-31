@@ -2,10 +2,10 @@
  * Configuration context that provides variables and functions to the config script
  */
 import {NickelProject} from "./nickel-project";
+import {ReportingItem, ReportSeparator} from "./nickel-report";
 
 export class ConfigContext {
-  static separators: number[] = [];
-  static projects: NickelProject[] = [];
+  static reportItems: ReportingItem[] = [];
   static root: string = '';
   static defaultBranch: string = 'master';
   static safeBranches: (string | RegExp)[] = [];
@@ -33,7 +33,7 @@ export class ConfigContext {
    */
   project(name: string, c: any) {
     let defaultBranch: string = (c && c.defaultBranch) || ConfigContext.defaultBranch;
-    ConfigContext.projects.push(new NickelProject({
+    ConfigContext.reportItems.push(new NickelProject({
       name: name,
       path: ConfigContext.root,
       defaultBranch: defaultBranch,
@@ -42,7 +42,7 @@ export class ConfigContext {
     }));
   }
 
-  separator() {
-    ConfigContext.separators.push(ConfigContext.projects.length);
+  separator(name: string = '') {
+    ConfigContext.reportItems.push(new ReportSeparator(name));
   }
 }

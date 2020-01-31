@@ -7,6 +7,7 @@ import * as fs from "fs";
 import {NickelInstigator} from "./nickel-instigator";
 import {ALL_ACTIONS} from "./actions/nickel-action";
 import * as winston from "winston";
+import {NickelProject} from "./nickel-project";
 
 const pkg = require('../package.json');
 
@@ -80,26 +81,27 @@ vm.runInContext(configScriptBytes, configContext);
 Initialize the project list
  */
 
-const projects = ConfigContext.projects;
-const separators = ConfigContext.separators;
+const reportItems = ConfigContext.reportItems;
 
 if (selectedProjects.length > 0) {
   selectedProjects.forEach(selected => {
-    const idx = projects.findIndex(p => p.name === selected);
-    if (idx < 0) {
+    const project = reportItems.find(p => (p instanceof NickelProject) && (p.name === selected)) as NickelProject;
+    if (project) {
+      project.selected = true;
+    } else {
       logger.error(`No such project: ${selected}`);
       process.exit(1);
     }
   });
 } else {
   // If no projects are selected, then implicitly, all projects are selected
-  selectedProjects = projects.map(p => p.name);
+  reportItems.forEach(item => item.selected = true);
 }
 
 const action = ALL_ACTIONS.find(nickelAction => nickelAction.command === command);
 if (action === undefined) {
   logger.error('this never happens');
 } else {
-  const instigator = new NickelInstigator(projects, separators, selectedProjects);
+  const instigator = new NickelInstigator(reportItems);
   instigator.doIt(action, commandArgs);
 }

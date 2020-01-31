@@ -230,8 +230,8 @@ The report structure looks like this:
 | Project   | The name of the project |
 | Branch    | Current branch for the project |
 | Status    | Overall status of merging for this project |
-| # Kept    | How many branches from the report were kept |
-| # Removed | How many branches form the report were removed |
+| Kept      | How many branches from the report were kept |
+| Removed   | How many branches form the report were removed |
 
 Here are the status values:
 
@@ -255,3 +255,12 @@ npm run build && npm install -g
 ```bash
 npm version patch && npm run build && npm publish
 ```
+
+## Future Plans
+These are features I have in mind for the future. I have no schedule for getting to them.
+* Section headers in the report
+  * Allow separators to be labeled in a way that shows up in the report
+* Logical grouping of projects
+  * Allow projects to be declared in logical groups
+  * Filter actions based on groups
+  * Configure groups (e.g. root directory)

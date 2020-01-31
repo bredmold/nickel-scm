@@ -8,6 +8,7 @@ import {GuidedBranchRemoval, GuidedBranchRemovalResult} from "./actions/guided-r
 import {OldBranchesReport} from "./actions/old-branches";
 import {BranchReportResult} from "./actions/branch-reports";
 import {MergedBranchesReport} from "./actions/merged-branches";
+import {ReportingItem} from "./nickel-report";
 
 /** Configuration values that can be passed in for a project */
 export interface NickelProjectConfig {
@@ -27,13 +28,14 @@ export interface NickelProjectConfig {
   safeBranches: (string | RegExp)[];
 }
 
-export class NickelProject {
+export class NickelProject implements ReportingItem {
   name: string;
   path: string;
   defaultBranch: string;
   safeBranches: (string | RegExp)[];
   buildSystem: string | boolean;
   repository: GitRepository;
+  selected: boolean = false;
 
   constructor(c: NickelProjectConfig) {
     this.name = c.name;
