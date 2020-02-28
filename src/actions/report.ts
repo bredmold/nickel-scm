@@ -1,46 +1,56 @@
-import {NickelProject} from "../nickel-project";
+import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
+import {ReportLine} from "../nickel-report";
+import {NickelAction} from "./nickel-action";
+import {TableColumn} from "../nickel-table";
 
-export interface ReportResult {
-  /* Report project */
-  project: NickelProject;
+export class RepositoryReportAction implements NickelAction {
+  readonly command = 'report';
+  readonly description = 'Local repository report';
+  readonly skipReport = new ReportLine({
+    'Project': EMPTY_PROJECT.name,
+    '# Mod': '0',
+    'Branch': '',
+    'Commit': '',
+  }, false);
+  readonly columns = [
+    new TableColumn('Project'),
+    new TableColumn('Branch'),
+    new TableColumn('# Mod'),
+    new TableColumn('Commit'),
+  ];
 
-  /** Current branch for the repository */
-  branch: string;
+  act(project: NickelProject, args?: any): Promise<ReportLine> {
+    return new Promise<ReportLine>(resolve => {
+      let branch = '';
+      let modifiedFiles = [];
+      let commit = '';
 
-  /** Number of modified files in the repository */
-  modified: number;
-
-  /** Commit ID */
-  commit: string;
-}
-
-export class RepositoryReport implements ReportResult {
-  branch: string;
-  modified: number;
-  commit: string;
-
-  constructor(public project: NickelProject) {
-    this.branch = '';
-    this.modified = 0;
-    this.commit = '';
-  }
-
-  report(): Promise<ReportResult> {
-    return new Promise<ReportResult>(resolve => {
-      this.project.repository.status().then(
+      const finish = function () {
+        resolve(new ReportLine({
+          'Project': project.name,
+          'Branch': branch,
+          '# Mod': modifiedFiles.length.toString(),
+          'Commit': commit,
+        }));
+      };
+      project.repository.status().then(
         status => {
-          this.branch = status.branch;
-          this.modified = status.modifiedFiles.length;
-          this.project.repository.commit().then(
+          branch = status.branch;
+          modifiedFiles = status.modifiedFiles;
+          project.repository.commit().then(
             commitId => {
-              this.commit = commitId;
-              resolve(this);
+              commit = commitId;
+              finish();
             },
-            () => resolve(this)
+            () => finish()
           );
         },
-        () => resolve(this)
+        () => finish()
       );
     });
+  }
+
+  post(reports: ReportLine[], args?: any): any {
+    // Empty
   }
 }

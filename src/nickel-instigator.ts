@@ -8,30 +8,32 @@ import {NickelProject} from "./nickel-project";
  * Nickel Instigator - perform actions across all projects
  */
 export class NickelInstigator {
-  private projects: NickelProject[];
-
   constructor(private reportItems: ReportingItem[]) {
-    this.projects = reportItems.filter(item => (item instanceof NickelProject)) as NickelProject[];
   }
 
-  doIt(action: NickelAction<any>, args: any) {
+  doIt(action: NickelAction, args: any) {
     // Do eeet!
     const timer = new NickelTimer();
-    const promises: Promise<any>[] = this.projects.map(project => {
-      if (project.selected) {
-        return action.act(project, args);
+    const promises: Promise<any>[] = this.reportItems.map(item => {
+      if (item.selected && (item instanceof NickelProject)) {
+        return action.act(<NickelProject>item, args);
+      } else if (item.selected) {
+        return Promise.resolve(item);
       } else {
         let report: any = {};
         Object.assign(report, action.skipReport);
-        report.project = project;
+        report.project = item;
         return Promise.resolve(report);
       }
     });
-    Promise.all(promises).then(reports => {
-      const report = new NickelReport(action.reportHeader, this.reportItems);
-      console.log(report.buildReport(reports));
-      action.post(reports, args);
-      logger.info(`${timer.elapsed() / 1000}s elapsed`);
-    });
+
+    Promise
+      .all(promises)
+      .then(reports => {
+        const report = new NickelReport(action.columns);
+        console.log(report.buildReport(reports));
+        action.post(reports, args);
+        logger.info(`${timer.elapsed() / 1000}s elapsed`);
+      });
   }
 }

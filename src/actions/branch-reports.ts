@@ -1,6 +1,6 @@
-import {NickelProject} from "../nickel-project";
 import {logger} from "../nickel";
 import * as fs from "fs";
+import {ReportLine} from "../nickel-report";
 
 export enum BranchReportStatus {
   New = 'report-new',
@@ -9,15 +9,11 @@ export enum BranchReportStatus {
   Skipped = 'report-skip',
 }
 
-export interface BranchReportResult {
-  /** The project being reported on */
-  project: NickelProject;
-
-  /** List of branches identified for removal */
-  candidateBranches: string[];
-
-  /** Status when pulling branch status */
-  status: BranchReportStatus;
+export class BranchReportLine extends ReportLine {
+  constructor(values: { [index: string]: string },
+              public candidateBranches: string[]) {
+    super(values);
+  }
 }
 
 export interface BranchReportDetails {
@@ -29,7 +25,7 @@ export interface BranchReportDetails {
 export class BranchReportWriter {
   private readonly reportFile: string;
 
-  constructor(private reports: BranchReportResult[],
+  constructor(private reports: BranchReportLine[],
               args: any) {
     this.reportFile = args[0];
   }
@@ -39,7 +35,7 @@ export class BranchReportWriter {
     this.reports.forEach(report => {
       report.candidateBranches.forEach(branch => {
         processed.push({
-          project: report.project.name,
+          project: report.get('Project'),
           branch: branch,
           keep: false,
         });

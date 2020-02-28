@@ -1,16 +1,42 @@
-import {NickelProject} from "../nickel-project";
-import {BranchReportResult, BranchReportStatus} from "./branch-reports";
+import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
+import {BranchReportLine, BranchReportStatus, BranchReportWriter} from "./branch-reports";
 import {logger} from "../nickel";
+import {ReportLine} from "../nickel-report";
+import {NickelAction} from "./nickel-action";
+import {TableColumn} from "../nickel-table";
 
-export class OldBranchesReport implements BranchReportResult {
-  candidateBranches: string[];
-  status: BranchReportStatus;
-  age: number;
+export class OldBranchesReportAction implements NickelAction {
+  readonly command = 'oldBranches <reportFile> [age]';
+  readonly description = 'Generate a list of branches older than a certain age';
+  readonly skipReport = new ReportLine({
+    'Project': EMPTY_PROJECT.name,
+    'Status': BranchReportStatus.Skipped,
+    '# Candidates': '0',
+  }, false);
+  readonly columns = [
+    new TableColumn('Project'),
+    new TableColumn('Status'),
+    new TableColumn('# Candidates'),
+  ];
+
+  act(project: NickelProject, args?: any): Promise<ReportLine> {
+    return new OldBranchesReport(project, args)
+      .report();
+  }
+
+  post(reports: ReportLine[], args?: any): any {
+    new BranchReportWriter(<BranchReportLine[]>reports, args)
+      .writeReport();
+  }
+}
+
+class OldBranchesReport {
+  private readonly candidateBranches: string[];
+  private readonly age: number;
 
   constructor(public project: NickelProject,
               args: any) {
     this.candidateBranches = [];
-    this.status = BranchReportStatus.New;
 
     let age: number = 60;
     if ((args instanceof Array)
@@ -33,11 +59,14 @@ export class OldBranchesReport implements BranchReportResult {
     logger.debug(`old branch report: age=${this.age}`);
   }
 
-  report(): Promise<BranchReportResult> {
-    return new Promise<BranchReportResult>(resolve => {
+  report(): Promise<ReportLine> {
+    return new Promise<ReportLine>(resolve => {
       const finish = (e: any, status: BranchReportStatus) => {
-        this.status = status;
-        resolve(this);
+        resolve(new BranchReportLine({
+          'Project': this.project.name,
+          'Status': status,
+          '# Candidates': this.candidateBranches.length.toString(),
+        }, this.candidateBranches));
       };
 
       this.project.repository.fetch().then(

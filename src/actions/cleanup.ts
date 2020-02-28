@@ -1,4 +1,7 @@
-import {NickelProject} from "../nickel-project";
+import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
+import {ReportLine} from "../nickel-report";
+import {NickelAction} from "./nickel-action";
+import {TableColumn} from "../nickel-table";
 
 export enum CleanupStatus {
   New = 'clean-new',
@@ -8,51 +11,48 @@ export enum CleanupStatus {
   Failure = 'clean-failure',
 }
 
-export interface CleanupResult {
-  /** The project that was cleaned */
-  project: NickelProject;
+export class RepositoryCleanupAction implements NickelAction {
+  readonly command = 'cleanup';
+  readonly description = 'Retire unused branches';
+  readonly skipReport = new ReportLine({
+    'Project': EMPTY_PROJECT.name,
+    'Branch': '',
+    'Status': CleanupStatus.Skipped,
+  }, false);
+  readonly columns = [
+    new TableColumn('Project'),
+    new TableColumn('Branch'),
+    new TableColumn('Status'),
+  ];
 
-  /** Starting branch for the project */
-  branch: string;
+  act(project: NickelProject, args?: any): Promise<ReportLine> {
+    return new Promise<ReportLine>(resolve => {
+      let branch = '';
 
-  /** Status of the cleanup operation */
-  status: CleanupStatus;
-}
-
-export class RepositoryCleaner implements CleanupResult {
-  project: NickelProject;
-  branch: string;
-  status: CleanupStatus;
-
-  constructor(project: NickelProject) {
-    this.project = project;
-    this.branch = '';
-    this.status = CleanupStatus.New;
-  }
-
-  cleanup(): Promise<CleanupResult> {
-    return new Promise<CleanupResult>(resolve => {
-      let finish = (e: any, status: CleanupStatus) => {
+      const finish = (e: any, status: CleanupStatus) => {
         // TODO log e?
-        this.status = status;
-        resolve(this);
+        resolve(new ReportLine({
+          'Project': project.name,
+          'Branch': branch,
+          'Status': status,
+        }));
       };
 
-      this.project.repository.status().then(
+      project.repository.status().then(
         status => {
-          this.branch = status.branch;
-          if (this.project.defaultBranch === status.branch) {
+          branch = status.branch;
+          if (project.defaultBranch === status.branch) {
             finish(null, CleanupStatus.Skipped);
           } else if (status.modifiedFiles.length > 0) {
             finish(null, CleanupStatus.Dirty);
           } else {
-            this.project.repository.selectBranch(this.project.defaultBranch).then(
+            project.repository.selectBranch(project.defaultBranch).then(
               () => {
-                this.project.repository.pull().then(
+                project.repository.pull().then(
                   () => {
-                    this.project.repository.deleteLocalBranch(status.branch).then(
+                    project.repository.deleteLocalBranch(status.branch).then(
                       () => {
-                        this.project.repository.prune('origin').then(
+                        project.repository.prune('origin').then(
                           () => {
                             finish(null, CleanupStatus.Success);
                           },
@@ -67,5 +67,9 @@ export class RepositoryCleaner implements CleanupResult {
         },
         e => finish(e, CleanupStatus.Failure));
     });
+  }
+
+  post(reports: ReportLine[], args?: any): any {
+    // Empty
   }
 }

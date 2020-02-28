@@ -1,4 +1,7 @@
-import {NickelProject} from "../nickel-project";
+import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
+import {ReportLine} from "../nickel-report";
+import {NickelAction} from "./nickel-action";
+import {TableColumn} from "../nickel-table";
 
 export enum SyncStatus {
   New = 'sync-new',
@@ -8,55 +11,63 @@ export enum SyncStatus {
   Skipped = 'sync-skipped',
 }
 
-export interface SyncResult {
-  /** Sync operation status */
-  status: SyncStatus;
+export class RepositorySyncAction implements NickelAction {
+  readonly command = 'sync';
+  readonly description = 'Sync all projects';
+  readonly skipReport = new ReportLine({
+    'Project': EMPTY_PROJECT.name,
+    'Updated': '0',
+    'Branch': '',
+    'Status': SyncStatus.Skipped,
+  }, false);
+  readonly columns = [
+    new TableColumn('Project'),
+    new TableColumn('Branch'),
+    new TableColumn('Updated'),
+    new TableColumn('Status'),
+  ];
 
-  /** Sync project */
-  project: NickelProject;
+  act(project: NickelProject, args?: any): Promise<ReportLine> {
+    return new Promise<ReportLine>(resolve => {
+      let updatedFiles = [];
+      let branch = '';
 
-  /** Number of files that were updated */
-  updateCount: number;
-
-  /** Current branch for the repository */
-  branch: string;
-}
-
-export class RepositorySync implements SyncResult {
-  status: SyncStatus;
-  updateCount: number;
-  branch: string;
-
-  constructor(public project: NickelProject) {
-    this.status = SyncStatus.New;
-    this.updateCount = 0;
-    this.branch = '';
-  }
-
-  sync(): Promise<SyncResult> {
-    return new Promise<SyncResult>(resolve => {
       let finish = (e: any, status: SyncStatus) => {
-        this.status = status;
-        resolve(this);
+        resolve(new ReportLine({
+          'Project': project.name,
+          'Branch': branch,
+          'Updated': updatedFiles.length.toString(),
+          'Status': status,
+        }));
       };
 
-      this.project.repository.status().then(
-        status => {
-          this.branch = status.branch;
-          if (status.modifiedFiles.length > 0) {
-            finish(null, SyncStatus.Dirty);
-          } else {
-            this.project.repository.pull().then(
-              pullResult => {
-                this.updateCount = pullResult.updatedFiles.length;
-                finish(null, SyncStatus.Success);
-              },
-              e => finish(e, SyncStatus.Failure)
-            );
-          }
-        },
-        e => finish(e, SyncStatus.Failure)
-      );
+      project
+        .repository
+        .status()
+        .then(
+          status => {
+            branch = status.branch;
+            if (status.modifiedFiles.length > 0) {
+              finish(null, SyncStatus.Dirty);
+            } else {
+              project
+                .repository
+                .pull()
+                .then(
+                  pullResult => {
+                    updatedFiles = pullResult.updatedFiles;
+                    finish(null, SyncStatus.Success);
+                  },
+                  e => finish(e, SyncStatus.Failure)
+                );
+            }
+          },
+          e => finish(e, SyncStatus.Failure)
+        );
     });
+  }
+
+  post(reports: ReportLine[], args?: any): any {
+    // Empty
   }
 }

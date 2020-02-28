@@ -1,15 +1,14 @@
-import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
-import {ReportResult} from "./report";
-import {CleanupResult, CleanupStatus} from "./cleanup";
-import {SyncResult, SyncStatus} from "./sync";
-import {BuildResult, BuildStatus} from "./build";
-import {GuidedBranchRemovalResult, GuidedBranchRemovalStatus} from "./guided-remove";
-import {BranchReportResult, BranchReportStatus, BranchReportWriter} from "./branch-reports";
+import {NickelProject} from "../nickel-project";
+import {RepositoryCleanupAction} from "./cleanup";
+import {RepositorySyncAction} from "./sync";
+import {GuidedBranchRemovalAction} from "./guided-remove";
+import {ReportLine} from "../nickel-report";
+import {TableColumn} from "../nickel-table";
+import {RepositoryReportAction} from "./report";
+import {MergedBranchesReportAction} from "./merged-branches";
+import {OldBranchesReportAction} from "./old-branches";
 
-type ReportConfigEntry = string | { [index: string]: string | number };
-type ReportConfig = { [index: string]: ReportConfigEntry };
-
-export interface NickelAction<ResponseType> {
+export interface NickelAction {
   /**
    * Command string template
    */
@@ -26,7 +25,7 @@ export interface NickelAction<ResponseType> {
    * @param project The project on which to act
    * @param args List of command arguments
    */
-  act(project: NickelProject, args?: any): Promise<ResponseType>;
+  act(project: NickelProject, args?: any): Promise<ReportLine>;
 
   /**
    * Perform an action after all other actions have completed
@@ -34,166 +33,25 @@ export interface NickelAction<ResponseType> {
    * @param reports List of all reports generated
    * @param args List of command arguments
    */
-  post(reports: ResponseType[], args?: any): any;
+  post(reports: ReportLine[], args?: any): any;
 
   /**
    * Generic empty report in case the project was skipped
    */
-  readonly skipReport: ResponseType;
+  readonly skipReport: ReportLine;
 
   /**
-   * Build the report description that tells the reporter how to assemble a report
+   * Column titles
    */
-  readonly reportHeader: ReportConfig;
+  readonly columns: TableColumn[];
 }
 
-const REPORT_ACTION: NickelAction<ReportResult> = {
-  command: 'report',
-  description: 'Local repository report',
-  act: project => project.report(),
-  post: () => {
-  },
-  skipReport: {
-    project: EMPTY_PROJECT,
-    branch: '',
-    modified: 0,
-    commit: '',
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'branch': 'Branch',
-    'modified': '# Mod',
-    'commit': 'Commit',
-  }
-};
-
-const CLEANUP_ACTION: NickelAction<CleanupResult> = {
-  command: 'cleanup',
-  description: 'Retire unused branches',
-  act: project => project.cleanup(),
-  post: () => {
-  },
-  skipReport: {
-    project: EMPTY_PROJECT,
-    branch: '',
-    status: CleanupStatus.Skipped,
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'branch': 'Branch',
-    'status': 'Status',
-  }
-};
-
-const SYNC_ACTION: NickelAction<SyncResult> = {
-  command: 'sync',
-  description: 'Sync all projects',
-  act: project => project.sync(),
-  post: () => {
-  },
-  skipReport: {
-    project: EMPTY_PROJECT,
-    updateCount: 0,
-    branch: '',
-    status: SyncStatus.Skipped,
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'branch': 'Branch',
-    'updateCount': 'Updated',
-    'status': 'Status'
-  }
-};
-
-const BUILD_ACTION: NickelAction<BuildResult> = {
-  command: 'build',
-  description: 'Build all projects',
-  act: project => project.build(),
-  post: () => {
-  },
-  skipReport: {
-    project: EMPTY_PROJECT,
-    type: 'skipped',
-    branch: '',
-    commit: '',
-    status: BuildStatus.Skipped,
-    error: '',
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'type': 'Type',
-    'branch': 'Branch',
-    'commit': 'Commit',
-    'status': 'Status',
-    'error': {header: 'Message', width: 120},
-  }
-};
-
-const MERGED_BRANCHES_REPORT_ACTION: NickelAction<BranchReportResult> = {
-  command: 'mergeReport <reportFile>',
-  description: 'Generate a merged branches report',
-  act: project => project.mergedBranchesReport(),
-  post: (reports, args) => new BranchReportWriter(reports, args).writeReport(),
-  skipReport: {
-    project: EMPTY_PROJECT,
-    candidateBranches: [],
-    status: BranchReportStatus.Skipped,
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'status': 'Status',
-    'candidateBranches.length': '# Candidates',
-  }
-};
-
-const GUIDED_BRANCH_REMOVAL_ACTION: NickelAction<GuidedBranchRemovalResult> = {
-  command: 'guidedRemove <reportFile>',
-  description: 'Remove branches based on a merged branches report',
-  act: (project, args) => project.guidedBranchRemoval(args),
-  post: () => {
-  },
-  skipReport: {
-    project: EMPTY_PROJECT,
-    branch: '',
-    branchesKept: [],
-    removedBranches: [],
-    notRemovedBranches: [],
-    status: GuidedBranchRemovalStatus.Skipped,
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'branch': 'Branch',
-    'status': 'Status',
-    'branchesKept.length': '# Kept',
-    'removedBranches.length': '# Removed',
-    'notRemovedBranches.length': '# Failed',
-  }
-};
-
-const OLD_BRANCHES_REPORT_ACTION: NickelAction<BranchReportResult> = {
-  command: 'oldBranches <reportFile> [age]',
-  description: 'Generate a list of branches older than a certain age',
-  act: (project, args) => project.oldBranchesReport(args),
-  post: (reports, args) => new BranchReportWriter(reports, args).writeReport(),
-  skipReport: {
-    project: EMPTY_PROJECT,
-    candidateBranches: [],
-    status: BranchReportStatus.Skipped,
-  },
-  reportHeader: {
-    'project.name': 'Project',
-    'status': 'Status',
-    'candidateBranches.length': '# Candidates',
-  }
-};
-
 export const ALL_ACTIONS = [
-  SYNC_ACTION,
-  REPORT_ACTION,
-  BUILD_ACTION,
-  CLEANUP_ACTION,
-  MERGED_BRANCHES_REPORT_ACTION,
-  GUIDED_BRANCH_REMOVAL_ACTION,
-  OLD_BRANCHES_REPORT_ACTION,
+  new RepositorySyncAction(),
+  new RepositoryReportAction(),
+  new RepositoryCleanupAction(),
+  new MergedBranchesReportAction(),
+  new GuidedBranchRemovalAction(),
+  new OldBranchesReportAction(),
 ];
 

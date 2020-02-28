@@ -1,9 +1,23 @@
-import {table, TableUserConfig} from "table";
 import {SyncStatus} from "./actions/sync";
-import {BuildStatus} from "./actions/build";
 import chalk, {Level} from "chalk";
 import {CleanupStatus} from "./actions/cleanup";
-import {logger} from "./nickel";
+import {CellAlignment, NickelTable, TableCell, TableColumn, TableRow} from "./nickel-table";
+
+/**
+ * Returns a collection of name/value pairs
+ */
+export class ReportLine implements ReportingItem {
+  readonly name: string;
+
+  constructor(private values: { [index: string]: string },
+              public readonly selected: boolean = true) {
+    this.name = values['Project'];
+  }
+
+  get(key: string): string {
+    return this.values[key];
+  }
+}
 
 /**
  * An item in a report - either a project or a separator
@@ -28,12 +42,6 @@ export class ReportSeparator implements ReportingItem {
   }
 }
 
-interface ColumnConfig {
-  path: string;
-  title: string;
-  maxWidth: number;
-}
-
 /**
  * Build a report after running some task on each project
  *
@@ -42,115 +50,62 @@ interface ColumnConfig {
  *   values = Printable header value
  */
 export class NickelReport {
-  private columns: ColumnConfig[] = [];
-  private separators: number[] = [0, 1];
-
-  constructor(header: any, reportItems: ReportingItem[]) {
+  constructor(private readonly columns: TableColumn[]) {
     chalk.enabled = true;
     chalk.level = Level.Basic;
-
-    let projectIdx = 1;
-    for (let item of reportItems) {
-      if (item instanceof ReportSeparator) {
-        this.separators.push(projectIdx);
-      } else {
-        ++projectIdx;
-      }
-    }
-
-    for (let key in header) {
-      let title: string;
-      let maxWidth: number = -1;
-
-      let value = header[key];
-      if ((typeof value) === 'string') {
-        title = value;
-      } else {
-        title = value.header;
-        if ((typeof value.width) === 'number') {
-          maxWidth = value.width;
-        }
-      }
-
-      logger.debug(`Report: path=${key} title=${title} maxWidth=${maxWidth}`);
-      this.columns.push({path: key, title: title, maxWidth: maxWidth});
-    }
   }
 
   /**
    * Generate a report string, based on the header structure
    *
-   * @param {any[]} rows Report rows, structure determined by the header
+   * @param {ReportLine[]} rows Report rows, structure determined by the header
    */
-  buildReport(rows: any[]): string {
-    let dataCount = rows.length + 1;
-    let options: TableUserConfig = {
-      drawHorizontalLine: (index: number, size: number) => {
-        let sepIdx = this.separators.findIndex(sIdx => sIdx === index);
-        return (sepIdx >= 0) || (index === dataCount);
+  buildReport(rows: ReportingItem[]): string {
+    const tableRows = rows.map(row => {
+      if (row instanceof ReportLine) {
+        return this.processRow(<ReportLine>row);
+      } else {
+        return this.processSeparator(<ReportSeparator>row);
       }
-    };
+    });
+    const table = new NickelTable(this.columns, tableRows);
+    return table.render();
+  }
 
-    let data: any[] = [];
-
-    data.push(this.columns.map(col => chalk.bold(col.title)));
-
-    rows.forEach(row => this.processRow(row, data));
-
-    for (let rowIdx in data) {
-      let row = data[rowIdx];
-      for (let colIdx in this.columns) {
-        let cell = row[colIdx];
-        let config = this.columns[colIdx];
-
-        if (typeof cell === 'object') {
-          cell = cell.toString();
-        }
-
-        logger.silly(`Report: rowIdx=${rowIdx} colIdx=${colIdx} len=${cell.length}`);
-        if (config.maxWidth > 0 && cell.length > config.maxWidth) {
-          if (options.columns === undefined) {
-            options.columns = {};
-          }
-          options.columns[colIdx] = {width: config.maxWidth};
-        }
-
-      }
-    }
-
-    return table(data, options);
+  /**
+   * Process a separator row
+   *
+   * @param sep the separator
+   */
+  private processSeparator(sep: ReportSeparator): TableRow {
+    const sectionText = (sep.name.match(/^\s*$/))
+      ? ''
+      : ` ${chalk.italic.bold(sep.name)} `;
+    const head = new TableCell(sectionText, CellAlignment.Left);
+    const tail = this.columns.slice(1).map(() => new TableCell(''));
+    return new TableRow([head].concat(tail), 'sep');
   }
 
   /**
    * Process a single data row, generating an appropriate report value
    *
    * @param row Data row in object form
-   * @param {any[]} data table data to buildSystem
    */
-  private processRow(row: any, data: any[]) {
-    let dataRow = [];
-    for (let colIdx in this.columns) {
-      let key = this.columns[colIdx].path;
-      let value = row;
-      key.split(/\./).forEach(keySegment => {
-        value = value[keySegment];
-        if (value === undefined) {
-          value = ' ';
-        }
-      });
+  private processRow(row: ReportLine): TableRow {
+    const cells = this.columns.map(column => {
+      let value = row.get(column.title);
 
       // Value transformations
-      if (value === SyncStatus.Success || value === BuildStatus.Success || value === CleanupStatus.Success) {
+      if (value === SyncStatus.Success || value === CleanupStatus.Success) {
         value = chalk.green(value);
-      } else if (value === SyncStatus.Failure || value === BuildStatus.Failure || value == CleanupStatus.Failure) {
+      } else if (value === SyncStatus.Failure || value == CleanupStatus.Failure) {
         value = chalk.red(value);
       } else if (value === SyncStatus.Dirty || value === CleanupStatus.Dirty) {
         value = chalk.bgYellow.black(value);
       }
 
-      dataRow.push(value);
-    }
-
-    data.push(dataRow);
+      return new TableCell(value.toString());
+    });
+    return new TableRow(cells, 'data');
   }
 }

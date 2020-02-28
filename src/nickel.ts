@@ -15,7 +15,6 @@ const pkg = require('../package.json');
 Global controls
  command          - the selected command
  commandArgs      - command arguments
- actions          - list of actions to perform on this run
  configScript     - Location of the configuration script
  selectedProjects - List of projects to select
  */

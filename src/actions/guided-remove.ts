@@ -1,8 +1,11 @@
-import {NickelProject} from "../nickel-project";
+import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
 import {RemoteBranch} from "../scm/git/git-repository";
 import {logger} from "../nickel";
 import * as fs from "fs";
 import {BranchReportDetails} from "./branch-reports";
+import {ReportLine} from "../nickel-report";
+import {NickelAction} from "./nickel-action";
+import {TableColumn} from "../nickel-table";
 
 export enum GuidedBranchRemovalStatus {
   New = 'guided-merge-new',
@@ -13,27 +16,37 @@ export enum GuidedBranchRemovalStatus {
   Working = 'guided-merge-working',
 }
 
-export interface GuidedBranchRemovalResult {
-  /** The project whose branches were pruned */
-  project: NickelProject;
+export class GuidedBranchRemovalAction implements NickelAction {
+  readonly command = 'guidedRemove <reportFile>';
+  readonly description = 'Remove branches based on a merged branches report';
+  readonly skipReport = new ReportLine({
+    'Project': EMPTY_PROJECT.name,
+    'Branch': '',
+    'Status': GuidedBranchRemovalStatus.Skipped,
+    '# Kept': '0',
+    '# Removed': '0',
+    '# Failed': '0',
+  }, false);
+  readonly columns = [
+    new TableColumn('Project'),
+    new TableColumn('Branch'),
+    new TableColumn('Status'),
+    new TableColumn('# Kept'),
+    new TableColumn('# Removed'),
+    new TableColumn('# Failed'),
+  ];
 
-  /** Current working branch for the project */
-  branch: string;
+  act(project: NickelProject, args?: any): Promise<ReportLine> {
+    return new GuidedBranchRemoval(project, args)
+      .prune();
+  }
 
-  /** List of branches explicitly retained */
-  branchesKept: string[]
-
-  /** List of merged branches that were removed */
-  removedBranches: string[];
-
-  /** List of branches that could not be removed for any reason */
-  notRemovedBranches: string[];
-
-  /** Status from merging branches */
-  status: GuidedBranchRemovalStatus;
+  post(reports: ReportLine[], args?: any): any {
+    // Empty
+  }
 }
 
-export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
+class GuidedBranchRemoval {
   branch: string;
   branchesKept: string[];
   removedBranches: string[];
@@ -41,7 +54,7 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
   branchesToRemove: RemoteBranch[];
   status: GuidedBranchRemovalStatus;
 
-  constructor(public project: NickelProject,
+  constructor(private project: NickelProject,
               branchReportFilename: string) {
     this.status = GuidedBranchRemovalStatus.New;
     this.branch = '';
@@ -81,11 +94,17 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
     });
   }
 
-  prune(): Promise<GuidedBranchRemovalResult> {
-    return new Promise<GuidedBranchRemovalResult>(resolve => {
+  prune(): Promise<ReportLine> {
+    return new Promise<ReportLine>(resolve => {
       let finish = (e: any, status: GuidedBranchRemovalStatus) => {
-        this.status = status;
-        resolve(this);
+        resolve(new ReportLine({
+          'Project': this.project.name,
+          'Branch': this.branch,
+          'Status': status,
+          '# Kept': this.branchesKept.length.toString(),
+          '# Removed': this.removedBranches.length.toString(),
+          '# Failed': this.notRemovedBranches.length.toString(),
+        }));
       };
 
       this.project.repository.status().then(
@@ -118,7 +137,8 @@ export class GuidedBranchRemoval implements GuidedBranchRemovalResult {
                 // Map from remote name to local branch name to remote branch name
                 let branchNameMap: { [key: string]: { [key: string]: string } } = {};
                 deletedBranches.forEach(localBranch => {
-                  const remoteBranch = addedBranches.find(addedBranch => addedBranch.toLowerCase() === localBranch.toLowerCase());
+                  const remoteBranch = addedBranches.find(
+                    addedBranch => addedBranch.toLowerCase() === localBranch.toLowerCase());
                   if (remoteBranch) {
                     const remoteBranchParts = remoteBranch.split(/\//);
                     const remote = remoteBranchParts[0];
