@@ -68,7 +68,6 @@ Commands:
 
   sync                       Sync all projects
   report                     Local repository report
-  build                      Build all projects
   cleanup                    Retire unused branches
   mergeReport <reportFile>   Generate a merged branches report
   guidedRemove <reportFile>  Remove branches based on a merged branches report
@@ -166,39 +165,6 @@ Here are the meanings of the status values:
 | clean-dirty | The project is not on the default branch, but the repository is dirty |
 | clean-success | Cleanup operation succeeded |
 | clean-failure | Cleanup operation was attempted, but failed |
-
-### build
-
-Build all projects that have a defined build system:
-
-```
-╔═══════════════════════════╤══════╤════════════════════╤═════════╤═══════════════╤══════════════════════════╗
-║ Project                   │ Type │ Branch             │ Commit  │ Status        │ Message                  ║
-╟───────────────────────────┼──────┼────────────────────┼─────────┼───────────────┼──────────────────────────╢
-║ service-project-a-base    │ mvn  │ Feature/FOOBAR-456 │ ca14608 │ build-failure │ There are test failures. ║
-║ project-b-commons         │ none │ Feature/FOOBAR-456 │ 661cc1d │ build-nope    │                          ║
-║ project-b-service         │ none │ Feature/FOOBAR-456 │ fa053ca │ build-nope    │                          ║
-║ service-project-a-commons │ none │ Feature/FOOBAR-456 │ 263be7c │ build-nope    │                          ║
-║ service-project-a-service │ none │ Feature/FOOBAR-456 │ 4998a09 │ build-nope    │                          ║
-╚═══════════════════════════╧══════╧════════════════════╧═════════╧═══════════════╧══════════════════════════╝
-```
-
-| Column Name | Description |
-| ---         | --- |
-| Project     | The name of the project |
-| Type        | What kind of build system (`none` or `mvn`) |
-| Branch      | Current branch for the project |
-| Commit      | Latest commit ID on the current branch |
-| Status      | Overall result of the build for this project |
-| Message     | For build failures, an indicator of what happened |
-
-Here are the meanings of the status values:
-
-| Status | Description |
-| ---    | --- |
-| build-success | Success |
-| build-failure | Failure |
-| build-nope    | Project has no build step |
 
 ### mergeReport
 
