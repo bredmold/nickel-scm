@@ -38,7 +38,7 @@ project('thing-base', {build: true});
 project('thing-commons');
 project('thing-service');
 
-separator();
+separator('Ops'); // Draw a horizontal line, labeled with the word 'Ops'
 defaultBranch = 'master';
 project('ops-project');
 ```
@@ -224,8 +224,6 @@ npm version patch && npm run build && npm publish
 
 ## Future Plans
 These are features I have in mind for the future. I have no schedule for getting to them.
-* Section headers in the report
-  * Allow separators to be labeled in a way that shows up in the report
 * Logical grouping of projects
   * Allow projects to be declared in logical groups
   * Filter actions based on groups
