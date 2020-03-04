@@ -8,22 +8,27 @@ export class RowConfig {
   }
 }
 
+/**
+ * Table configuration - tagged list of row configurations.
+ *
+ * The following tags are expected
+ *   first - configuration for the first row of the table
+ *   last  - configuration for the last row of the table
+ *   sep   - configuration for separator rows in the table
+ *   data  - configuration for "normal" data rows in the table
+ *
+ * Other configuration tags are perfectly acceptable
+ */
 export class TableConfig {
-  constructor(readonly first: RowConfig,
-              readonly last: RowConfig,
-              readonly sep: RowConfig,
-              readonly data: RowConfig) {
-  }
-
   [index: string]: RowConfig;
 }
 
-const CONFIG = new TableConfig(
-  new RowConfig('╔═', '═╗', '═╤═', '═'), // first
-  new RowConfig('╚═', '═╝', '═╧═', '═'), // last
-  new RowConfig('╟─', '─╢', '─┼─', '─'), // sep
-  new RowConfig('║ ', ' ║', ' │ ', ' ')  // data
-);
+const CONFIG = {
+  'first': new RowConfig('╔═', '═╗', '═╤═', '═'),
+  'last': new RowConfig('╚═', '═╝', '═╧═', '═'),
+  'sep': new RowConfig('╟─', '─╢', '─┼─', '─'),
+  'data': new RowConfig('║ ', ' ║', ' │ ', ' '),
+};
 
 /**
  * Model a table column, including all relevant data
@@ -80,7 +85,7 @@ export class TableCell {
  */
 export class TableRow {
   constructor(readonly cells: TableCell[],
-              private readonly tag: string) {
+              private readonly tag: string = 'data') {
   }
 
   render(columnWidths: number[], tableConfig: TableConfig, override: string | null = null): string {
