@@ -9,6 +9,7 @@ export class ConfigContext {
   static root: string = '';
   static defaultBranch: string = 'master';
   static safeBranches: (string | RegExp)[] = [];
+  static commitPrefix: number = 12;
 
   /**
    * Set the root for the config context
@@ -38,7 +39,7 @@ export class ConfigContext {
       path: ConfigContext.root,
       defaultBranch: defaultBranch,
       safeBranches: ConfigContext.safeBranches,
-      build: (c && c.build) || undefined,
+      commitPrefix: ConfigContext.commitPrefix,
     }));
   }
 

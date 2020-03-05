@@ -1,9 +1,9 @@
 import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
 import {BranchReportLine, BranchReportStatus, BranchReportWriter} from "./branch-reports";
-import {logger} from "../nickel";
 import {ReportLine} from "../nickel-report";
 import {NickelAction} from "./nickel-action";
 import {TableColumn} from "../nickel-table";
+import {logger} from "../logger";
 
 export class OldBranchesReportAction implements NickelAction {
   readonly command = 'oldBranches <reportFile> [age]';

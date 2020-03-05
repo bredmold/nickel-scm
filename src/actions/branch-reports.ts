@@ -1,6 +1,6 @@
-import {logger} from "../nickel";
 import * as fs from "fs";
 import {ReportLine} from "../nickel-report";
+import {logger} from "../logger";
 
 export enum BranchReportStatus {
   New = 'report-new',

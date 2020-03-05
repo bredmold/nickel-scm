@@ -6,8 +6,8 @@ import {ConfigContext} from "./config-context";
 import * as fs from "fs";
 import {NickelInstigator} from "./nickel-instigator";
 import {ALL_ACTIONS} from "./actions/nickel-action";
-import * as winston from "winston";
 import {NickelProject} from "./nickel-project";
+import {logger} from "./logger";
 
 const pkg = require('../package.json');
 
@@ -22,14 +22,6 @@ let command: string = '';
 let commandArgs: any = null;
 let configScript: string = `${process.env['HOME']}/nickel.js`;
 let selectedProjects: string[] = [];
-
-export const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.simple(),
-  transports: [
-    new winston.transports.Console(),
-  ],
-});
 
 /*
 Command-line parsing

@@ -1,11 +1,11 @@
 import {EMPTY_PROJECT, NickelProject} from "../nickel-project";
 import {RemoteBranch} from "../scm/git/git-repository";
-import {logger} from "../nickel";
 import * as fs from "fs";
 import {BranchReportDetails} from "./branch-reports";
 import {ReportLine} from "../nickel-report";
 import {NickelAction} from "./nickel-action";
 import {TableColumn} from "../nickel-table";
+import {logger} from "../logger";
 
 export enum GuidedBranchRemovalStatus {
   New = 'guided-merge-new',

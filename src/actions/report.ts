@@ -33,20 +33,18 @@ export class RepositoryReportAction implements NickelAction {
           'Commit': commit,
         }));
       };
-      project.repository.status().then(
-        status => {
-          branch = status.branch;
-          modifiedFiles = status.modifiedFiles;
-          project.repository.commit().then(
-            commitId => {
-              commit = commitId;
-              finish();
-            },
-            () => finish()
-          );
-        },
-        () => finish()
-      );
+
+      project
+        .repository
+        .status()
+        .then(
+          status => {
+            branch = status.branch;
+            modifiedFiles = status.modifiedFiles;
+            commit = status.commit;
+            finish();
+          },
+          () => finish());
     });
   }
 

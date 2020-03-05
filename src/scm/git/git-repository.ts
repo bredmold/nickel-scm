@@ -1,5 +1,5 @@
-import * as child_process from "child_process";
-import {logger} from "../../nickel";
+import {ShellRunner} from "./shell-runner";
+import {logger} from "../../logger";
 
 /** Results of a pull */
 export interface PullResult {
@@ -24,6 +24,8 @@ export interface FetchResult {
 export interface StatusResult {
   modifiedFiles: string[];
   branch: string;
+  remoteBranch: string;
+  commit: string;
   ahead: number;
   behind: number;
 }
@@ -61,17 +63,10 @@ export interface BranchListing {
   remote: RemoteBranch[];
 }
 
-interface ProcessResult {
-  stdout: string;
-  stderr: string;
-}
-
-
-/**
- * Local Git repository
- */
 export class GitRepository {
-  constructor(private path: string) {
+  constructor(private readonly path: string,
+              private readonly runner: ShellRunner,
+              private readonly commitPrefix: number) {
   }
 
   /**
@@ -80,8 +75,8 @@ export class GitRepository {
    * @returns {Promise<PullResult>} Report of what happened
    */
   pull(): Promise<PullResult> {
-    let updateRegex = /^ ([a-zA-Z0-9/.-_]*)/;
-    return this.run('git pull --ff-only').then(out => {
+    let updateRegex = /^ ([a-zA-Z0-9/.-_]*)\s+\|/;
+    return this.runner.run('git pull --ff-only').then(out => {
       let files: string[] = [];
       out.stdout.split(/\n/).forEach(line => {
         let match = line.match(updateRegex);
@@ -95,7 +90,7 @@ export class GitRepository {
 
   fetch(): Promise<FetchResult> {
     const branchRegex = /^ ([ +\-t*!=]) (\[?[a-zA-Z0-9 .]+]?)\s+([a-zA-Z0-9-_./]+|\(none\))\s+->\s+([a-zA-Z0-9-_./]+)\s*(.*)?$/;
-    return this.run('git fetch --prune').then(out => {
+    return this.runner.run('git fetch --prune').then(out => {
       let lines = out.stderr.split(/\n/);
       let fetchItems: FetchItem[] = [];
       lines.forEach(line => {
@@ -151,7 +146,7 @@ export class GitRepository {
    */
   removeRemoteBranchSync(remote: string, branch: string): boolean {
     try {
-      this.runSync(`git push --delete ${remote} ${branch}`);
+      this.runner.runSync(`git push --delete ${remote} ${branch}`);
       return true;
     } catch (e) {
       return false;
@@ -165,7 +160,7 @@ export class GitRepository {
    * @returns {Promise<any>} Promise that resolves (or rejects) with the command
    */
   selectBranch(branch: string): Promise<any> {
-    return this.run(`git checkout ${branch}`).then(() => true);
+    return this.runner.run(`git checkout ${branch}`).then(() => true);
   }
 
   /**
@@ -175,7 +170,7 @@ export class GitRepository {
    * @returns {Promise<any>} Promise that resolves (or rejects) with the command
    */
   deleteLocalBranch(branch: string): Promise<any> {
-    return this.run(`git branch -d ${branch}`).then(() => true);
+    return this.runner.run(`git branch -d ${branch}`).then(() => true);
   }
 
   /**
@@ -185,32 +180,35 @@ export class GitRepository {
    * @returns {Promise<string[]>} List of branches that were pruned
    */
   prune(remote: string): Promise<string[]> {
-    let pruneRegex = /^ * \[pruned] (.*)$/;
-    return this.run(`git remote prune ${remote}`).then(out => {
-      let lines: string[] = out.stdout.split(/\n/);
+    let pruneRegex = /^ \* \[pruned] (.*)$/;
+    return this
+      .runner
+      .run(`git remote prune ${remote}`)
+      .then(out => {
+        let lines: string[] = out.stdout.split(/\n/);
 
-      if (lines.length <= 0) {
-        return [];
-      } else {
-        let pruned: string[] = [];
+        if (lines.length <= 0) {
+          return [];
+        } else {
+          let pruned: string[] = [];
 
-        lines.forEach(line => {
-          let pruneMatch = line.match(pruneRegex);
-          if (pruneMatch) {
-            pruned.push(pruneMatch[1]);
-          }
-        });
+          lines.forEach(line => {
+            let pruneMatch = line.match(pruneRegex);
+            if (pruneMatch) {
+              pruned.push(pruneMatch[1]);
+            }
+          });
 
-        return pruned;
-      }
-    });
+          return pruned;
+        }
+      });
   }
 
   /**
    * Get the current branch for this repository
    */
   branch(): Promise<string> {
-    return this.run('git rev-parse --abbrev-ref HEAD')
+    return this.runner.run('git rev-parse --abbrev-ref HEAD')
       .then(out => out.stdout.trim());
   }
 
@@ -218,38 +216,72 @@ export class GitRepository {
    * Get the current commit ID for this repository
    */
   commit(): Promise<string> {
-    return this.run('git rev-parse --short HEAD')
-      .then(out => out.stdout.trim());
+    return this
+      .runner
+      .run('git rev-parse HEAD')
+      .then(out => this.shorten(out.stdout.trim()));
   }
 
   status(): Promise<StatusResult> {
-    let fileRegex = /^.. ([a-zA-Z0-9-._/]+)/;
-    let threeDots = /(.+)\.\.\.(.+)/;
-    let branchRegex = /^## ([a-zA-Z0-9-_/.]+)/;
+    const commitRe = /^# branch.oid ([a-fA-F0-9]+)$/;
+    const localBranchRe = /^# branch.head ([a-zA-Z0-9_/-]+)$/;
+    const remoteBranchRe = /^# branch.upstream ([a-zA-Z0-9_/-]+)$/;
+    const aheadBehindRe = /^# branch.ab \+(\d+) -(\d+)$/;
+    const fileLineRe = /^([12]) [ .MADRCU?!]{2} N\.\.\. \d+ \d+ \d+ [a-fA-F0-9]+ [a-fA-F0-9]+ (.*)$/;
+    const renameRe = /^\w\d+ ([a-zA-Z0-9_/.-]+)\t([a-zA-Z0-9_/.-]+)$/;
 
-    return this.run('git status -s -b').then(out => {
-      let lines: string[] = out.stdout.split(/\n/);
-      let firstLine = lines[0];
+    return this.runner.run('git status --porcelain=2 -b').then(out => {
+      const lines: string[] = out.stdout.split(/\n/);
 
-      let threeDotsMatch = firstLine.match(threeDots);
-      let branchSpec = threeDotsMatch ? threeDotsMatch[1] : firstLine;
+      let idx = 0;
 
-      let branchMatch = branchSpec.match(branchRegex);
-      let branch = branchMatch ? branchMatch[1] : '';
+      const commitLine = lines[idx];
+      const commitMatch = commitLine.match(commitRe);
+      const commit = commitMatch ? commitMatch[1] : '';
+      idx += (commitMatch ? 1 : 0);
 
-      let files: string[] = [];
-      lines.splice(1).forEach(line => {
-        let lineMatch = line.match(fileRegex);
-        if (lineMatch) {
-          files.push(lineMatch[1]);
-        }
-      });
+      const localBranchLine = lines[idx];
+      const localBranchMatch = localBranchLine.match(localBranchRe);
+      const localBranch = localBranchMatch ? localBranchMatch[1] : '';
+      idx += (localBranchMatch ? 1 : 0);
+
+      const remoteBranchLine = lines[idx];
+      const remoteBranchMatch = remoteBranchLine.match(remoteBranchRe);
+      const remoteBranch = remoteBranchMatch ? remoteBranchMatch[1] : '';
+      idx += (remoteBranchMatch ? 1 : 0);
+
+      const aheadBehindLine = lines[idx];
+      const aheadBehindMatch = aheadBehindLine.match(aheadBehindRe);
+      const ahead = aheadBehindMatch ? parseInt(aheadBehindMatch[1]) : 0;
+      const behind = aheadBehindMatch ? parseInt(aheadBehindMatch[2]) : 0;
+      idx += (aheadBehindMatch ? 1 : 0);
+
+      const modifiedFiles: string[] = lines
+        .splice(idx)
+        .map(line => {
+          const lineMatcher = line.match(fileLineRe);
+          if (lineMatcher) {
+            const indicator = lineMatcher[1];
+            const tail = lineMatcher[2];
+            if (indicator === '1') {
+              return tail;
+            } else {
+              const renameMatch = tail.match(renameRe);
+              return renameMatch ? renameMatch[1] : '';
+            }
+          } else {
+            return '';
+          }
+        })
+        .filter(file => (file !== ''));
 
       return {
-        modifiedFiles: files,
-        branch: branch,
-        ahead: 0,
-        behind: 0,
+        modifiedFiles: modifiedFiles,
+        branch: localBranch,
+        remoteBranch: remoteBranch,
+        commit: this.shorten(commit),
+        ahead: ahead,
+        behind: behind,
       };
     });
   }
@@ -258,7 +290,7 @@ export class GitRepository {
    * Gets all the merged remote-tracking branches for this repository. Filters out HEAD.
    */
   remoteMergedBranches(): Promise<string[]> {
-    return this.run('git branch -r --merged').then(out => {
+    return this.runner.run('git branch -r --merged').then(out => {
       const lines: string[] = out.stdout.split(/\n/);
       const branchRe = /^\s+([a-zA-Z0-9-\/._]+)$/;
       let branches: string[] = [];
@@ -279,7 +311,7 @@ export class GitRepository {
    * Get a listing of all the branches the repository knows about
    */
   allBranches(): Promise<BranchListing> {
-    return this.run('git branch -a').then(out => {
+    return this.runner.run('git branch -a').then(out => {
       const lines: string[] = out.stdout.split(/\n'/);
       const branchRe = /^..(remotes\/([a-zA-Z0-9_-]+)\/)?([a-zA-Z0-9/_-]+)$/;
       let localBranches: string[] = [];
@@ -312,35 +344,19 @@ export class GitRepository {
    * @param branch Branch name to check
    */
   committerDate(branch: string): Promise<Date> {
-    return this.run(`git log -n 1 --pretty=format:%cI ${branch}`).then(out => {
+    return this.runner.run(`git log -n 1 --pretty=format:%cI ${branch}`).then(out => {
       const trimmed: string = out.stdout.replace(/^\s+/, '')
         .replace(/\s+$/, '');
       return new Date(trimmed);
     });
   }
 
-  private run(command: string): Promise<ProcessResult> {
-    logger.debug(`${command} [${this.path}]`);
-    return new Promise<any>((resolve, reject) => {
-      child_process.exec(command, {cwd: this.path, encoding: 'utf8'}, (error, stdout, stderr) => {
-        if (error) {
-          logger.warn(`${this.path}: ${error.message}`);
-          reject(error);
-        } else {
-          resolve({stdout: stdout, stderr: stderr});
-        }
-      });
-    });
+  /**
+   * Shorten a commit ID according to the policy
+   */
+  private shorten(commit: string): string {
+    return ((this.commitPrefix > 0) && (commit.length > this.commitPrefix))
+      ? commit.substr(0, this.commitPrefix)
+      : commit;
   }
-
-  private runSync(command: string): string {
-    logger.debug(`${command} [${this.path}]`);
-    try {
-      return child_process.execSync(command, {cwd: this.path, stdio: 'pipe', encoding: 'utf8'});
-    } catch (error) {
-      logger.warn(`${this.path}: ${error.message}`);
-      throw error;
-    }
-  }
-
 }
