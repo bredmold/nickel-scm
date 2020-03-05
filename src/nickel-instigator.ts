@@ -31,7 +31,8 @@ export class NickelInstigator {
       .all(promises)
       .then(reports => {
         const report = new NickelReport(action.columns);
-        console.log(report.buildReport(reports));
+        const table = report.buildReport(reports);
+        console.log(table.render());
         action.post(reports, args);
         logger.info(`${timer.elapsed() / 1000}s elapsed`);
       });

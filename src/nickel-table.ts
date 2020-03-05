@@ -103,8 +103,8 @@ export class TableRow {
 export class NickelTable {
   private readonly columnWidths: number[];
 
-  constructor(private readonly columns: TableColumn[],
-              private readonly rows: TableRow[]) {
+  constructor(readonly columns: TableColumn[],
+              readonly rows: TableRow[]) {
     const titleWidths = this.columns.map(col => col.title.length);
     this.columnWidths = this.buildColumnWidths(titleWidths, 0);
   }

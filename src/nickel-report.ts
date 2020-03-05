@@ -60,7 +60,7 @@ export class NickelReport {
    *
    * @param {ReportLine[]} rows Report rows, structure determined by the header
    */
-  buildReport(rows: ReportingItem[]): string {
+  buildReport(rows: ReportingItem[]): NickelTable {
     const tableRows = rows.map(row => {
       if (row instanceof ReportLine) {
         return this.processRow(<ReportLine>row);
@@ -68,8 +68,7 @@ export class NickelReport {
         return this.processSeparator(<ReportSeparator>row);
       }
     });
-    const table = new NickelTable(this.columns, tableRows);
-    return table.render();
+    return new NickelTable(this.columns, tableRows);
   }
 
   /**
