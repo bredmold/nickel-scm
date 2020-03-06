@@ -9,7 +9,7 @@ import {CellAlignment, NickelTable, TableCell, TableColumn, TableRow} from "./ni
 export class ReportLine implements ReportingItem {
   readonly name: string;
 
-  constructor(private values: { [index: string]: string },
+  constructor(public readonly values: { [index: string]: string },
               public readonly selected: boolean = true) {
     this.name = values['Project'];
   }
@@ -23,7 +23,7 @@ export class ReportLine implements ReportingItem {
  * An item in a report - either a project or a separator
  */
 export interface ReportingItem {
-  name: string;
+  readonly name: string;
   selected: boolean;
 }
 
@@ -38,7 +38,7 @@ export class ReportSeparator implements ReportingItem {
    *
    * @param name Optional label for the separator
    */
-  constructor(public name: string) {
+  constructor(public readonly name: string) {
   }
 }
 

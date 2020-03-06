@@ -1,6 +1,6 @@
 import {NickelTimer} from "./nickel-timer";
 import {NickelAction} from "./actions/nickel-action";
-import {NickelReport, ReportingItem} from "./nickel-report";
+import {NickelReport, ReportingItem, ReportLine} from "./nickel-report";
 import {NickelProject} from "./nickel-project";
 import {logger} from "./logger";
 
@@ -15,15 +15,19 @@ export class NickelInstigator {
     // Do eeet!
     const timer = new NickelTimer();
     const promises: Promise<any>[] = this.reportItems.map(item => {
-      if (item.selected && (item instanceof NickelProject)) {
-        return action.act(<NickelProject>item, args);
-      } else if (item.selected) {
-        return Promise.resolve(item);
+      if (item instanceof NickelProject) {
+        if (item.selected) {
+          return action.act(<NickelProject>item, args);
+        } else {
+          let values = action.skipReport.values;
+          values['Project'] = item.name;
+
+          const report: ReportLine = new ReportLine(values, false);
+          return Promise.resolve(report);
+        }
       } else {
-        let report: any = {};
-        Object.assign(report, action.skipReport);
-        report.project = item;
-        return Promise.resolve(report);
+        // Assume it's a separator
+        return Promise.resolve(item);
       }
     });
 
@@ -33,7 +37,8 @@ export class NickelInstigator {
         const report = new NickelReport(action.columns);
         const table = report.buildReport(reports);
         console.log(table.render());
-        action.post(reports, args);
+        const reportLines = reports.filter(report => report instanceof ReportLine);
+        action.post(reportLines, args);
         logger.info(`${timer.elapsed() / 1000}s elapsed`);
       });
   }
