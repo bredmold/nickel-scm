@@ -6,40 +6,40 @@ So, you want to contribute code back to `nickel`? It warms my heart. Here are so
 npm run build
 ```
 
-I have to admit that I'm not sure how other node projects do it. I use the above command to run my build.
-In a better world, I would have written good unit tests, as well. Perhaps that will be one of my future projects
-for `nickel`.
+I have to admit that I'm not sure how other node projects do it. I use the above command to run my build. In a better world, I would have written good unit tests, as well. Perhaps that will be one of my future projects for `nickel`.
 
 # Test
 
-Despite the fact that I have very little automated testing, I use the tool on a daily basis, which means many
-of the features are quite well tested. Here's a rough breakdown of the pieces, and how well tested they are
-in the real world.
+Tests are written using [Jest](https://jestjs.io/en/) and [ts-jest](https://github.com/kulshekhar/ts-jest).
+
+Not all of the features are fully tested, but here's a rough breakdown of test coverage for each major component.
 
 ## Testing Breakdown
 
 ### sync
 
-This is the core. I use this constantly. It's very well tested.
+Sync is pretty much fully covered. Certain error paths are missing, but unit test coverage is solid. This is also the core component, and I use it at least daily.
 
 ### report
 
-Also well tested from routine use.
+This is in a similar testing state to `sync` above. Good testing coverage, and used in my daily development process.
 
 ### cleanup
 
-Less well tested, but still used frequently.
+This is frequently used, and has good test coverage.
 
-### build
+### mergedReport
 
-This could be broken, for all I know. I almost never use it.
+The branch reporting features are less well tested than the core `sync`, `report`, and `cleanup` features. There is only limited unit test coverage here. Please feel free to contribute!
 
-## Jasmine
+### guidedRemove
 
-While the automated tests are woefully inadquate, please do feel free to contribute appropriate unit tests
-with your PR, written against the Jasmine testing API.
+As with `mergedReport`, there is limited test coverage for this feature.
+
+### oldBranches
+
+See above. This is the newest, and least well-tested feature in the application.
 
 # Contribute
 
-I welcome contributions. Since this is something I do in my Copious Free Time, I can't really make promises
-as to when I'll have time to review pull requests.
+I welcome contributions. Since this is something I do in my Copious Free Time, I can't really make promises as to when I'll have time to review pull requests.
