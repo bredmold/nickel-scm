@@ -228,3 +228,6 @@ These are features I have in mind for the future. I have no schedule for getting
   * Allow projects to be declared in logical groups
   * Filter actions based on groups
   * Configure groups (e.g. root directory)
+* Select projects by active branch name
+* Create and push a branch across projects
+* Check out an existing remote branch across projects
