@@ -57,20 +57,20 @@ Usage: nickel [options] [command]
 nickel-scm: Manage local Git repositories
 
 Options:
-
-  -V, --version              output the version number
-  --config <config>          Configuration file
-  --projects <projects>      List of projects
-  --level <level>            Log level
-  -h, --help                 output usage information
+  -V, --version                   output the version number
+  --config <config>               Configuration file
+  --projects <projects>           List of projects
+  --active-branch <activeBranch>  Select projects with this active branch
+  --level <level>                 Log level
+  -h, --help                      output usage information
 
 Commands:
-
-  sync                       Sync all projects
-  report                     Local repository report
-  cleanup                    Retire unused branches
-  mergeReport <reportFile>   Generate a merged branches report
-  guidedRemove <reportFile>  Remove branches based on a merged branches report
+  sync                            Sync all projects
+  report                          Local repository report
+  cleanup                         Retire unused branches
+  mergedReport <reportFile>       Generated a merged branches report
+  guidedRemove <reportFile>       Remove branches based on a merged branches report
+  oldBranches <reportFile> [age]  Generate a list of branches older than a certain age
 ```
 
 The most common form of the command is `nickel sync`. This will sync all the repositories listed
@@ -78,6 +78,15 @@ in the config file.
 
 Any list of commands may be listed, though they will be run in a fixed order, rather than in
 command-line order.
+
+### Selecting projects
+
+There are two command-line options that allow you to select the list of projects to run against:
+
+| Option | Description |
+| ---    | --- |
+| `--projects`| Select projects by name (if there are duplicates, this will select all matching projects) |
+| `--active-branch` | Select projects by active branch (this will query each project as part of project selection |
 
 ### report
 
@@ -228,6 +237,5 @@ These are features I have in mind for the future. I have no schedule for getting
   * Allow projects to be declared in logical groups
   * Filter actions based on groups
   * Configure groups (e.g. root directory)
-* Select projects by active branch name
 * Create and push a branch across projects
 * Check out an existing remote branch across projects

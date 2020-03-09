@@ -6,8 +6,9 @@ import {ConfigContext} from "./config-context";
 import * as fs from "fs";
 import {NickelInstigator} from "./nickel-instigator";
 import {ALL_ACTIONS} from "./actions/nickel-action";
-import {NickelProject} from "./nickel-project";
 import {logger} from "./logger";
+import {ReportingItem} from "./nickel-report";
+import {nickelSelector, SelectedItem} from "./nickel-selector";
 
 const pkg = require('../package.json');
 
@@ -22,6 +23,7 @@ let command: string = '';
 let commandArgs: any = null;
 let configScript: string = `${process.env['HOME']}/nickel.js`;
 let selectedProjects: string[] = [];
+let activeBranch = '';
 
 /*
 Command-line parsing
@@ -31,10 +33,16 @@ program
   .version(pkg.version)
   .option('--config <config>', 'Configuration file')
   .option('--projects <projects>', 'List of projects')
+  .option('--active-branch <activeBranch>', 'Select projects with this active branch')
   .option('--level <level>', 'Log level')
   .on('option:level', () => logger.level = program.level)
   .on('option:config', () => configScript = program.config)
-  .on('option:projects', () => selectedProjects = program.projects.replace(/\s+/, '').split(','));
+  .on('option:active-branch', () => activeBranch = program.activeBranch)
+  .on('option:projects', () => selectedProjects =
+    program
+      .projects
+      .replace(/\s+/, '')
+      .split('\s*\s*'));
 
 ALL_ACTIONS.forEach(nickelAction => {
   program.command(nickelAction.command)
@@ -69,30 +77,49 @@ vm.createContext(configContext);
 vm.runInContext(configScriptBytes, configContext);
 
 /*
-Initialize the project list
+Do the things!
  */
 
-const reportItems = ConfigContext.reportItems;
+// const reportItems = ConfigContext.reportItems;
 
-if (selectedProjects.length > 0) {
-  selectedProjects.forEach(selected => {
-    const project = reportItems.find(p => (p instanceof NickelProject) && (p.name === selected)) as NickelProject;
-    if (project) {
-      project.selected = true;
+/**
+ * Filter the list of projects based on selection criteria
+ *
+ * @param items List of configured reporting items
+ * @return A promise containing projects merged with selection criteria
+ */
+function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
+  try {
+    const selector = nickelSelector(selectedProjects, activeBranch);
+    const selectorPromises = items.map(item => selector(item));
+    return Promise
+      .all(selectorPromises)
+      .then(selectedItems => {
+        const selected: number = selectedItems.reduce(
+          (sum, item) => sum + (item.selected ? 1 : 0),
+          0);
+
+        logger.debug(`Selected ${selected} projects`);
+        if (selected === 0) {
+          logger.error(`No projects meet selection criteria: ${selector.criteria}`);
+          process.exit(1);
+        }
+
+        return selectedItems;
+      });
+  } catch (e) {
+    logger.error(e);
+    process.exit(1);
+  }
+}
+
+selectItems(ConfigContext.reportItems)
+  .then((selectedItems: SelectedItem[]) => {
+    const action = ALL_ACTIONS.find(nickelAction => nickelAction.command === command);
+    if (action === undefined) {
+      logger.error('this never happens');
     } else {
-      logger.error(`No such project: ${selected}`);
-      process.exit(1);
+      const instigator = new NickelInstigator(selectedItems);
+      instigator.doIt(action, commandArgs);
     }
   });
-} else {
-  // If no projects are selected, then implicitly, all projects are selected
-  reportItems.forEach(item => item.selected = true);
-}
-
-const action = ALL_ACTIONS.find(nickelAction => nickelAction.command === command);
-if (action === undefined) {
-  logger.error('this never happens');
-} else {
-  const instigator = new NickelInstigator(reportItems);
-  instigator.doIt(action, commandArgs);
-}

@@ -1,25 +1,28 @@
 import {NickelTimer} from "./nickel-timer";
 import {NickelAction} from "./actions/nickel-action";
-import {NickelReport, ReportingItem, ReportLine} from "./nickel-report";
+import {NickelReport, ReportLine} from "./nickel-report";
 import {NickelProject} from "./nickel-project";
 import {logger} from "./logger";
+import {SelectedItem} from "./nickel-selector";
 
 /**
  * Nickel Instigator - perform actions across all projects
  */
 export class NickelInstigator {
-  constructor(private reportItems: ReportingItem[]) {
+  constructor(private readonly selectedItems: SelectedItem[]) {
   }
 
   doIt(action: NickelAction, args: any) {
     // Do eeet!
     const timer = new NickelTimer();
-    const promises: Promise<any>[] = this.reportItems.map(item => {
+    const promises: Promise<any>[] = this.selectedItems.map(selectedItem => {
+      const item = selectedItem.item;
       if (item instanceof NickelProject) {
-        if (item.selected) {
+        if (selectedItem.selected) {
           return action.act(<NickelProject>item, args);
         } else {
-          let values = action.skipReport.values;
+          const values: { [index: string]: string } = {};
+          Object.assign(values, action.skipReport.values);
           values['Project'] = item.name;
 
           const report: ReportLine = new ReportLine(values, false);

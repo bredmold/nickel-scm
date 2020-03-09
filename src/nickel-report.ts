@@ -24,7 +24,6 @@ export class ReportLine implements ReportingItem {
  */
 export interface ReportingItem {
   readonly name: string;
-  selected: boolean;
 }
 
 /**

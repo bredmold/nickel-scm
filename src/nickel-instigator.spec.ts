@@ -1,24 +1,27 @@
 import {NickelInstigator} from "./nickel-instigator";
-import {ReportingItem, ReportLine, ReportSeparator} from "./nickel-report";
+import {ReportLine, ReportSeparator} from "./nickel-report";
 import {NickelProject} from "./nickel-project";
 import {NickelAction} from "./actions/nickel-action";
 import {TableColumn} from "./nickel-table";
+import {SelectedItem} from "./nickel-selector";
 
 describe('Nickel Instigator', () => {
-  let items: ReportingItem[];
+  let items: SelectedItem[];
   let instigator: NickelInstigator;
 
   beforeEach(() => {
-    items = [
-      new NickelProject({
+    items = [{
+      item: new NickelProject({
         name: 'test',
         path: '/application/path',
         defaultBranch: 'master',
         safeBranches: [],
         commitPrefix: -1,
-      }),
-      new ReportSeparator('Bell bottoms!'),
-    ];
+      }), selected: true
+    }, {
+      item: new ReportSeparator('Bell bottoms!'),
+      selected: true
+    }];
 
     instigator = new NickelInstigator(items);
   });
@@ -42,9 +45,6 @@ describe('Nickel Instigator', () => {
         done();
       }
     };
-    items.forEach(item => {
-      item.selected = true
-    });
 
     instigator.doIt(action, null);
   });
@@ -67,9 +67,9 @@ describe('Nickel Instigator', () => {
         done();
       }
     };
-    items.forEach(item => {
-      item.selected = false
-    });
+
+    items = items.map(item => ({item: item.item, selected: false}));
+    instigator = new NickelInstigator(items);
 
     instigator.doIt(action, null);
   });
