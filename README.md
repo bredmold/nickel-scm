@@ -3,6 +3,8 @@
 Nickel is a tool to keep a bunch of Git repositories in sync, and to run certain common
 maintenance operations across those repositories.
 
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+
 ## Install
 
 ```bash
@@ -26,21 +28,21 @@ Configuration is done using a JS configuration file. The default location of thi
 The content of this file is a series of project declarations. For example:
 
 ```javascript
-root = 'c:/Dev/Lexipol';
-defaultBranch = 'develop';
+root = "c:/Dev/Lexipol";
+defaultBranch = "develop";
 
-project('project-base', {build: true});
-project('project-commons');
-project('project-service');
+project("project-base", { build: true });
+project("project-commons");
+project("project-service");
 
 separator(); // Draw a horizontal line in all reports
-project('thing-base', {build: true});
-project('thing-commons');
-project('thing-service');
+project("thing-base", { build: true });
+project("thing-commons");
+project("thing-service");
 
-separator('Ops'); // Draw a horizontal line, labeled with the word 'Ops'
-defaultBranch = 'master';
-project('ops-project');
+separator("Ops"); // Draw a horizontal line, labeled with the word 'Ops'
+defaultBranch = "master";
+project("ops-project");
 ```
 
 The first line declares where the projects live. If you have projects in multiple locations,
@@ -83,9 +85,9 @@ command-line order.
 
 There are two command-line options that allow you to select the list of projects to run against:
 
-| Option | Description |
-| ---    | --- |
-| `--projects`| Select projects by name (if there are duplicates, this will select all matching projects) |
+| Option            | Description                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| `--projects`      | Select projects by name (if there are duplicates, this will select all matching projects)   |
 | `--active-branch` | Select projects by active branch (this will query each project as part of project selection |
 
 ### report
@@ -104,12 +106,12 @@ Generates a project report. Here's an example:
 ╚═══════════════════════════╧════════════════════╧═══════╧═════════╝
 ```
 
-| Column Name | Description |
-| ---         | --- |
-| Project     | The name of the project |
-| Branch      | Current branch for the project |
+| Column Name | Description                                      |
+| ----------- | ------------------------------------------------ |
+| Project     | The name of the project                          |
+| Branch      | Current branch for the project                   |
 | # Mod       | Count of modified files in the project workspace |
-| Commit      | Latest commit ID on the current branch |
+| Commit      | Latest commit ID on the current branch           |
 
 ### sync
 
@@ -127,19 +129,19 @@ Sync all projects and report on the results:
 ╚═══════════════════════════╧════════════════════╧═════════╧══════════════╝
 ```
 
-| Column Name | Description |
-| ---         | --- |
-| Project     | The name of the project |
-| Branch      | Current branch for the project |
+| Column Name | Description                                                |
+| ----------- | ---------------------------------------------------------- |
+| Project     | The name of the project                                    |
+| Branch      | Current branch for the project                             |
 | Updated     | Count of files that were updated during the sync operation |
-| Status      | Overall result of the sync for this project |
+| Status      | Overall result of the sync for this project                |
 
 Here are the meanings of the status values:
 
-| Status | Description |
-| ---    | --- |
-| sync-success | Success |
-| sync-failure | Failure |
+| Status       | Description                                       |
+| ------------ | ------------------------------------------------- |
+| sync-success | Success                                           |
+| sync-failure | Failure                                           |
 | sync-new     | Nothing happened - this indicates a bug in nickel |
 
 ### cleanup
@@ -160,20 +162,20 @@ Cleanup all projects that are not on their "default" branch:
 ╚═══════════════════════════╧═════════════════════╧═══════════════╝
 ```
 
-| Column Name | Description |
-| ---         | --- |
-| Project     | The name of the project |
+| Column Name | Description                                    |
+| ----------- | ---------------------------------------------- |
+| Project     | The name of the project                        |
 | Branch      | Current branch for the project, before cleanup |
-| Status      | Overall result for the cleanup operation |
+| Status      | Overall result for the cleanup operation       |
 
 Here are the meanings of the status values:
 
-| Status | Description |
-| ---    | --- |
-| clean-skip | The project was not cleaned (already on the default branch) |
-| clean-dirty | The project is not on the default branch, but the repository is dirty |
-| clean-success | Cleanup operation succeeded |
-| clean-failure | Cleanup operation was attempted, but failed |
+| Status        | Description                                                           |
+| ------------- | --------------------------------------------------------------------- |
+| clean-skip    | The project was not cleaned (already on the default branch)           |
+| clean-dirty   | The project is not on the default branch, but the repository is dirty |
+| clean-success | Cleanup operation succeeded                                           |
+| clean-failure | Cleanup operation was attempted, but failed                           |
 
 ### mergeReport
 
@@ -181,18 +183,18 @@ Identify merged branches and generate a report.
 
 No example report, in this case, but here are the report columns:
 
-| Column Name  | Description |
-| ---          | --- |
-| Project      | The name of the project |
-| Status       | Overall result of the merge operation |
+| Column Name  | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| Project      | The name of the project                               |
+| Status       | Overall result of the merge operation                 |
 | # Candidates | List of branches identified as candidates for removal |
 
 Here are the status values:
 
-| Status | Description |
-| ---    | --- |
+| Status               | Description                             |
+| -------------------- | --------------------------------------- |
 | merge-report-success | Successful merged branch identification |
-| merge-report-failure | The merge failed - see the log |
+| merge-report-failure | The merge failed - see the log          |
 
 ### guidedRemove
 
@@ -200,42 +202,47 @@ Based on a merge branch report, remove selected branches.
 
 The report structure looks like this:
 
-| Column Name | Description |
-| --- | --- |
-| Project   | The name of the project |
-| Branch    | Current branch for the project |
-| Status    | Overall status of merging for this project |
-| Kept      | How many branches from the report were kept |
-| Removed   | How many branches form the report were removed |
+| Column Name | Description                                    |
+| ----------- | ---------------------------------------------- |
+| Project     | The name of the project                        |
+| Branch      | Current branch for the project                 |
+| Status      | Overall status of merging for this project     |
+| Kept        | How many branches from the report were kept    |
+| Removed     | How many branches form the report were removed |
 
 Here are the status values:
 
-| Status | Description |
-| --- | --- |
-| guided-merge-success | Successfully completed at least one merge for the project |
-| guided-merge-failure | Unable to merge any branches for this project |
-| guided-merge-skipped | Skipped the project because there was nothing to do |
-| guided-merge-dirty   | The work space was dirty, so no branch manipulation was possible |
+| Status               | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| guided-merge-success | Successfully completed at least one merge for the project            |
+| guided-merge-failure | Unable to merge any branches for this project                        |
+| guided-merge-skipped | Skipped the project because there was nothing to do                  |
+| guided-merge-dirty   | The work space was dirty, so no branch manipulation was possible     |
 | guided-merge-working | The work space was already on a branch, so no branches were targeted |
 
 # Develop
+
 Some handy commands to run when developing and releasing nickel.
 
 ## Building Locally
+
 ```bash
 npm run build && npm install -g
 ```
 
 ## Release
+
 ```bash
 npm version patch && npm run build && npm publish
 ```
 
 ## Future Plans
+
 These are features I have in mind for the future. I have no schedule for getting to them.
-* Logical grouping of projects
-  * Allow projects to be declared in logical groups
-  * Filter actions based on groups
-  * Configure groups (e.g. root directory)
-* Create and push a branch across projects
-* Check out an existing remote branch across projects
+
+- Logical grouping of projects
+  - Allow projects to be declared in logical groups
+  - Filter actions based on groups
+  - Configure groups (e.g. root directory)
+- Create and push a branch across projects
+- Check out an existing remote branch across projects

@@ -1,5 +1,5 @@
-import {GitRepository} from "./git-repository";
-import {ShellRunner} from "./shell-runner";
+import { GitRepository, RemoteBranch } from "./git-repository";
+import { ShellRunner } from "./shell-runner";
 
 describe('Git Repository', () => {
   let runner: ShellRunner;
@@ -116,5 +116,112 @@ describe('Git Repository', () => {
     return expect(repository.prune('origin'))
       .resolves
       .toStrictEqual(['origin/test-branch']);
+  });
+
+  test('branch', () => {
+    runner.run = jest.fn(() => Promise.resolve({
+      stdout: 'test-branch\n',
+      stderr: '',
+    }));
+
+    return expect(repository.branch())
+      .resolves
+      .toStrictEqual('test-branch');
+  });
+
+  test('commit', () => {
+    runner.run = jest.fn(() => Promise.resolve({
+      stdout: '15be9b216cbaaeb16706bcf3d6eb2031b325c5f4\n',
+      stderr: '',
+    }));
+
+    return expect(repository.commit())
+      .resolves
+      .toStrictEqual('15be9b216cba');
+  });
+
+  test('remoteMergedBranch', () => {
+    runner.run = jest.fn(() => Promise.resolve({
+      stdout: [
+        '  origin/HEAD -> origin/master',
+        '  origin/test-branch',
+      ].join('\n'),
+      stderr: ''
+    }));
+
+    return expect(repository.remoteMergedBranches())
+      .resolves
+      .toStrictEqual(['origin/test-branch']);
+  });
+
+  test('committerDate', () => {
+    runner.run = jest.fn(() => Promise.resolve({
+      stdout: '2020-03-11T20:25:07+00:00\n',
+      stderr: '',
+    }));
+
+    const expectedDate = new Date();
+    expectedDate.setUTCFullYear(2020);
+    expectedDate.setUTCMonth(2);
+    expectedDate.setUTCDate(11);
+    expectedDate.setUTCHours(20);
+    expectedDate.setUTCMinutes(25);
+    expectedDate.setUTCSeconds(7);
+    expectedDate.setUTCMilliseconds(0);
+
+    return expect(repository.committerDate('master'))
+      .resolves
+      .toStrictEqual(expectedDate);
+  });
+
+  test('allBranches', () => {
+    runner.run = jest.fn(() => Promise.resolve({
+      stdout: [
+        '  master',
+        '  remotes/origin/HEAD -> origin/master',
+        '  remotes/origin/master',
+      ].join('\n'),
+      stderr: '',
+    }));
+
+    return expect(repository.allBranches())
+      .resolves
+      .toStrictEqual({
+        local: ['master'],
+        remote: [new RemoteBranch('origin', 'master')],
+      });
+  });
+
+  test('fetch', () => {
+    runner.run = jest.fn(() => Promise.resolve({
+      stdout: '',
+      stderr: [
+        ' - [deleted]         (none)     -> origin/test'
+      ].join('\n'),
+    }));
+
+    return expect(repository.fetch())
+      .resolves
+      .toStrictEqual({
+        updatedBranches: [{
+          flag: 'pruned',
+          action: '[deleted]',
+          remoteBranch: '(none)',
+          trackingBranch: 'origin/test',
+        }],
+      });
+  });
+});
+
+describe('Remote Branch', () => {
+  test('fromBranchName', () => {
+    const remoteBranch = RemoteBranch.fromBranchName('remotes/origin/master');
+    expect(remoteBranch.remote).toStrictEqual('origin');
+    expect(remoteBranch.branch).toStrictEqual('master');
+  });
+
+  test('toString', () => {
+    const remoteBranch = new RemoteBranch('origin', 'test');
+    expect(remoteBranch.toString()).toStrictEqual('origin/test');
   });
 });
