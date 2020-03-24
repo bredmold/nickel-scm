@@ -1,11 +1,12 @@
 import chalk from "chalk";
 
 export class RowConfig {
-  constructor(readonly left: string,
-              readonly right: string,
-              readonly sep: string,
-              readonly pad: string) {
-  }
+  constructor(
+    readonly left: string,
+    readonly right: string,
+    readonly sep: string,
+    readonly pad: string
+  ) {}
 }
 
 /**
@@ -24,18 +25,17 @@ export class TableConfig {
 }
 
 const CONFIG = {
-  'first': new RowConfig('╔═', '═╗', '═╤═', '═'),
-  'last': new RowConfig('╚═', '═╝', '═╧═', '═'),
-  'sep': new RowConfig('╟─', '─╢', '─┼─', '─'),
-  'data': new RowConfig('║ ', ' ║', ' │ ', ' '),
+  first: new RowConfig("╔═", "═╗", "═╤═", "═"),
+  last: new RowConfig("╚═", "═╝", "═╧═", "═"),
+  sep: new RowConfig("╟─", "─╢", "─┼─", "─"),
+  data: new RowConfig("║ ", " ║", " │ ", " "),
 };
 
 /**
  * Model a table column, including all relevant data
  */
 export class TableColumn {
-  constructor(readonly title: string) {
-  }
+  constructor(readonly title: string) {}
 }
 
 /**
@@ -43,7 +43,7 @@ export class TableColumn {
  */
 export enum CellAlignment {
   Left,
-  Right
+  Right,
 }
 
 const ANSI_PATTERN = /\u001b\[\d+m/;
@@ -54,8 +54,10 @@ const ANSI_PATTERN = /\u001b\[\d+m/;
 export class TableCell {
   readonly size: number;
 
-  constructor(private readonly data: string,
-              private readonly align: CellAlignment = CellAlignment.Right) {
+  constructor(
+    private readonly data: string,
+    private readonly align: CellAlignment = CellAlignment.Right
+  ) {
     this.size = this.lengthInternal();
   }
 
@@ -67,7 +69,7 @@ export class TableCell {
    */
   render(width: number, pad: string): string {
     const padding = pad.repeat(width - this.size);
-    return (this.align === CellAlignment.Left)
+    return this.align === CellAlignment.Left
       ? this.data + padding
       : padding + this.data;
   }
@@ -75,7 +77,7 @@ export class TableCell {
   private lengthInternal(): number {
     return this.data
       .split(ANSI_PATTERN)
-      .map(segment => segment.length)
+      .map((segment) => segment.length)
       .reduce((a, b) => a + b);
   }
 }
@@ -84,14 +86,21 @@ export class TableCell {
  * Model a table row
  */
 export class TableRow {
-  constructor(readonly cells: TableCell[],
-              private readonly tag: string = 'data') {
-  }
+  constructor(
+    readonly cells: TableCell[],
+    private readonly tag: string = "data"
+  ) {}
 
-  render(columnWidths: number[], tableConfig: TableConfig, override: string | null = null): string {
+  render(
+    columnWidths: number[],
+    tableConfig: TableConfig,
+    override: string | null = null
+  ): string {
     const tag = override ? override : this.tag;
     const rowConfig = tableConfig[tag];
-    const renderedCells = this.cells.map((cell, i) => cell.render(columnWidths[i], rowConfig.pad));
+    const renderedCells = this.cells.map((cell, i) =>
+      cell.render(columnWidths[i], rowConfig.pad)
+    );
     const rowContent = renderedCells.join(rowConfig.sep);
     return rowConfig.left + rowContent + rowConfig.right;
   }
@@ -103,9 +112,8 @@ export class TableRow {
 export class NickelTable {
   private readonly columnWidths: number[];
 
-  constructor(readonly columns: TableColumn[],
-              readonly rows: TableRow[]) {
-    const titleWidths = this.columns.map(col => col.title.length);
+  constructor(readonly columns: TableColumn[], readonly rows: TableRow[]) {
+    const titleWidths = this.columns.map((col) => col.title.length);
     this.columnWidths = this.buildColumnWidths(titleWidths, 0);
   }
 
@@ -115,19 +123,27 @@ export class NickelTable {
    * @param config
    */
   render(config: TableConfig = CONFIG): string {
-    const emptyRow = new TableRow(this.columns.map(() => new TableCell('')), 'empty');
-    const headerRow = new TableRow(this.columns.map(col => new TableCell(chalk.bold(col.title))), 'data');
+    const emptyRow = new TableRow(
+      this.columns.map(() => new TableCell("")),
+      "empty"
+    );
+    const headerRow = new TableRow(
+      this.columns.map((col) => new TableCell(chalk.bold(col.title))),
+      "data"
+    );
 
     const preamble: string[] = [
-      emptyRow.render(this.columnWidths, config, 'first'),
+      emptyRow.render(this.columnWidths, config, "first"),
       headerRow.render(this.columnWidths, config),
-      emptyRow.render(this.columnWidths, config, 'sep'),
+      emptyRow.render(this.columnWidths, config, "sep"),
     ];
-    const dataLines: string[] = this.rows.map(row => row.render(this.columnWidths, config));
-    const lastLine = emptyRow.render(this.columnWidths, config, 'last');
+    const dataLines: string[] = this.rows.map((row) =>
+      row.render(this.columnWidths, config)
+    );
+    const lastLine = emptyRow.render(this.columnWidths, config, "last");
 
     const allLines = preamble.concat(dataLines, [lastLine]);
-    return allLines.join('\n');
+    return allLines.join("\n");
   }
 
   private buildColumnWidths(widths: number[], idx: number): number[] {
@@ -137,12 +153,12 @@ export class NickelTable {
 
     const row = this.rows[idx];
     if (row.cells.length != widths.length) {
-      throw `Invalid row with ${row.cells.length} cells: expected ${widths.length}`
+      throw `Invalid row with ${row.cells.length} cells: expected ${widths.length}`;
     }
 
-    const rowWidths = row.cells.map(cell => cell.size);
+    const rowWidths = row.cells.map((cell) => cell.size);
     const widthPairs = widths.map((w, i) => [w, rowWidths[i]]);
-    const mergedWidths = widthPairs.map(p => Math.max(p[0], p[1]));
+    const mergedWidths = widthPairs.map((p) => Math.max(p[0], p[1]));
     return this.buildColumnWidths(mergedWidths, idx + 1);
   }
 }

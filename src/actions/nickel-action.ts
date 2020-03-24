@@ -1,12 +1,12 @@
-import {NickelProject} from "../nickel-project";
-import {RepositoryCleanupAction} from "./cleanup";
-import {RepositorySyncAction} from "./sync";
-import {GuidedBranchRemovalAction} from "./guided-remove";
-import {ReportLine} from "../nickel-report";
-import {TableColumn} from "../nickel-table";
-import {RepositoryReportAction} from "./report";
-import {MergedBranchesReportAction} from "./merged-branches";
-import {OldBranchesReportAction} from "./old-branches";
+import { NickelProject } from "../nickel-project";
+import { RepositoryCleanupAction } from "./cleanup";
+import { RepositorySyncAction } from "./sync";
+import { GuidedBranchRemovalAction } from "./guided-remove";
+import { ReportLine } from "../nickel-report";
+import { TableColumn } from "../nickel-table";
+import { RepositoryReportAction } from "./report";
+import { MergedBranchesReportAction } from "./merged-branches";
+import { OldBranchesReportAction } from "./old-branches";
 
 export interface NickelAction {
   /**
@@ -54,4 +54,3 @@ export const ALL_ACTIONS = [
   new GuidedBranchRemovalAction(),
   new OldBranchesReportAction(),
 ];
-

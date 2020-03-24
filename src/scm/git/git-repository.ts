@@ -35,17 +35,15 @@ export interface StatusResult {
  */
 export class RemoteBranch {
   static fromBranchName(branchName: string) {
-    const normalized = branchName.replace(/^remotes\//, '');
+    const normalized = branchName.replace(/^remotes\//, "");
     const pathElements = normalized.split(/\//);
     const remote = pathElements[0];
-    const branch = pathElements.slice(1).join('/');
+    const branch = pathElements.slice(1).join("/");
     logger.debug(`Remote branch: remote=${remote} branch=${branch}`);
     return new RemoteBranch(remote, branch);
   }
 
-  constructor(public remote: string,
-    public branch: string) {
-  }
+  constructor(public remote: string, public branch: string) {}
 
   toString(): string {
     return `${this.remote}/${this.branch}`;
@@ -64,10 +62,11 @@ export interface BranchListing {
 }
 
 export class GitRepository {
-  constructor(private readonly path: string,
+  constructor(
+    private readonly path: string,
     private readonly runner: ShellRunner,
-    private readonly commitPrefix: number) {
-  }
+    private readonly commitPrefix: number
+  ) {}
 
   /**
    * Perform a Git pull operation on the given repository
@@ -76,66 +75,72 @@ export class GitRepository {
    */
   async pull(): Promise<PullResult> {
     const updateRegex = /^ ([a-zA-Z0-9/.-_]*)\s+\|/;
-    const out = await this.runner.run('git pull --ff-only');
+    const out = await this.runner.run("git pull --ff-only");
     const lines = out.stdout.split(/\n/);
 
-    return lines.reduce((pullResult: PullResult, line: string) => {
-      let match = line.match(updateRegex);
-      if (match) {
-        pullResult.updatedFiles.push(match[1]);
-      }
-      return pullResult;
-    }, { updatedFiles: [] });
+    return lines.reduce(
+      (pullResult: PullResult, line: string) => {
+        let match = line.match(updateRegex);
+        if (match) {
+          pullResult.updatedFiles.push(match[1]);
+        }
+        return pullResult;
+      },
+      { updatedFiles: [] }
+    );
   }
 
   async fetch(): Promise<FetchResult> {
     const branchRegex = /^ ([ +\-t*!=]) (\[?[a-zA-Z0-9 .]+]?)\s+([a-zA-Z0-9-_./]+|\(none\))\s+->\s+([a-zA-Z0-9-_./]+)\s*(.*)?$/;
-    const out = await this.runner.run('git fetch --prune');
+    const out = await this.runner.run("git fetch --prune");
 
     const lines = out.stderr.split(/\n/);
     console.log(lines);
-    const result: FetchResult = lines.reduce((result: FetchResult, line: string) => {
-      console.log(line);
-      const lineMatch = line.match(branchRegex);
-      if (lineMatch) {
-        const rawFlag = lineMatch[1];
-        let flag = 'unknown';
-        switch (rawFlag) {
-          case ' ':
-            flag = 'fast-forward';
-            break;
-          case '+':
-            flag = 'forced update';
-            break;
-          case '-':
-            flag = 'pruned';
-            break;
-          case 't':
-            flag = 'tag update';
-            break;
-          case '*':
-            flag = 'new ref';
-            break;
-          case '!':
-            flag = 'rejected';
-            break;
-          case '=':
-            flag = 'up to date';
-            break;
-        }
+    const result: FetchResult = lines.reduce(
+      (result: FetchResult, line: string) => {
+        console.log(line);
+        const lineMatch = line.match(branchRegex);
+        if (lineMatch) {
+          const rawFlag = lineMatch[1];
+          let flag = "unknown";
+          switch (rawFlag) {
+            case " ":
+              flag = "fast-forward";
+              break;
+            case "+":
+              flag = "forced update";
+              break;
+            case "-":
+              flag = "pruned";
+              break;
+            case "t":
+              flag = "tag update";
+              break;
+            case "*":
+              flag = "new ref";
+              break;
+            case "!":
+              flag = "rejected";
+              break;
+            case "=":
+              flag = "up to date";
+              break;
+          }
 
-        const summary = lineMatch[2];
-        const remoteBranch = lineMatch[3];
-        const localBranch = lineMatch[4];
-        result.updatedBranches.push({
-          flag: flag,
-          action: summary,
-          remoteBranch: remoteBranch,
-          trackingBranch: localBranch,
-        });
-      }
-      return result;
-    }, { updatedBranches: [] });
+          const summary = lineMatch[2];
+          const remoteBranch = lineMatch[3];
+          const localBranch = lineMatch[4];
+          result.updatedBranches.push({
+            flag: flag,
+            action: summary,
+            remoteBranch: remoteBranch,
+            trackingBranch: localBranch,
+          });
+        }
+        return result;
+      },
+      { updatedBranches: [] }
+    );
 
     logger.debug(`fetchItems=${JSON.stringify(result.updatedBranches)}`);
     return result;
@@ -186,34 +191,31 @@ export class GitRepository {
    */
   prune(remote: string): Promise<string[]> {
     let pruneRegex = /^ \* \[pruned] (.*)$/;
-    return this
-      .runner
-      .run(`git remote prune ${remote}`)
-      .then(out => {
-        let lines: string[] = out.stdout.split(/\n/);
+    return this.runner.run(`git remote prune ${remote}`).then((out) => {
+      let lines: string[] = out.stdout.split(/\n/);
 
-        if (lines.length <= 0) {
-          return [];
-        } else {
-          let pruned: string[] = [];
+      if (lines.length <= 0) {
+        return [];
+      } else {
+        let pruned: string[] = [];
 
-          lines.forEach(line => {
-            let pruneMatch = line.match(pruneRegex);
-            if (pruneMatch) {
-              pruned.push(pruneMatch[1]);
-            }
-          });
+        lines.forEach((line) => {
+          let pruneMatch = line.match(pruneRegex);
+          if (pruneMatch) {
+            pruned.push(pruneMatch[1]);
+          }
+        });
 
-          return pruned;
-        }
-      });
+        return pruned;
+      }
+    });
   }
 
   /**
    * Get the current branch for this repository
    */
   async branch(): Promise<string> {
-    const out = await this.runner.run('git rev-parse --abbrev-ref HEAD');
+    const out = await this.runner.run("git rev-parse --abbrev-ref HEAD");
     return out.stdout.trim();
   }
 
@@ -221,9 +223,7 @@ export class GitRepository {
    * Get the current commit ID for this repository
    */
   async commit(): Promise<string> {
-    const out = await this
-      .runner
-      .run('git rev-parse HEAD');
+    const out = await this.runner.run("git rev-parse HEAD");
     return this.shorten(out.stdout.trim());
   }
 
@@ -235,50 +235,50 @@ export class GitRepository {
     const fileLineRe = /^([12]) [ .MADRCU?!]{2} N\.\.\. \d+ \d+ \d+ [a-fA-F0-9]+ [a-fA-F0-9]+ (.*)$/;
     const renameRe = /^\w\d+ ([a-zA-Z0-9_/.-]+)\t([a-zA-Z0-9_/.-]+)$/;
 
-    const out = await this.runner.run('git status --porcelain=2 -b');
+    const out = await this.runner.run("git status --porcelain=2 -b");
     const lines: string[] = out.stdout.split(/\n/);
 
     let idx = 0;
 
     const commitLine = lines[idx];
     const commitMatch = commitLine.match(commitRe);
-    const commit = commitMatch ? commitMatch[1] : '';
-    idx += (commitMatch ? 1 : 0);
+    const commit = commitMatch ? commitMatch[1] : "";
+    idx += commitMatch ? 1 : 0;
 
     const localBranchLine = lines[idx];
     const localBranchMatch = localBranchLine.match(localBranchRe);
-    const localBranch = localBranchMatch ? localBranchMatch[1] : '';
-    idx += (localBranchMatch ? 1 : 0);
+    const localBranch = localBranchMatch ? localBranchMatch[1] : "";
+    idx += localBranchMatch ? 1 : 0;
 
     const remoteBranchLine = lines[idx];
     const remoteBranchMatch = remoteBranchLine.match(remoteBranchRe);
-    const remoteBranch = remoteBranchMatch ? remoteBranchMatch[1] : '';
-    idx += (remoteBranchMatch ? 1 : 0);
+    const remoteBranch = remoteBranchMatch ? remoteBranchMatch[1] : "";
+    idx += remoteBranchMatch ? 1 : 0;
 
     const aheadBehindLine = lines[idx];
     const aheadBehindMatch = aheadBehindLine.match(aheadBehindRe);
     const ahead = aheadBehindMatch ? parseInt(aheadBehindMatch[1]) : 0;
     const behind = aheadBehindMatch ? parseInt(aheadBehindMatch[2]) : 0;
-    idx += (aheadBehindMatch ? 1 : 0);
+    idx += aheadBehindMatch ? 1 : 0;
 
     const modifiedFiles: string[] = lines
       .splice(idx)
-      .map(line => {
+      .map((line) => {
         const lineMatcher = line.match(fileLineRe);
         if (lineMatcher) {
           const indicator = lineMatcher[1];
           const tail = lineMatcher[2];
-          if (indicator === '1') {
+          if (indicator === "1") {
             return tail;
           } else {
             const renameMatch = tail.match(renameRe);
-            return renameMatch ? renameMatch[1] : '';
+            return renameMatch ? renameMatch[1] : "";
           }
         } else {
-          return '';
+          return "";
         }
       })
-      .filter(file => (file !== ''));
+      .filter((file) => file !== "");
 
     return {
       modifiedFiles: modifiedFiles,
@@ -294,46 +294,49 @@ export class GitRepository {
    * Gets all the merged remote-tracking branches for this repository. Filters out HEAD.
    */
   async remoteMergedBranches(): Promise<string[]> {
-    const out = await this.runner.run('git branch -r --merged');
+    const out = await this.runner.run("git branch -r --merged");
     const lines: string[] = out.stdout.split(/\n/);
     const branchRe = /^\s+([a-zA-Z0-9-\/._]+)$/;
 
     return lines
-      .map(line => {
+      .map((line) => {
         const lineMatch = line.match(branchRe);
         if (lineMatch) {
           logger.debug(`${this.path}: branch=${lineMatch[1]} line=${line}`);
           return lineMatch[1];
         } else {
-          return '';
+          return "";
         }
       })
-      .filter(branch => (branch !== ''));
+      .filter((branch) => branch !== "");
   }
 
   /**
    * Get a listing of all the branches the repository knows about
    */
   async allBranches(): Promise<BranchListing> {
-    const out = await this.runner.run('git branch -a');
+    const out = await this.runner.run("git branch -a");
     const lines: string[] = out.stdout.split(/\n/);
     const branchRe = /^..(remotes\/([a-zA-Z0-9_-]+)\/)?([a-zA-Z0-9/_-]+)$/;
 
-    return lines.reduce((branches: BranchListing, line: string) => {
-      const lineMatch = line.match(branchRe);
-      if (lineMatch) {
-        const remote = lineMatch[1];
-        const remoteName = lineMatch[2];
-        const branchName = lineMatch[3];
-        if (remote && remote.length > 0) {
-          branches.remote.push(new RemoteBranch(remoteName, branchName));
-        } else {
-          branches.local.push(branchName);
+    return lines.reduce(
+      (branches: BranchListing, line: string) => {
+        const lineMatch = line.match(branchRe);
+        if (lineMatch) {
+          const remote = lineMatch[1];
+          const remoteName = lineMatch[2];
+          const branchName = lineMatch[3];
+          if (remote && remote.length > 0) {
+            branches.remote.push(new RemoteBranch(remoteName, branchName));
+          } else {
+            branches.local.push(branchName);
+          }
         }
-      }
 
-      return branches;
-    }, { local: [], remote: [] });
+        return branches;
+      },
+      { local: [], remote: [] }
+    );
   }
 
   /**
@@ -342,7 +345,9 @@ export class GitRepository {
    * @param branch Branch name to check
    */
   async committerDate(branch: string): Promise<Date> {
-    const out = await this.runner.run(`git log -n 1 --pretty=format:%cI ${branch}`);
+    const out = await this.runner.run(
+      `git log -n 1 --pretty=format:%cI ${branch}`
+    );
     const trimmed = out.stdout.trim();
     return new Date(trimmed);
   }
@@ -351,7 +356,7 @@ export class GitRepository {
    * Shorten a commit ID according to the policy
    */
   private shorten(commit: string): string {
-    return ((this.commitPrefix > 0) && (commit.length > this.commitPrefix))
+    return this.commitPrefix > 0 && commit.length > this.commitPrefix
       ? commit.substr(0, this.commitPrefix)
       : commit;
   }

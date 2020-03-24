@@ -1,7 +1,13 @@
-import {SyncStatus} from "./actions/sync";
-import chalk, {Level} from "chalk";
-import {CleanupStatus} from "./actions/cleanup";
-import {CellAlignment, NickelTable, TableCell, TableColumn, TableRow} from "./nickel-table";
+import { SyncStatus } from "./actions/sync";
+import chalk, { Level } from "chalk";
+import { CleanupStatus } from "./actions/cleanup";
+import {
+  CellAlignment,
+  NickelTable,
+  TableCell,
+  TableColumn,
+  TableRow,
+} from "./nickel-table";
 
 /**
  * Returns a collection of name/value pairs
@@ -9,9 +15,11 @@ import {CellAlignment, NickelTable, TableCell, TableColumn, TableRow} from "./ni
 export class ReportLine implements ReportingItem {
   readonly name: string;
 
-  constructor(public readonly values: { [index: string]: string },
-              public readonly selected: boolean = true) {
-    this.name = values['Project'];
+  constructor(
+    public readonly values: { [index: string]: string },
+    public readonly selected: boolean = true
+  ) {
+    this.name = values["Project"];
   }
 
   get(key: string): string {
@@ -37,8 +45,7 @@ export class ReportSeparator implements ReportingItem {
    *
    * @param name Optional label for the separator
    */
-  constructor(public readonly name: string) {
-  }
+  constructor(public readonly name: string) {}
 }
 
 /**
@@ -60,7 +67,7 @@ export class NickelReport {
    * @param {ReportLine[]} rows Report rows, structure determined by the header
    */
   buildReport(rows: ReportingItem[]): NickelTable {
-    const tableRows = rows.map(row => {
+    const tableRows = rows.map((row) => {
       if (row instanceof ReportLine) {
         return this.processRow(<ReportLine>row);
       } else {
@@ -76,12 +83,12 @@ export class NickelReport {
    * @param sep the separator
    */
   private processSeparator(sep: ReportSeparator): TableRow {
-    const sectionText = (sep.name.match(/^\s*$/))
-      ? ''
+    const sectionText = sep.name.match(/^\s*$/)
+      ? ""
       : ` ${chalk.italic.bold(sep.name)} `;
     const head = new TableCell(sectionText, CellAlignment.Left);
-    const tail = this.columns.slice(1).map(() => new TableCell(''));
-    return new TableRow([head].concat(tail), 'sep');
+    const tail = this.columns.slice(1).map(() => new TableCell(""));
+    return new TableRow([head].concat(tail), "sep");
   }
 
   /**
@@ -90,13 +97,16 @@ export class NickelReport {
    * @param row Data row in object form
    */
   private processRow(row: ReportLine): TableRow {
-    const cells = this.columns.map(column => {
+    const cells = this.columns.map((column) => {
       let value = row.get(column.title);
 
       // Value transformations
       if (value === SyncStatus.Success || value === CleanupStatus.Success) {
         value = chalk.green(value);
-      } else if (value === SyncStatus.Failure || value == CleanupStatus.Failure) {
+      } else if (
+        value === SyncStatus.Failure ||
+        value == CleanupStatus.Failure
+      ) {
         value = chalk.red(value);
       } else if (value === SyncStatus.Dirty || value === CleanupStatus.Dirty) {
         value = chalk.bgYellow.black(value);
@@ -104,6 +114,6 @@ export class NickelReport {
 
       return new TableCell(value.toString());
     });
-    return new TableRow(cells, 'data');
+    return new TableRow(cells, "data");
   }
 }

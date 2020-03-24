@@ -1,17 +1,19 @@
 import * as fs from "fs";
-import {ReportLine} from "../nickel-report";
-import {logger} from "../logger";
+import { ReportLine } from "../nickel-report";
+import { logger } from "../logger";
 
 export enum BranchReportStatus {
-  New = 'report-new',
-  Success = 'report-success',
-  Failure = 'report-failure',
-  Skipped = 'report-skip',
+  New = "report-new",
+  Success = "report-success",
+  Failure = "report-failure",
+  Skipped = "report-skip",
 }
 
 export class BranchReportLine extends ReportLine {
-  constructor(values: { [index: string]: string },
-              public candidateBranches: string[]) {
+  constructor(
+    values: { [index: string]: string },
+    public candidateBranches: string[]
+  ) {
     super(values);
   }
 }
@@ -25,17 +27,16 @@ export interface BranchReportDetails {
 export class BranchReportWriter {
   private readonly reportFile: string;
 
-  constructor(private reports: BranchReportLine[],
-              args: any) {
+  constructor(private reports: BranchReportLine[], args: any) {
     this.reportFile = args[0];
   }
 
   writeReport(): void {
     let processed: BranchReportDetails[] = [];
-    this.reports.forEach(report => {
-      report.candidateBranches.forEach(branch => {
+    this.reports.forEach((report) => {
+      report.candidateBranches.forEach((branch) => {
         processed.push({
-          project: report.get('Project'),
+          project: report.get("Project"),
           branch: branch,
           keep: false,
         });
@@ -48,4 +49,3 @@ export class BranchReportWriter {
     fs.writeFileSync(this.reportFile, reportText);
   }
 }
-
