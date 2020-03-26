@@ -26,18 +26,4 @@ export class ShellRunner {
       );
     });
   }
-
-  runSync(command: string): string {
-    logger.debug(`${command} [${this.path}]`);
-    try {
-      return child_process.execSync(command, {
-        cwd: this.path,
-        stdio: "pipe",
-        encoding: "utf8",
-      });
-    } catch (error) {
-      logger.warn(`${this.path}: ${error.message}`);
-      throw error;
-    }
-  }
 }

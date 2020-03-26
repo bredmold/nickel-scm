@@ -185,33 +185,43 @@ class GuidedBranchRemoval {
 
                 this.project.repository.allBranches().then(
                   () => {
-                    this.branchesToRemove.forEach((remoteBranch) => {
-                      const remote = remoteBranch.remote;
-                      const branch = branchNameMap[remote].hasOwnProperty(
-                        remoteBranch.branch
-                      )
-                        ? branchNameMap[remote][remoteBranch.branch]
-                        : remoteBranch.branch;
-                      logger.debug(
-                        `${this.project.name}: Delete ${remote} ${branch}`
-                      );
-                      const deleted = this.project.repository.removeRemoteBranchSync(
-                        remote,
-                        branch
-                      );
-                      if (deleted) {
-                        logger.info(
-                          `${this.project.name}: Deleted ${remoteBranch.remote} ${remoteBranch.branch}`
+                    const deletePromises = this.branchesToRemove.map(
+                      (remoteBranch) => {
+                        const remote = remoteBranch.remote;
+                        const branch = branchNameMap[remote].hasOwnProperty(
+                          remoteBranch.branch
+                        )
+                          ? branchNameMap[remote][remoteBranch.branch]
+                          : remoteBranch.branch;
+                        logger.debug(
+                          `${this.project.name}: Delete ${remote} ${branch}`
                         );
-                        this.removedBranches.push(remoteBranch.toString());
-                      } else {
-                        logger.warn(
-                          `${this.project.name}: Failed to remove branch ${remoteBranch.remote} ${remoteBranch.branch}`
+                        return this.project.repository.removeRemoteBranch(
+                          remote,
+                          branch
                         );
-                        this.notRemovedBranches.push(remoteBranch.toString());
                       }
-                    });
-                    finish(null, GuidedBranchRemovalStatus.Success);
+                    );
+                    Promise.all(deletePromises).then(
+                      (deleteResponses) => {
+                        deleteResponses.forEach((deleteResponse) => {
+                          const remoteBranch = `${deleteResponse.remote}/${deleteResponse.branch}`;
+                          if (deleteResponse.deleted) {
+                            logger.info(
+                              `${this.project.name}: Deleted ${deleteResponse.remote} ${deleteResponse.branch}`
+                            );
+                            this.removedBranches.push(remoteBranch);
+                          } else {
+                            logger.warn(
+                              `${this.project.name}: Failed to remove branch ${deleteResponse.remote} ${deleteResponse.branch}`
+                            );
+                            this.notRemovedBranches.push(remoteBranch);
+                          }
+                        });
+                        finish(null, GuidedBranchRemovalStatus.Success);
+                      },
+                      (e) => finish(e, GuidedBranchRemovalStatus.Failure)
+                    );
                   },
                   (e) => finish(e, GuidedBranchRemovalStatus.Failure)
                 );

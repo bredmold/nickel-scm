@@ -37,12 +37,4 @@ describe("Shell Runner", () => {
       }
     );
   });
-
-  test("runSync", () => {
-    expect(runner.runSync("echo test")).toBe("test\n");
-  });
-
-  test("runSync error", () => {
-    expect(() => runner.runSync('bash -c "exit 1"')).toThrow();
-  });
 });

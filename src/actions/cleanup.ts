@@ -29,7 +29,7 @@ export class RepositoryCleanupAction implements NickelAction {
   ];
 
   act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new Promise<ReportLine>((resolve) => {
+    return new Promise<ReportLine>(async (resolve) => {
       let branch = "";
 
       const finish = (e: any, status: CleanupStatus) => {
@@ -43,39 +43,23 @@ export class RepositoryCleanupAction implements NickelAction {
         );
       };
 
-      project.repository.status().then(
-        (status) => {
-          branch = status.branch;
-          if (project.defaultBranch === status.branch) {
-            finish(null, CleanupStatus.Skipped);
-          } else if (status.modifiedFiles.length > 0) {
-            finish(null, CleanupStatus.Dirty);
-          } else {
-            project.repository.selectBranch(project.defaultBranch).then(
-              () => {
-                project.repository.pull().then(
-                  () => {
-                    project.repository.deleteLocalBranch(status.branch).then(
-                      () => {
-                        project.repository.prune("origin").then(
-                          () => {
-                            finish(null, CleanupStatus.Success);
-                          },
-                          (e) => finish(e, CleanupStatus.Failure)
-                        );
-                      },
-                      (e) => finish(e, CleanupStatus.Failure)
-                    );
-                  },
-                  (e) => finish(e, CleanupStatus.Failure)
-                );
-              },
-              (e) => finish(e, CleanupStatus.Failure)
-            );
-          }
-        },
-        (e) => finish(e, CleanupStatus.Failure)
-      );
+      try {
+        const status = await project.repository.status();
+        branch = status.branch;
+        if (project.defaultBranch === status.branch) {
+          finish(null, CleanupStatus.Skipped);
+        } else if (status.modifiedFiles.length > 0) {
+          finish(null, CleanupStatus.Dirty);
+        } else {
+          await project.repository.selectBranch(project.defaultBranch);
+          await project.repository.pull();
+          await project.repository.deleteLocalBranch(status.branch);
+          await project.repository.prune("origin");
+          finish(null, CleanupStatus.Success);
+        }
+      } catch (e) {
+        finish(e, CleanupStatus.Failure);
+      }
     });
   }
 

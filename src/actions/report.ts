@@ -23,7 +23,7 @@ export class RepositoryReportAction implements NickelAction {
   ];
 
   act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new Promise<ReportLine>((resolve) => {
+    return new Promise<ReportLine>(async (resolve) => {
       let branch = "";
       let modifiedFiles = [];
       let commit = "";
@@ -39,15 +39,14 @@ export class RepositoryReportAction implements NickelAction {
         );
       };
 
-      project.repository.status().then(
-        (status) => {
-          branch = status.branch;
-          modifiedFiles = status.modifiedFiles;
-          commit = status.commit;
-          finish();
-        },
-        () => finish()
-      );
+      try {
+        const status = await project.repository.status();
+        branch = status.branch;
+        modifiedFiles = status.modifiedFiles;
+        commit = status.commit;
+      } finally {
+        finish();
+      }
     });
   }
 

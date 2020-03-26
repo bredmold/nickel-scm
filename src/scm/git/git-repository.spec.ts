@@ -216,6 +216,25 @@ describe("Git Repository", () => {
       ],
     });
   });
+
+  test("removeRemoteBranch", (done) => {
+    runner.run = jest.fn(() =>
+      Promise.resolve({
+        stdout: "",
+        stderr: "",
+      })
+    );
+
+    repository.removeRemoteBranch("origin", "test").then(
+      () => {
+        expect(runner.run).toHaveBeenCalledWith(
+          "git push --delete origin test"
+        );
+        done();
+      },
+      (e) => done.fail(e)
+    );
+  });
 });
 
 describe("Remote Branch", () => {

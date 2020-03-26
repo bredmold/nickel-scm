@@ -83,34 +83,29 @@ vm.runInContext(configScriptBytes, configContext);
 Do the things!
  */
 
-// const reportItems = ConfigContext.reportItems;
-
 /**
  * Filter the list of projects based on selection criteria
  *
  * @param items List of configured reporting items
  * @return A promise containing projects merged with selection criteria
  */
-function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
+async function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
   try {
     const selector = nickelSelector(selectedProjects, activeBranch);
     const selectorPromises = items.map((item) => selector(item));
-    return Promise.all(selectorPromises).then((selectedItems) => {
-      const selected: number = selectedItems.reduce(
-        (sum, item) => sum + (item.selected ? 1 : 0),
-        0
-      );
+    const selectedItems = await Promise.all(selectorPromises);
+    const selected: number = selectedItems.reduce(
+      (sum, item_2) => sum + (item_2.selected ? 1 : 0),
+      0
+    );
+    logger.debug(`Selected ${selected} projects`);
 
-      logger.debug(`Selected ${selected} projects`);
-      if (selected === 0) {
-        logger.error(
-          `No projects meet selection criteria: ${selector.criteria}`
-        );
-        process.exit(1);
-      }
+    if (selected === 0) {
+      logger.error(`No projects meet selection criteria: ${selector.criteria}`);
+      process.exit(1);
+    }
 
-      return selectedItems;
-    });
+    return selectedItems;
   } catch (e) {
     logger.error(e);
     process.exit(1);

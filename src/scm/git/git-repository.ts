@@ -31,6 +31,15 @@ export interface StatusResult {
 }
 
 /**
+ * Result of deleting a branch
+ */
+export interface RemoveRemoteBranchResult {
+  remote: string;
+  branch: string;
+  deleted: boolean;
+}
+
+/**
  * Remote branch reference, with origin name and branch name
  */
 export class RemoteBranch {
@@ -147,17 +156,20 @@ export class GitRepository {
   }
 
   /**
-   * Synchronously remove a remote branch
+   * Remove a remote branch
    *
    * @param remote Name of the remote being operated on
    * @param branch Name of the branch to remove
    */
-  removeRemoteBranchSync(remote: string, branch: string): boolean {
+  async removeRemoteBranch(
+    remote: string,
+    branch: string
+  ): Promise<RemoveRemoteBranchResult> {
     try {
-      this.runner.runSync(`git push --delete ${remote} ${branch}`);
-      return true;
-    } catch (e) {
-      return false;
+      await this.runner.run(`git push --delete ${remote} ${branch}`);
+      return { remote: remote, branch: branch, deleted: true };
+    } catch (error) {
+      return { remote: remote, branch: branch, deleted: false };
     }
   }
 

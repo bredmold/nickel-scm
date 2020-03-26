@@ -31,11 +31,11 @@ export class RepositorySyncAction implements NickelAction {
   ];
 
   act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new Promise<ReportLine>((resolve) => {
+    return new Promise<ReportLine>(async (resolve) => {
       let updatedFiles = [];
       let branch = "";
 
-      let finish = (e: any, status: SyncStatus) => {
+      const finish = (e: any, status: SyncStatus) => {
         resolve(
           new ReportLine({
             Project: project.name,
@@ -46,23 +46,19 @@ export class RepositorySyncAction implements NickelAction {
         );
       };
 
-      project.repository.status().then(
-        (status) => {
-          branch = status.branch;
-          if (status.modifiedFiles.length > 0) {
-            finish(null, SyncStatus.Dirty);
-          } else {
-            project.repository.pull().then(
-              (pullResult) => {
-                updatedFiles = pullResult.updatedFiles;
-                finish(null, SyncStatus.Success);
-              },
-              (e) => finish(e, SyncStatus.Failure)
-            );
-          }
-        },
-        (e) => finish(e, SyncStatus.Failure)
-      );
+      try {
+        const status = await project.repository.status();
+        branch = status.branch;
+        if (status.modifiedFiles.length > 0) {
+          finish(null, SyncStatus.Dirty);
+        } else {
+          const pullResult = await project.repository.pull();
+          updatedFiles = pullResult.updatedFiles;
+          finish(null, SyncStatus.Success);
+        }
+      } catch (e) {
+        finish(e, SyncStatus.Failure);
+      }
     });
   }
 
