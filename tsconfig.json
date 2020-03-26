@@ -1,24 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es2017",
-      "es2015",
-      "dom",
-      "es6"
-    ],
+    "target": "es2017",
+    "lib": ["es2017", "es2015", "es6"],
     "module": "commonjs",
     "outDir": "./dist",
     "sourceMap": false,
     "strict": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "package.json",
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "src/**/*.spec.ts"
-  ]
+  "include": ["package.json", "src/**/*.ts"],
+  "exclude": ["node_modules", "src/**/*.spec.ts"]
 }
