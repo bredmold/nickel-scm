@@ -25,11 +25,10 @@ export interface BranchReportDetails {
 }
 
 export class BranchReportWriter {
-  private readonly reportFile: string;
-
-  constructor(private reports: BranchReportLine[], args: any) {
-    this.reportFile = args[0];
-  }
+  constructor(
+    private reports: BranchReportLine[],
+    private readonly reportFile: string
+  ) {}
 
   writeReport(): void {
     let processed: BranchReportDetails[] = [];
