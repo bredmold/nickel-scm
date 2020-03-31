@@ -293,11 +293,9 @@ export class GitRepository {
     };
   }
 
-  /**
-   * Gets all the merged remote-tracking branches for this repository. Filters out HEAD.
-   */
-  async remoteMergedBranches(): Promise<string[]> {
-    const out = await this.runner.run("git branch -r --merged");
+  async remoteBranches(merged: boolean = false): Promise<string[]> {
+    const command = `git branch -r ${merged ? "--merged" : ""}`;
+    const out = await this.runner.run(command);
     const lines: string[] = out.stdout.split(/\n/);
     const branchRe = /^\s+([a-zA-Z0-9-\/._]+)$/;
 
@@ -312,6 +310,13 @@ export class GitRepository {
         }
       })
       .filter((branch) => branch !== "");
+  }
+
+  /**
+   * Gets all the merged remote-tracking branches for this repository. Filters out HEAD.
+   */
+  remoteMergedBranches(): Promise<string[]> {
+    return this.remoteBranches(true);
   }
 
   /**

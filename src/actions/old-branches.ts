@@ -9,6 +9,11 @@ import { NickelAction } from "./nickel-action";
 import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";
 
+/**
+ * args is expected to be an array of strings containing 1 or 2 items
+ *   - item 0: report file name
+ *   - item 1: age in days
+ */
 export class OldBranchesReportAction implements NickelAction {
   readonly command = "oldBranches <reportFile> [age]";
   readonly description = "Generate a list of branches older than a certain age";
@@ -27,21 +32,6 @@ export class OldBranchesReportAction implements NickelAction {
   ];
 
   act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new OldBranchesReport(project, args).report();
-  }
-
-  post(reports: ReportLine[], args?: any): any {
-    new BranchReportWriter(<BranchReportLine[]>reports, args).writeReport();
-  }
-}
-
-class OldBranchesReport {
-  private readonly candidateBranches: string[];
-  private readonly age: number;
-
-  constructor(public project: NickelProject, args: any) {
-    this.candidateBranches = [];
-
     let age: number = 60;
     if (
       args instanceof Array &&
@@ -64,60 +54,84 @@ class OldBranchesReport {
         );
       }
     }
-    this.age = age;
 
+    return new OldBranchesReport(project, age).report();
+  }
+
+  post(reports: ReportLine[], args?: any): any {
+    new BranchReportWriter(
+      <BranchReportLine[]>reports,
+      args instanceof Array ? args[0].toString() : args.toString()
+    ).writeReport();
+  }
+}
+
+class OldBranchesReport {
+  constructor(
+    private readonly project: NickelProject,
+    private readonly age: number
+  ) {
     logger.debug(`old branch report: age=${this.age}`);
   }
 
   report(): Promise<ReportLine> {
-    return new Promise<ReportLine>((resolve) => {
-      const finish = (e: any, status: BranchReportStatus) => {
+    return new Promise<ReportLine>(async (resolve) => {
+      const finish = (
+        e: any,
+        status: BranchReportStatus,
+        candidateBranches: string[]
+      ) => {
         resolve(
           new BranchReportLine(
             {
               Project: this.project.name,
               Status: status,
-              "# Candidates": this.candidateBranches.length.toString(),
+              "# Candidates": candidateBranches.length.toString(),
             },
-            this.candidateBranches
+            candidateBranches
           )
         );
       };
 
-      this.project.repository.fetch().then(
-        (fetchResult) => {
-          const remoteBranchItems = fetchResult.updatedBranches.filter(
-            (item) => item.remoteBranch !== "(none)"
-          );
-          const trackingBranches = remoteBranchItems.map(
-            (item) => item.trackingBranch
-          );
-          const logPromises = trackingBranches.map((branch) =>
-            this.project.repository.committerDate(branch)
-          );
-          const now = new Date();
+      try {
+        await this.project.repository.fetch();
+        const trackingBranches = await this.project.repository.remoteBranches();
 
-          Promise.all(logPromises).then((logDates) => {
-            for (let i = 0; i < logPromises.length; ++i) {
-              const branch: string = trackingBranches[i];
-              const committerDate: Date = logDates[i];
-              const ageInMillis = now.getTime() - committerDate.getTime();
-              const ageInDays = Math.floor(ageInMillis / (3600 * 24 * 1000));
-              if (ageInDays >= this.age) {
-                const elements = branch.split(/\//);
-                const remote = elements[0];
-                const trackingBranch = elements.slice(1).join("/");
-                logger.info(
-                  `${this.project.name}: Candidate ${remote} ${trackingBranch} (${ageInDays} days)`
-                );
-                this.candidateBranches.push(branch);
-              }
+        const logPromises = trackingBranches.map((branch) =>
+          this.project.repository.committerDate(branch).then((date) => {
+            return { branch: branch, logDate: date };
+          })
+        );
+
+        const now = new Date();
+        const logDates = await Promise.all(logPromises);
+
+        const candidateBranches: string[] = logDates.reduce(
+          (candidates: string[], dateAndBranch) => {
+            const branch: string = dateAndBranch.branch;
+            const committerDate: Date = dateAndBranch.logDate;
+
+            const ageInMillis = now.getTime() - committerDate.getTime();
+            const ageInDays = Math.floor(ageInMillis / (3600 * 24 * 1000));
+            if (ageInDays >= this.age) {
+              const elements = branch.split(/\//);
+              const remote = elements[0];
+              const trackingBranch = elements.slice(1).join("/");
+              logger.info(
+                `${this.project.name}: Candidate ${remote} ${trackingBranch} (${ageInDays} days)`
+              );
+              candidates.push(branch);
             }
-            finish(null, BranchReportStatus.Success);
-          });
-        },
-        (e) => finish(e, BranchReportStatus.Failure)
-      );
+
+            return candidates;
+          },
+          []
+        );
+
+        finish(null, BranchReportStatus.Success, candidateBranches);
+      } catch (e) {
+        finish(e, BranchReportStatus.Failure, []);
+      }
     });
   }
 }
