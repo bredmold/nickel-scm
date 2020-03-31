@@ -104,10 +104,9 @@ export class GitRepository {
     const out = await this.runner.run("git fetch --prune");
 
     const lines = out.stderr.split(/\n/);
-    console.log(lines);
+    logger.debug("lines = %j", lines);
     const result: FetchResult = lines.reduce(
       (result: FetchResult, line: string) => {
-        console.log(line);
         const lineMatch = line.match(branchRegex);
         if (lineMatch) {
           const rawFlag = lineMatch[1];
@@ -201,26 +200,18 @@ export class GitRepository {
    * @param {string} remote Name of the remote to prune
    * @returns {Promise<string[]>} List of branches that were pruned
    */
-  prune(remote: string): Promise<string[]> {
-    let pruneRegex = /^ \* \[pruned] (.*)$/;
-    return this.runner.run(`git remote prune ${remote}`).then((out) => {
-      let lines: string[] = out.stdout.split(/\n/);
+  async prune(remote: string): Promise<string[]> {
+    const pruneRegex = /^ \* \[pruned] (.*)$/;
+    const out = await this.runner.run(`git remote prune ${remote}`);
+    const lines: string[] = out.stdout.split(/\n/);
 
-      if (lines.length <= 0) {
-        return [];
-      } else {
-        let pruned: string[] = [];
-
-        lines.forEach((line) => {
-          let pruneMatch = line.match(pruneRegex);
-          if (pruneMatch) {
-            pruned.push(pruneMatch[1]);
-          }
-        });
-
-        return pruned;
+    return lines.reduce((pruned: string[], line: string) => {
+      const pruneMatch = line.match(pruneRegex);
+      if (pruneMatch) {
+        pruned.push(pruneMatch[1]);
       }
-    });
+      return pruned;
+    }, []);
   }
 
   /**

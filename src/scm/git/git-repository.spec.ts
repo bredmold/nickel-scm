@@ -201,7 +201,11 @@ describe("Git Repository", () => {
     runner.run = jest.fn(() =>
       Promise.resolve({
         stdout: "",
-        stderr: [" - [deleted]         (none)     -> origin/test"].join("\n"),
+        stderr: [
+          "From ssh://github.com/bredmold/nickel-scm",
+          " - [deleted]         (none) -> origin/test",
+          " * [new branch]      test2  -> origin/test2",
+        ].join("\n"),
       })
     );
 
@@ -212,6 +216,12 @@ describe("Git Repository", () => {
           action: "[deleted]",
           remoteBranch: "(none)",
           trackingBranch: "origin/test",
+        },
+        {
+          flag: "new ref",
+          action: "[new branch]",
+          remoteBranch: "test2",
+          trackingBranch: "origin/test2",
         },
       ],
     });

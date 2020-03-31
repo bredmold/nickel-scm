@@ -1,5 +1,6 @@
 import * as child_process from "child_process";
 import { logger } from "../../logger";
+import * as winston from "winston";
 
 export interface ProcessResult {
   stdout: string;
@@ -7,17 +8,22 @@ export interface ProcessResult {
 }
 
 export class ShellRunner {
-  constructor(private readonly path: string) {}
+  constructor(
+    private readonly path: string,
+    private readonly log: winston.Logger = logger
+  ) {}
 
   run(command: string): Promise<ProcessResult> {
-    logger.debug(`${command} [${this.path}]`);
+    this.log.debug(`${command} [${this.path}]`);
     return new Promise<any>((resolve, reject) => {
       child_process.exec(
         command,
         { cwd: this.path, encoding: "utf8" },
         (error, stdout, stderr) => {
+          this.logOutput(command, "STDOUT", stdout);
+          this.logOutput(command, "STDERR", stderr);
           if (error) {
-            logger.warn(`${this.path}: ${error.message}`);
+            this.log.warn(`${command} [${this.path}]: ${error.message}`);
             reject(error);
           } else {
             resolve({ stdout: stdout, stderr: stderr });
@@ -25,5 +31,30 @@ export class ShellRunner {
         }
       );
     });
+  }
+
+  private logOutput(command: string, label: string, out: string) {
+    const level: string = this.log.level;
+    const priority: number = this.log.levels[level];
+    const debugPriority: number = this.log.levels["debug"];
+
+    if (priority >= debugPriority) {
+      let msg = `${command} [${this.path}] ${label}: `;
+
+      const normalized: string = out.trim();
+      if (normalized.length <= 0) {
+        msg += "<EMPTY>";
+      } else {
+        const newlineMatch = normalized.match(/\n/);
+        if (newlineMatch) {
+          msg += "\n";
+          msg += normalized;
+        } else {
+          msg += normalized;
+        }
+      }
+
+      this.log.debug(msg);
+    }
   }
 }
