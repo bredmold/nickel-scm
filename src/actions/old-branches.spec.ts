@@ -1,9 +1,10 @@
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
-import { OldBranchesReportAction } from "./old-branches";
-import { BranchReportLine, BranchReportStatus } from "./branch-reports";
-import * as tmp from "tmp";
 import * as fs from "fs";
-import { doesNotReject } from "assert";
+import * as tmp from "tmp";
+
+import { BranchReportLine, BranchReportStatus } from "./branch-reports";
+import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+
+import { OldBranchesReportAction } from "./old-branches";
 
 describe("Old Branches Report", () => {
   let project: NickelProject;

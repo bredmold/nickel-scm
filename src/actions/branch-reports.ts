@@ -1,4 +1,5 @@
 import * as fs from "fs";
+
 import { ReportLine } from "../nickel-report";
 import { logger } from "../logger";
 

@@ -5,6 +5,7 @@ import {
   TableColumn,
   TableRow,
 } from "./nickel-table";
+
 import chalk from "chalk";
 
 beforeAll(() => {

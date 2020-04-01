@@ -1,6 +1,6 @@
-import { RepositoryCleanupAction } from "./cleanup";
 import { NickelProject } from "../nickel-project";
 import { ReportLine } from "../nickel-report";
+import { RepositoryCleanupAction } from "./cleanup";
 
 describe("Cleanup Action", () => {
   let project: NickelProject;

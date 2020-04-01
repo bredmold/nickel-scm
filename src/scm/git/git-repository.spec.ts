@@ -1,4 +1,5 @@
 import { GitRepository, RemoteBranch } from "./git-repository";
+
 import { ShellRunner } from "./shell-runner";
 
 describe("Git Repository", () => {

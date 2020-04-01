@@ -1,9 +1,10 @@
-import { NickelInstigator } from "./nickel-instigator";
 import { ReportLine, ReportSeparator } from "./nickel-report";
-import { NickelProject } from "./nickel-project";
+
 import { NickelAction } from "./actions/nickel-action";
-import { TableColumn } from "./nickel-table";
+import { NickelInstigator } from "./nickel-instigator";
+import { NickelProject } from "./nickel-project";
 import { SelectedItem } from "./nickel-selector";
+import { TableColumn } from "./nickel-table";
 
 describe("Nickel Instigator", () => {
   let items: SelectedItem[];

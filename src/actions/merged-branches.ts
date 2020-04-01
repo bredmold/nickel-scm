@@ -1,11 +1,12 @@
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
 import {
   BranchReportLine,
   BranchReportStatus,
   BranchReportWriter,
 } from "./branch-reports";
-import { ReportLine } from "../nickel-report";
+import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+
 import { NickelAction } from "./nickel-action";
+import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";
 

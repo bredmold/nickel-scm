@@ -1,5 +1,6 @@
-import { RepositorySyncAction, SyncStatus } from "./sync";
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+import { RepositorySyncAction, SyncStatus } from "./sync";
+
 import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 

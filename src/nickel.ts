@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
+import * as fs from "fs";
 import * as program from "commander";
 import * as vm from "vm";
-import { ConfigContext } from "./config-context";
-import * as fs from "fs";
-import { NickelInstigator } from "./nickel-instigator";
+
+import { SelectedItem, nickelSelector } from "./nickel-selector";
+
 import { ALL_ACTIONS } from "./actions/nickel-action";
-import { logger } from "./logger";
+import { ConfigContext } from "./config-context";
+import { NickelInstigator } from "./nickel-instigator";
 import { ReportingItem } from "./nickel-report";
-import { nickelSelector, SelectedItem } from "./nickel-selector";
+import { logger } from "./logger";
 
 const pkg = require("../package.json");
 

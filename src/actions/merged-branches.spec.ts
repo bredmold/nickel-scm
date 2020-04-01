@@ -1,8 +1,10 @@
-import { NickelProject } from "../nickel-project";
-import { MergedBranchesReportAction } from "./merged-branches";
-import { BranchReportStatus, BranchReportLine } from "./branch-reports";
-import * as tmp from "tmp";
 import * as fs from "fs";
+import * as tmp from "tmp";
+
+import { BranchReportLine, BranchReportStatus } from "./branch-reports";
+
+import { MergedBranchesReportAction } from "./merged-branches";
+import { NickelProject } from "../nickel-project";
 
 describe("Merged Branche Report", () => {
   let project: NickelProject;

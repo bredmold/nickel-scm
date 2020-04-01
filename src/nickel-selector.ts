@@ -1,4 +1,5 @@
-import { ReportingItem, ReportSeparator } from "./nickel-report";
+import { ReportSeparator, ReportingItem } from "./nickel-report";
+
 import { NickelProject } from "./nickel-project";
 import { logger } from "./logger";
 

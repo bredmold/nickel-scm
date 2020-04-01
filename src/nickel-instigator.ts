@@ -1,9 +1,10 @@
-import { NickelTimer } from "./nickel-timer";
-import { NickelAction } from "./actions/nickel-action";
 import { NickelReport, ReportLine } from "./nickel-report";
+
+import { NickelAction } from "./actions/nickel-action";
 import { NickelProject } from "./nickel-project";
-import { logger } from "./logger";
+import { NickelTimer } from "./nickel-timer";
 import { SelectedItem } from "./nickel-selector";
+import { logger } from "./logger";
 
 /**
  * Nickel Instigator - perform actions across all projects

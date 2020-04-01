@@ -1,6 +1,6 @@
 import { NickelProject } from "./nickel-project";
-import { nickelSelector } from "./nickel-selector";
 import { ReportSeparator } from "./nickel-report";
+import { nickelSelector } from "./nickel-selector";
 
 describe("Nickel Selector", () => {
   let project: NickelProject;

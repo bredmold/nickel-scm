@@ -1,6 +1,7 @@
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
-import { ReportLine } from "../nickel-report";
+
 import { NickelAction } from "./nickel-action";
+import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 
 export class RepositoryReportAction implements NickelAction {

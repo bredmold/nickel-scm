@@ -1,6 +1,7 @@
-import { RepositoryReportAction } from "./report";
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+
 import { ReportLine } from "../nickel-report";
+import { RepositoryReportAction } from "./report";
 import { TableColumn } from "../nickel-table";
 
 describe("Report Action", () => {

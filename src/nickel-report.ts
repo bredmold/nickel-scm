@@ -1,6 +1,3 @@
-import { SyncStatus } from "./actions/sync";
-import chalk, { Level } from "chalk";
-import { CleanupStatus } from "./actions/cleanup";
 import {
   CellAlignment,
   NickelTable,
@@ -8,6 +5,10 @@ import {
   TableColumn,
   TableRow,
 } from "./nickel-table";
+import chalk, { Level } from "chalk";
+
+import { CleanupStatus } from "./actions/cleanup";
+import { SyncStatus } from "./actions/sync";
 
 /**
  * Returns a collection of name/value pairs

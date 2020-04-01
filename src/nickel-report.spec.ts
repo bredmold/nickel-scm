@@ -1,18 +1,19 @@
 import {
-  NickelReport,
-  ReportingItem,
-  ReportLine,
-  ReportSeparator,
-} from "./nickel-report";
-import {
   CellAlignment,
   TableCell,
   TableColumn,
   TableRow,
 } from "./nickel-table";
-import chalk from "chalk";
-import { SyncStatus } from "./actions/sync";
+import {
+  NickelReport,
+  ReportLine,
+  ReportSeparator,
+  ReportingItem,
+} from "./nickel-report";
+
 import { CleanupStatus } from "./actions/cleanup";
+import { SyncStatus } from "./actions/sync";
+import chalk from "chalk";
 
 describe("Nickel Report", () => {
   let columns: TableColumn[];

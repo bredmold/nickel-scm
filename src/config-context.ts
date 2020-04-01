@@ -1,8 +1,9 @@
+import { ReportSeparator, ReportingItem } from "./nickel-report";
+
 /**
  * Configuration context that provides variables and functions to the config script
  */
 import { NickelProject } from "./nickel-project";
-import { ReportingItem, ReportSeparator } from "./nickel-report";
 
 export class ConfigContext {
   static reportItems: ReportingItem[] = [];

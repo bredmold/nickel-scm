@@ -1,9 +1,11 @@
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
-import { RemoteBranch } from "../scm/git/git-repository";
 import * as fs from "fs";
+
+import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+
 import { BranchReportDetails } from "./branch-reports";
-import { ReportLine } from "../nickel-report";
 import { NickelAction } from "./nickel-action";
+import { RemoteBranch } from "../scm/git/git-repository";
+import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";
 

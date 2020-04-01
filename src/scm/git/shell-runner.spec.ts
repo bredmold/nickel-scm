@@ -1,7 +1,8 @@
+import * as Transport from "winston-transport";
+import * as winston from "winston";
+
 import { ShellRunner } from "./shell-runner";
 import { logger } from "../../logger";
-import * as winston from "winston";
-import * as Transport from "winston-transport";
 
 class TestTransport extends Transport {
   public readonly events: any[] = [];
