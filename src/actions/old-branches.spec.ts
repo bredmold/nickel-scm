@@ -2,8 +2,8 @@ import * as fs from "fs";
 import * as tmp from "tmp";
 
 import { BranchReportLine, BranchReportStatus } from "./branch-reports";
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
 
+import { NickelProject } from "../nickel-project";
 import { OldBranchesReportAction } from "./old-branches";
 
 describe("Old Branches Report", () => {

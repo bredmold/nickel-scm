@@ -1,10 +1,14 @@
 import * as fs from "fs";
 
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+import {
+  FetchResult,
+  RemoteBranch,
+  RemoveRemoteBranchResult,
+} from "../scm/git/git-repository";
 
 import { BranchReportDetails } from "./branch-reports";
 import { NickelAction } from "./nickel-action";
-import { RemoteBranch } from "../scm/git/git-repository";
 import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";
@@ -42,7 +46,10 @@ export class GuidedBranchRemovalAction implements NickelAction {
   ];
 
   act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new GuidedBranchRemoval(project, args).prune();
+    return new GuidedBranchRemoval(
+      project,
+      args instanceof Array ? args[0].toString() : args.toString()
+    ).prune();
   }
 
   post(reports: ReportLine[], args?: any): any {
@@ -50,19 +57,26 @@ export class GuidedBranchRemovalAction implements NickelAction {
   }
 }
 
+/**
+ * Map from remote name to local branch name to remote branch name
+ */
+type BranchNameMap = {
+  [key: string]: { [key: string]: string };
+};
+
+interface FetchInfo {
+  added: string[];
+  deleted: string[];
+}
+
 class GuidedBranchRemoval {
-  branch: string;
-  branchesKept: string[];
-  removedBranches: string[];
-  notRemovedBranches: string[];
-  branchesToRemove: RemoteBranch[];
-  status: GuidedBranchRemovalStatus;
+  private readonly branchesKept: string[];
+  private readonly branchesToRemove: RemoteBranch[];
 
-  constructor(private project: NickelProject, branchReportFilename: string) {
-    this.status = GuidedBranchRemovalStatus.New;
-    this.branch = "";
-    this.removedBranches = [];
-
+  constructor(
+    private readonly project: NickelProject,
+    branchReportFilename: string
+  ) {
     // List of regex values that check for 'safe' branches
     const safeBranchRes: RegExp[] = this.project.safeBranches.map(
       (safeBranch) => {
@@ -82,10 +96,9 @@ class GuidedBranchRemoval {
     // Filter the branch instructions - selecting only "non-safe" branches for the current project
     this.branchesKept = [];
     this.branchesToRemove = [];
-    this.notRemovedBranches = [];
     branchInstructions.forEach((bi) => {
       if (bi.project === project.name) {
-        logger.debug(`${JSON.stringify(bi)}`);
+        logger.debug("%j", bi);
         if (bi.keep) {
           this.branchesKept.push(bi.branch);
           logger.info(`${this.project.name}: Keeping branch ${bi.branch}`);
@@ -110,130 +123,139 @@ class GuidedBranchRemoval {
   }
 
   prune(): Promise<ReportLine> {
-    return new Promise<ReportLine>((resolve) => {
+    return new Promise<ReportLine>(async (resolve) => {
+      let branch: string = "";
+      let removedBranches: string[] = [];
+      let notRemovedBranches: string[] = [];
+
       let finish = (e: any, status: GuidedBranchRemovalStatus) => {
+        if (e) logger.warn(e);
+
         resolve(
           new ReportLine({
             Project: this.project.name,
-            Branch: this.branch,
+            Branch: branch,
             Status: status,
             "# Kept": this.branchesKept.length.toString(),
-            "# Removed": this.removedBranches.length.toString(),
-            "# Failed": this.notRemovedBranches.length.toString(),
+            "# Removed": removedBranches.length.toString(),
+            "# Failed": notRemovedBranches.length.toString(),
           })
         );
       };
 
-      this.project.repository.status().then(
-        (status) => {
-          this.branch = status.branch;
-          if (status.modifiedFiles.length > 0) {
-            finish(null, GuidedBranchRemovalStatus.Dirty);
-          } else if (status.branch !== this.project.defaultBranch) {
-            finish(null, GuidedBranchRemovalStatus.Working);
-          } else if (this.branchesToRemove.length < 1) {
-            logger.debug(`${this.project.name}: No branches to remove`);
-            finish(null, GuidedBranchRemovalStatus.Skipped);
-          } else if (this.branchesToRemove.length > 0) {
-            this.project.repository.fetch().then(
-              (fetchResult) => {
-                //
-                // Find the list of branches that are both deleted and added
-                //
+      try {
+        const status = await this.project.repository.status();
 
-                let deletedBranches: string[] = [];
-                let addedBranches: string[] = [];
-                fetchResult.updatedBranches.forEach((fetchItem) => {
-                  if (fetchItem.flag === "pruned") {
-                    deletedBranches.push(fetchItem.trackingBranch);
-                  } else if (fetchItem.flag === "new ref") {
-                    addedBranches.push(fetchItem.trackingBranch);
-                  }
-                });
+        branch = status.branch;
+        if (status.modifiedFiles.length > 0) {
+          finish(null, GuidedBranchRemovalStatus.Dirty);
+        } else if (status.branch !== this.project.defaultBranch) {
+          finish(null, GuidedBranchRemovalStatus.Working);
+        } else if (this.branchesToRemove.length < 1) {
+          logger.debug(`${this.project.name}: No branches to remove`);
+          finish(null, GuidedBranchRemovalStatus.Skipped);
+        } else if (this.branchesToRemove.length > 0) {
+          const fetchResult = await this.project.repository.fetch();
 
-                // Map from remote name to local branch name to remote branch name
-                let branchNameMap: {
-                  [key: string]: { [key: string]: string };
-                } = {};
-                deletedBranches.forEach((localBranch) => {
-                  const remoteBranch = addedBranches.find(
-                    (addedBranch) =>
-                      addedBranch.toLowerCase() === localBranch.toLowerCase()
-                  );
-                  if (remoteBranch) {
-                    const remoteBranchParts = remoteBranch.split(/\//);
-                    const remote = remoteBranchParts[0];
-                    const remoteBranchName = remoteBranchParts
-                      .slice(1)
-                      .join("/");
+          const fetchInfo = this.constructFetchInfo(fetchResult);
+          const branchNameMap: BranchNameMap = this.constructBranchNameMap(
+            fetchInfo
+          );
+          const deletePromises = this.requestBranchDeletes(branchNameMap);
+          const deleteResponses = await Promise.all(deletePromises);
 
-                    const localBranchParts = localBranch.split(/\//);
-                    const localBranchName = localBranchParts.slice(1).join("/");
+          deleteResponses.forEach((deleteResponse) => {
+            const remoteBranch = `${deleteResponse.remote}/${deleteResponse.branch}`;
+            if (deleteResponse.deleted) {
+              logger.info(
+                `${this.project.name}: Deleted ${deleteResponse.remote} ${deleteResponse.branch}`
+              );
+              removedBranches.push(remoteBranch);
+            } else {
+              logger.warn(
+                `${this.project.name}: Failed to remove branch ${deleteResponse.remote} ${deleteResponse.branch}`
+              );
+              notRemovedBranches.push(remoteBranch);
+            }
+          });
+          finish(null, GuidedBranchRemovalStatus.Success);
+        }
+      } catch (e) {
+        finish(e, GuidedBranchRemovalStatus.Failure);
+      }
+    });
+  }
 
-                    if (!branchNameMap[remote]) {
-                      branchNameMap[remote] = {};
-                    }
+  /**
+   * Based on the results of a fetch, constrct a list of branches added and removed. This is useful to support Windows
+   * clients, where case information for branch names is often lost. Using this map, it's possible to recover that
+   * information.
+   *
+   * @param fetchResult Parsed results from git fetch
+   */
+  private constructFetchInfo(fetchResult: FetchResult): FetchInfo {
+    let deletedBranches: string[] = [];
+    let addedBranches: string[] = [];
+    fetchResult.updatedBranches.forEach((fetchItem) => {
+      if (fetchItem.flag === "pruned") {
+        deletedBranches.push(fetchItem.trackingBranch);
+      } else if (fetchItem.flag === "new ref") {
+        addedBranches.push(fetchItem.trackingBranch);
+      }
+    });
 
-                    branchNameMap[remote][localBranchName] = remoteBranchName;
-                    logger.debug(
-                      `Matching branch: ${localBranch} => ${remoteBranch}`
-                    );
-                  }
-                });
+    return { added: addedBranches, deleted: deletedBranches };
+  }
 
-                //
-                // Use the branch name map to figure out which branches to keep or delete
-                //
-
-                this.project.repository.allBranches().then(
-                  () => {
-                    const deletePromises = this.branchesToRemove.map(
-                      (remoteBranch) => {
-                        const remote = remoteBranch.remote;
-                        const branch = branchNameMap[remote].hasOwnProperty(
-                          remoteBranch.branch
-                        )
-                          ? branchNameMap[remote][remoteBranch.branch]
-                          : remoteBranch.branch;
-                        logger.debug(
-                          `${this.project.name}: Delete ${remote} ${branch}`
-                        );
-                        return this.project.repository.removeRemoteBranch(
-                          remote,
-                          branch
-                        );
-                      }
-                    );
-                    Promise.all(deletePromises).then(
-                      (deleteResponses) => {
-                        deleteResponses.forEach((deleteResponse) => {
-                          const remoteBranch = `${deleteResponse.remote}/${deleteResponse.branch}`;
-                          if (deleteResponse.deleted) {
-                            logger.info(
-                              `${this.project.name}: Deleted ${deleteResponse.remote} ${deleteResponse.branch}`
-                            );
-                            this.removedBranches.push(remoteBranch);
-                          } else {
-                            logger.warn(
-                              `${this.project.name}: Failed to remove branch ${deleteResponse.remote} ${deleteResponse.branch}`
-                            );
-                            this.notRemovedBranches.push(remoteBranch);
-                          }
-                        });
-                        finish(null, GuidedBranchRemovalStatus.Success);
-                      },
-                      (e) => finish(e, GuidedBranchRemovalStatus.Failure)
-                    );
-                  },
-                  (e) => finish(e, GuidedBranchRemovalStatus.Failure)
-                );
-              },
-              (e) => finish(e, GuidedBranchRemovalStatus.Failure)
-            );
-          }
-        },
-        (e) => finish(e, GuidedBranchRemovalStatus.Failure)
+  /**
+   * Once we've parsed out the details of added and removed branches, we can use that information to supplement
+   * our knowledge of branch names, mapping local branch names with remote branch names that may differ only on case.
+   *
+   * @param fetch FetchInfo object built out of the fetch results
+   */
+  private constructBranchNameMap(fetch: FetchInfo): BranchNameMap {
+    let branchNameMap: BranchNameMap = {};
+    fetch.deleted.forEach((localBranch) => {
+      const remoteBranch = fetch.added.find(
+        (addedBranch) => addedBranch.toLowerCase() === localBranch.toLowerCase()
       );
+      if (remoteBranch) {
+        const remoteBranchParts = remoteBranch.split(/\//);
+        const remote = remoteBranchParts[0];
+        const remoteBranchName = remoteBranchParts.slice(1).join("/");
+
+        const localBranchParts = localBranch.split(/\//);
+        const localBranchName = localBranchParts.slice(1).join("/");
+
+        if (!branchNameMap[remote]) {
+          branchNameMap[remote] = {};
+        }
+
+        branchNameMap[remote][localBranchName] = remoteBranchName;
+        logger.debug(`Matching branch: ${localBranch} => ${remoteBranch}`);
+      }
+    });
+
+    return branchNameMap;
+  }
+
+  /**
+   * Use the branch name map to figure out which branches to keep or delete
+   *
+   * @param branchNameMap Supplemental information giving the remote names of some branches
+   */
+  private requestBranchDeletes(
+    branchNameMap: BranchNameMap
+  ): Promise<RemoveRemoteBranchResult>[] {
+    return this.branchesToRemove.map((remoteBranch) => {
+      const remote = remoteBranch.remote;
+      const forRemote = branchNameMap[remote];
+      const branch =
+        forRemote && forRemote.hasOwnProperty(remoteBranch.branch)
+          ? forRemote[remoteBranch.branch]
+          : remoteBranch.branch;
+      logger.debug(`${this.project.name}: Delete ${remote} ${branch}`);
+      return this.project.repository.removeRemoteBranch(remote, branch);
     });
   }
 }
