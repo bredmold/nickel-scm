@@ -20,6 +20,7 @@ describe("Guided Remove", () => {
       defaultBranch: "master",
       safeBranches: [],
       commitPrefix: -1,
+      marks: [],
     });
     action = new GuidedBranchRemovalAction();
   });

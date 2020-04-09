@@ -19,6 +19,7 @@ describe("Nickel Instigator", () => {
           defaultBranch: "master",
           safeBranches: [],
           commitPrefix: -1,
+          marks: [],
         }),
         selected: true,
       },

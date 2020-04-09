@@ -8,64 +8,112 @@ export interface SelectedItem {
   readonly selected: boolean;
 }
 
+/**
+ * Selector configuration
+ */
+export interface SelectorConfig {
+  /** Projects in this list are selected */
+  readonly projects: string[];
+
+  /** Select based on this branch name */
+  readonly branch: string;
+
+  /** Select projects with this mark */
+  readonly mark: string;
+}
+
 export interface NickelSelector {
   (item: ReportingItem): Promise<SelectedItem>;
 
   criteria: string;
 }
 
-/**
- * Generate a project selection predicate. If the inputs are invalid, then throw.
- *
- * @param selectedProjects A list of explicitly selected projects
- * @param activeBranch
- */
-export function nickelSelector(
-  selectedProjects: string[],
-  activeBranch: string
-): NickelSelector {
-  const haveSelectedProjects = selectedProjects.length > 0;
-  const haveActiveBranch = activeBranch.trim().length > 0;
+function trueSelector(): NickelSelector {
+  logger.debug(`No project selector`);
+  let selector = ((item) =>
+    Promise.resolve({ item: item, selected: true })) as NickelSelector;
+  selector.criteria = "All projects";
+  return selector;
+}
 
-  let selector: NickelSelector;
-  if (!haveSelectedProjects && !haveActiveBranch) {
-    logger.debug(`No project selector`);
-    selector = ((item) =>
-      Promise.resolve({ item: item, selected: true })) as NickelSelector;
-    selector.criteria = "All projects";
-  } else if (haveSelectedProjects && !haveActiveBranch) {
-    logger.debug(`Project list selector: ${selectedProjects}`);
-    selector = ((item) => {
-      return item instanceof ReportSeparator
-        ? Promise.resolve({ item: item, selected: false })
-        : Promise.resolve({
-            item: item,
-            selected:
-              selectedProjects.findIndex((project) => project === item.name) >=
-              0,
-          });
-    }) as NickelSelector;
-    selector.criteria = `in list: ${selectedProjects}`;
-  } else if (!haveSelectedProjects && haveActiveBranch) {
-    logger.debug(`Active branch selector: ${activeBranch}`);
-    selector = ((item) =>
-      new Promise((resolve) => {
-        if (item instanceof ReportSeparator)
-          resolve({ item: item, selected: false });
-
-        (<NickelProject>item).repository.branch().then((branch) => {
-          logger.debug(
-            `[${item.name}] branch=${branch} selected=${
-              branch === activeBranch
-            }`
-          );
-          resolve({ item: item, selected: branch === activeBranch });
+function projectListSelector(projects: string[]): NickelSelector {
+  logger.debug(`Project list selector: ${projects}`);
+  let selector = ((item) => {
+    return item instanceof ReportSeparator
+      ? Promise.resolve({ item: item, selected: false })
+      : Promise.resolve({
+          item: item,
+          selected: projects.findIndex((project) => project === item.name) >= 0,
         });
-      })) as NickelSelector;
-    selector.criteria = `active branch = ${activeBranch}`;
-  } else {
-    throw "Conflicting project selectors";
+  }) as NickelSelector;
+  selector.criteria = `in list: ${projects}`;
+  return selector;
+}
+
+function branchSelector(selectorBranch: string): NickelSelector {
+  logger.debug(`Active branch selector: ${selectorBranch}`);
+  let selector = ((item) =>
+    new Promise(async (resolve) => {
+      if (item instanceof ReportSeparator) {
+        resolve({ item: item, selected: false });
+      } else {
+        const branch = await (<NickelProject>item).repository.branch();
+        logger.debug(
+          `[${item.name}] branch=${branch} selected=${
+            branch === selectorBranch
+          }`
+        );
+        resolve({ item: item, selected: branch === selectorBranch });
+      }
+    })) as NickelSelector;
+  selector.criteria = `active branch = ${selectorBranch}`;
+  return selector;
+}
+
+function markSelector(selectorMark: string): NickelSelector {
+  logger.debug(`Project mark selector: ${selectorMark}`);
+
+  function isMarked(project: NickelProject): boolean {
+    const markIdx = project.marks.findIndex(
+      (projectMark) => projectMark === selectorMark
+    );
+    return markIdx >= 0;
   }
 
+  let selector = ((item) => {
+    return item instanceof ReportSeparator
+      ? Promise.resolve({ item: item, selected: false })
+      : Promise.resolve({
+          item: item,
+          selected: isMarked(<NickelProject>item),
+        });
+  }) as NickelSelector;
+  selector.criteria = `project mark = ${selectorMark}`;
   return selector;
+}
+
+/**
+ * Generate a project selection predicate. If the inputs are invalid, then throw.
+ */
+export function nickelSelector(config: SelectorConfig): NickelSelector {
+  const haveSelectedProjects = config.projects.length > 0;
+  const haveActiveBranch = config.branch.trim().length > 0;
+  const haveSelectedMark = config.mark.trim().length > 0;
+
+  const selectorCount: number =
+    (haveSelectedProjects ? 1 : 0) +
+    (haveActiveBranch ? 1 : 0) +
+    (haveSelectedMark ? 1 : 0);
+
+  if (selectorCount > 1) {
+    throw `Conflicting selectors: projects=${config.projects} branch=${config.branch} mark=${config.mark}`;
+  } else if (haveSelectedProjects) {
+    return projectListSelector(config.projects);
+  } else if (haveActiveBranch) {
+    return branchSelector(config.branch);
+  } else if (haveSelectedMark) {
+    return markSelector(config.mark);
+  } else {
+    return trueSelector();
+  }
 }

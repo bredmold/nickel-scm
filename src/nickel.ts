@@ -12,7 +12,7 @@ import { NickelInstigator } from "./nickel-instigator";
 import { ReportingItem } from "./nickel-report";
 import { logger } from "./logger";
 
-const pkg = require("../package.json");
+import pkg = require("../package.json");
 
 /*
 Global controls
@@ -25,7 +25,8 @@ let command: string = "";
 let commandArgs: any = null;
 let configScript: string = `${process.env["HOME"]}/nickel.js`;
 let selectedProjects: string[] = [];
-let activeBranch = "";
+let activeBranch: string = "";
+let selectedMark: string = "";
 
 /*
 Command-line parsing
@@ -40,13 +41,15 @@ program
     "Select projects with this active branch"
   )
   .option("--level <level>", "Log level")
+  .option("--mark <mark>", "Select projects with this mark")
   .on("option:level", () => (logger.level = program.level))
   .on("option:config", () => (configScript = program.config))
   .on("option:active-branch", () => (activeBranch = program.activeBranch))
   .on(
     "option:projects",
     () => (selectedProjects = program.projects.replace(/\s+/, "").split("s*s*"))
-  );
+  )
+  .on("option:mark", () => (selectedMark = program.mark));
 
 ALL_ACTIONS.forEach((nickelAction) => {
   program
@@ -93,7 +96,12 @@ Do the things!
  */
 async function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
   try {
-    const selector = nickelSelector(selectedProjects, activeBranch);
+    const selector = nickelSelector({
+      projects: selectedProjects,
+      branch: activeBranch,
+      mark: selectedMark,
+    });
+
     const selectorPromises = items.map((item) => selector(item));
     const selectedItems = await Promise.all(selectorPromises);
     const selected: number = selectedItems.reduce(

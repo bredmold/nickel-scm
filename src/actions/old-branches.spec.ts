@@ -17,6 +17,7 @@ describe("Old Branches Report", () => {
       defaultBranch: "master",
       safeBranches: [],
       commitPrefix: -1,
+      marks: [],
     });
     action = new OldBranchesReportAction();
   });

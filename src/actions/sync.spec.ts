@@ -15,6 +15,7 @@ describe("Sync Action", () => {
       defaultBranch: "master",
       safeBranches: [],
       commitPrefix: -1,
+      marks: [],
     });
     action = new RepositorySyncAction();
   });

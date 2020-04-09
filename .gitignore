@@ -4,3 +4,4 @@ dist
 .idea
 *.swp
 coverage
+.DS_Store

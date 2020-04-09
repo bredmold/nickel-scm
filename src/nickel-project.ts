@@ -18,6 +18,9 @@ export interface NickelProjectConfig {
 
   /** Controls how commit IDs are abbreviated: a value of -1 means no commit ID abbreviation */
   commitPrefix: number;
+
+  /** Semantic tagging structure - allow projects to be chosen based on marks */
+  marks: string[];
 }
 
 export class NickelProject implements ReportingItem {
@@ -25,6 +28,7 @@ export class NickelProject implements ReportingItem {
   readonly path: string;
   readonly defaultBranch: string;
   readonly safeBranches: (string | RegExp)[];
+  readonly marks: string[];
   readonly repository: GitRepository;
   selected: boolean = false;
 
@@ -33,6 +37,7 @@ export class NickelProject implements ReportingItem {
     this.path = c.path ? `${c.path}/${c.name}` : c.name;
     this.defaultBranch = c.defaultBranch;
     this.safeBranches = c.safeBranches;
+    this.marks = c.marks;
     this.repository = new GitRepository(
       this.path,
       new ShellRunner(this.path),
@@ -50,4 +55,5 @@ export const EMPTY_PROJECT: NickelProject = new NickelProject({
   defaultBranch: "master",
   safeBranches: ["master"],
   commitPrefix: -1,
+  marks: [],
 });

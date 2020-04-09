@@ -16,11 +16,12 @@ export class RepositoryReportAction implements NickelAction {
     },
     false
   );
-  readonly columns = [
+  readonly columns: TableColumn[] = [
     new TableColumn("Project"),
     new TableColumn("Branch"),
     new TableColumn("# Mod"),
     new TableColumn("Commit"),
+    new TableColumn("Marks"),
   ];
 
   act(project: NickelProject, args?: any): Promise<ReportLine> {
@@ -36,6 +37,7 @@ export class RepositoryReportAction implements NickelAction {
             Branch: branch,
             "# Mod": modifiedFiles.length.toString(),
             Commit: commit,
+            Marks: project.marks.join(","),
           })
         );
       };

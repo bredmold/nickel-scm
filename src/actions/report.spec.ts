@@ -15,6 +15,7 @@ describe("Report Action", () => {
       defaultBranch: "master",
       safeBranches: [],
       commitPrefix: -1,
+      marks: ["a", "b"],
     });
     action = new RepositoryReportAction();
   });
@@ -38,6 +39,7 @@ describe("Report Action", () => {
       new TableColumn("Branch"),
       new TableColumn("# Mod"),
       new TableColumn("Commit"),
+      new TableColumn("Marks"),
     ]);
   });
 
@@ -59,6 +61,7 @@ describe("Report Action", () => {
         Branch: "master",
         "# Mod": "0",
         Commit: "123456789012",
+        Marks: "a,b",
       })
     );
   });

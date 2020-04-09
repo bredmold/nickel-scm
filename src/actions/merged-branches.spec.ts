@@ -17,6 +17,7 @@ describe("Merged Branche Report", () => {
       defaultBranch: "master",
       safeBranches: [],
       commitPrefix: -1,
+      marks: [],
     });
     action = new MergedBranchesReportAction();
   });
