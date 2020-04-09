@@ -31,14 +31,15 @@ The content of this file is a series of project declarations. For example:
 root = "c:/Dev/Lexipol";
 defaultBranch = "develop";
 
-project("project-base", { build: true });
+project("project-base");
 project("project-commons");
 project("project-service");
 
+// All of the "thing" projects share a mark
 separator(); // Draw a horizontal line in all reports
-project("thing-base", { build: true });
-project("thing-commons");
-project("thing-service");
+project("thing-base", { marks: ["thing"] });
+project("thing-commons", { marks: ["thing"] });
+project("thing-service", { marks: ["thing"] });
 
 separator("Ops"); // Draw a horizontal line, labeled with the word 'Ops'
 defaultBranch = "master";
@@ -64,6 +65,7 @@ Options:
   --projects <projects>           List of projects
   --active-branch <activeBranch>  Select projects with this active branch
   --level <level>                 Log level
+  --mark <mark>                   Select projects with this mark
   -h, --help                      output usage information
 
 Commands:
@@ -95,23 +97,24 @@ There are two command-line options that allow you to select the list of projects
 Generates a project report. Here's an example:
 
 ```
-╔═══════════════════════════╤════════════════════╤═══════╤═════════╗
-║ Project                   │ Branch             │ # Mod │ Commit  ║
-╟───────────────────────────┼────────────────────┼───────┼─────────╢
-║ service-project-b-base    │ Feature/FOOBAR-456 │ 0     │ ca14608 ║
-║ project-a-commons         │ Feature/FOOBAR-456 │ 0     │ 661cc1d ║
-║ project-a-service         │ Feature/FOOBAR-456 │ 0     │ 1a85852 ║
-║ service-project-b-commons │ Feature/FOOBAR-456 │ 0     │ 7f5784a ║
-║ service-project-b-service │ Feature/FOOBAR-456 │ 0     │ 5c5e360 ║
-╚═══════════════════════════╧════════════════════╧═══════╧═════════╝
+╔═══════════════════════════╤════════════════════╤═══════╤═════════╤═══════╗
+║ Project                   │ Branch             │ # Mod │  Commit │ Marks ║
+╟───────────────────────────┼────────────────────┼───────┼─────────┼───────╢
+║ service-project-b-base    │ Feature/FOOBAR-456 │ 0     │ ca14608 │ a     ║
+║ project-a-commons         │ Feature/FOOBAR-456 │ 0     │ 661cc1d │ b     ║
+║ project-a-service         │ Feature/FOOBAR-456 │ 0     │ 1a85852 │       ║
+║ service-project-b-commons │ Feature/FOOBAR-456 │ 0     │ 7f5784a │       ║
+║ service-project-b-service │ Feature/FOOBAR-456 │ 0     │ 5c5e360 │       ║
+╚═══════════════════════════╧════════════════════╧═══════╧═════════╧═══════╝
 ```
 
-| Column Name | Description                                      |
-| ----------- | ------------------------------------------------ |
-| Project     | The name of the project                          |
-| Branch      | Current branch for the project                   |
-| # Mod       | Count of modified files in the project workspace |
-| Commit      | Latest commit ID on the current branch           |
+| Column Name | Description                                               |
+| ----------- | --------------------------------------------------------- |
+| Project     | The name of the project                                   |
+| Branch      | Current branch for the project                            |
+| # Mod       | Count of modified files in the project workspace          |
+| Commit      | Latest commit ID on the current branch                    |
+| Marks       | Comma-separated list of marks associated with the project |
 
 ### sync
 
@@ -230,6 +233,18 @@ Some handy commands to run when developing and releasing nickel.
 npm run build && npm install -g
 ```
 
+## Tests
+
+Run unit tests:
+```bash
+npm run test
+```
+
+Run unit tests with coverage:
+```bash
+npm run coverage
+```
+
 ## Release
 
 ```bash
@@ -240,9 +255,9 @@ npm version patch && npm run build && npm publish
 
 These are features I have in mind for the future. I have no schedule for getting to them.
 
-- Logical grouping of projects
-  - Allow projects to be declared in logical groups
-  - Filter actions based on groups
-  - Configure groups (e.g. root directory)
+- Expand the marks feature to make it more robust
+  - Implicit marking based on filesystem location
+  - Implicit marking based on project inspection
+  - Default marks similar to current filesystem root
 - Create and push a branch across projects
 - Check out an existing remote branch across projects

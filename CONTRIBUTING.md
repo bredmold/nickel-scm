@@ -14,6 +14,15 @@ Tests are written using [Jest](https://jestjs.io/en/) and [ts-jest](https://gith
 
 Not all of the features are fully tested, but here's a rough breakdown of test coverage for each major component.
 
+## Coverage Reporting
+
+To generate a coverage report:
+```bash
+npm run coverage
+```
+
+Please do look at test coverage for new features as you add them.
+
 ## Testing Breakdown
 
 ### sync
