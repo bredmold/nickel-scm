@@ -98,13 +98,13 @@ Generates a project report. Here's an example:
 
 ```
 ╔═══════════════════════════╤════════════════════╤═══════╤═════════╤═══════╗
-║ Project                   │ Branch             │ # Mod │  Commit │ Marks ║
+║                   Project │             Branch │ # Mod │  Commit │ Marks ║
 ╟───────────────────────────┼────────────────────┼───────┼─────────┼───────╢
-║ service-project-b-base    │ Feature/FOOBAR-456 │ 0     │ ca14608 │ a     ║
-║ project-a-commons         │ Feature/FOOBAR-456 │ 0     │ 661cc1d │ b     ║
-║ project-a-service         │ Feature/FOOBAR-456 │ 0     │ 1a85852 │       ║
-║ service-project-b-commons │ Feature/FOOBAR-456 │ 0     │ 7f5784a │       ║
-║ service-project-b-service │ Feature/FOOBAR-456 │ 0     │ 5c5e360 │       ║
+║    service-project-b-base │ Feature/FOOBAR-456 │     0 │ ca14608 │     a ║
+║         project-a-commons │ Feature/FOOBAR-456 │     0 │ 661cc1d │     b ║
+║         project-a-service │ Feature/FOOBAR-456 │     0 │ 1a85852 │       ║
+║ service-project-b-commons │ Feature/FOOBAR-456 │     0 │ 7f5784a │       ║
+║ service-project-b-service │ Feature/FOOBAR-456 │     0 │ 5c5e360 │       ║
 ╚═══════════════════════════╧════════════════════╧═══════╧═════════╧═══════╝
 ```
 
@@ -122,13 +122,13 @@ Sync all projects and report on the results:
 
 ```
 ╔═══════════════════════════╤════════════════════╤═════════╤══════════════╗
-║ Project                   │ Branch             │ Updated │ Status       ║
+║                   Project │             Branch │ Updated │       Status ║
 ╟───────────────────────────┼────────────────────┼─────────┼──────────────╢
-║ service-project-b-base    │ Feature/FOOBAR-456 │ 0       │ sync-success ║
-║ project-a-commons         │ Feature/FOOBAR-456 │ 0       │ sync-success ║
-║ project-a-service         │ Feature/FOOBAR-456 │ 2       │ sync-success ║
-║ service-project-b-commons │ Feature/FOOBAR-456 │ 0       │ sync-success ║
-║ service-project-b-service │ Feature/FOOBAR-456 │ 0       │ sync-success ║
+║    service-project-b-base │ Feature/FOOBAR-456 │       0 │ sync-success ║
+║         project-a-commons │ Feature/FOOBAR-456 │       0 │ sync-success ║
+║         project-a-service │ Feature/FOOBAR-456 │       2 │ sync-success ║
+║ service-project-b-commons │ Feature/FOOBAR-456 │       0 │ sync-success ║
+║ service-project-b-service │ Feature/FOOBAR-456 │       0 │ sync-success ║
 ╚═══════════════════════════╧════════════════════╧═════════╧══════════════╝
 ```
 
@@ -153,15 +153,15 @@ Cleanup all projects that are not on their "default" branch:
 
 ```
 ╔═══════════════════════════╤═════════════════════╤═══════════════╗
-║ Project                   │ Branch              │ Status        ║
+║                   Project │              Branch │        Status ║
 ╟───────────────────────────┼─────────────────────┼───────────────╢
-║ service-project-a-base    │ Feature/FOOBAR-1111 │ clean-success ║
+║    service-project-a-base │ Feature/FOOBAR-1111 │ clean-success ║
 ║ service-project-a-commons │ Feature/FOOBAR-1111 │ clean-success ║
 ║ service-project-a-service │ Feature/FOOBAR-1111 │ clean-success ║
 ╟───────────────────────────┼─────────────────────┼───────────────╢
-║ prj-client-web            │ develop             │ clean-skip    ║
-║ ops-kubernetes-clusters   │ develop             │ clean-skip    ║
-║ ops-jenkins-docker        │ master              │ clean-skip    ║
+║            prj-client-web │             develop │    clean-skip ║
+║   ops-kubernetes-clusters │             develop │    clean-skip ║
+║        ops-jenkins-docker │              master │    clean-skip ║
 ╚═══════════════════════════╧═════════════════════╧═══════════════╝
 ```
 
@@ -261,3 +261,67 @@ These are features I have in mind for the future. I have no schedule for getting
   - Default marks similar to current filesystem root
 - Create and push a branch across projects
 - Check out an existing remote branch across projects
+
+### Configuration
+
+Nested configuration around folders. Here's a proposed bit of example configuration:
+```javascript
+root("/home/bredmold/Projects", projectsDir => {
+  projectsDir.repositoryDir("work", work => {
+    work.label("Company Name");
+    work.git("models");
+    work.git("service-impl", repo => {
+      repo.label("Service Implementation");
+    });
+    work.svn("legacy-service");
+  });
+
+  projectsDir.repositoryDir("personal", personal => {
+    personal.label("Personal Projects");
+    personal.addRepositories();
+  });
+});
+```
+
+There's a lot to unpack in this example
+
+* Function `root()`
+    * Accepts an argument giving the filesystem path of a project root
+    * Accepts a second argument that is a callback function with one argument
+        * Argument `projectsDir` is an object that hold configuration context
+    * Method `repositoryDir()` recurses into a sub-directory containing more projects
+        * The method implicitly creates a separator in the report
+        * Accepts a directory name, and a callback function as arguments
+        * The callback function takes a context argument
+    * Method `git()` declares a Git repository, taking an argument with the directory name
+        * Optional second argument is a callback function that takes a config context
+    * Method `svn()` declares a SubVersion repository
+        * Similar to Git, it takes an optional callback function for additional configuration
+        * This is the *most* aspirational item in the proposed configuration (supporting non-Git VCS)
+
+Note that the resulting table display will still not be hierarchichal. Here's the expectation
+```
+╔═════════════════════════╤═════════╤═════════╤══════════════╗
+║                 Project │  Branch │ Updated │       Status ║
+╟─ Company Name ──────────┼─────────┼─────────┼──────────────╢
+║                  models │  master │       0 │ sync-success ║
+║  Service Implementation │ PRJ-123 │       1 │ sync-success ║
+║          legacy-service │  master │      12 │ sync-success ║
+╟─ Personal Projects ─────┼─────────┼─────────┼──────────────╢
+║        found-repository │ develop │       0 │ sync-success ║
+╚═════════════════════════╧═════════╧═════════╧══════════════╝
+```
+
+### Combined Search for Branches
+
+Instead of having different specialized reports for branches, have a branch searching feature that can apply various criteria. Ideally, the feature optimizes certain requests "under the hood", in order to search efficiently when Git already supplies the desired search.
+
+```bash
+nickel branches --merged --report=merged.json # Search for merged branches, and save the result to merged.json
+nickel branches --old --days=60               # Search for branches at least 60 days old, with no saved report (only stdout)
+nickel branches --email='bredmold@gmail.com'  # Branches with an author email or committer email equal to bredmold@gmail.com
+```
+
+The report feature generates a JSON document suitable for use with the [guidedRemove](#guidedRemove) command.
+
+This is a generalization of some existing features.

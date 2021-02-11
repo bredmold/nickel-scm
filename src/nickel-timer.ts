@@ -2,7 +2,7 @@
  * Simple timer class
  */
 export class NickelTimer {
-  private startTime: Date;
+  private readonly startTime: Date;
 
   constructor() {
     this.startTime = new Date();
@@ -12,7 +12,7 @@ export class NickelTimer {
    * Elapsed milliseconds
    */
   elapsed(): number {
-    let now = new Date();
+    const now = new Date();
     return now.valueOf() - this.startTime.valueOf();
   }
 }
