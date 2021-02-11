@@ -13,9 +13,10 @@ export enum BranchReportStatus {
 export class BranchReportLine extends ReportLine {
   constructor(
     values: { [index: string]: string },
-    public candidateBranches: string[]
+    public candidateBranches: string[],
+    selected: boolean = true,
   ) {
-    super(values);
+    super(values, selected);
   }
 }
 

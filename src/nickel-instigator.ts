@@ -21,11 +21,14 @@ export class NickelInstigator {
         if (selectedItem.selected) {
           return action.act(<NickelProject>item, args);
         } else {
+          // TODO Perform a more robust deep-copy of the skipReport object
           const values: { [index: string]: string } = {};
           Object.assign(values, action.skipReport.values);
           values["Project"] = item.name;
 
           const report: ReportLine = new ReportLine(values, false);
+          Object.assign(report, action.skipReport);
+
           return Promise.resolve(report);
         }
       } else {

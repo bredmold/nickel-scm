@@ -7,7 +7,7 @@
     "url": "https://github.com/bredmold/nickel.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod a+x dist/src/nickel.js",
     "test": "jest",
     "coverage": "jest --coverage",
     "format": "prettier --write '**/*.ts'"
