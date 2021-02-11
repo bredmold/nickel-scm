@@ -18,12 +18,13 @@ import { logger } from "../logger";
 export class OldBranchesReportAction implements NickelAction {
   readonly command = "oldBranches <reportFile> [age]";
   readonly description = "Generate a list of branches older than a certain age";
-  readonly skipReport = new ReportLine(
+  readonly skipReport = new BranchReportLine(
     {
       Project: EMPTY_PROJECT.name,
       Status: BranchReportStatus.Skipped,
       "# Candidates": "0",
     },
+    [],
     false
   );
   readonly columns = [
