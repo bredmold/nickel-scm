@@ -29,7 +29,7 @@
     "prettier-plugin-import-sort": "0.0.4",
     "tmp": "^0.1.0",
     "ts-jest": "^25.2.1",
-    "typescript": "^3.7.4"
+    "typescript": "^3.9.8"
   },
   "dependencies": {
     "@types/node": "^13.1.2",
