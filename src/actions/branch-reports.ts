@@ -14,7 +14,7 @@ export class BranchReportLine extends ReportLine {
   constructor(
     values: { [index: string]: string },
     public candidateBranches: string[],
-    selected: boolean = true,
+    selected: boolean = true
   ) {
     super(values, selected);
   }

@@ -60,7 +60,10 @@ describe("Nickel Instigator", () => {
       readonly columns = [new TableColumn("test")];
       readonly command = "test";
       readonly description = "test";
-      readonly skipReport = new ReportLine({ Project: "test", test: "a" }, false);
+      readonly skipReport = new ReportLine(
+        { Project: "test", test: "a" },
+        false
+      );
 
       act(project: NickelProject, args?: any): Promise<ReportLine> {
         done.fail("act should not be called");
