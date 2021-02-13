@@ -16,7 +16,7 @@ export class ShellRunner {
 
   run(command: string): Promise<ProcessResult> {
     this.log.debug(`${command} [${this.path}]`);
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<ProcessResult>((resolve, reject) => {
       child_process.exec(
         command,
         { cwd: this.path, encoding: "utf8" },

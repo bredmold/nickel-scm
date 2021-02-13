@@ -33,7 +33,7 @@ describe("Old Branches Report", () => {
       Promise.resolve(["origin/master"])
     );
 
-    project.repository.committerDate = jest.fn((branch) => {
+    project.repository.committerDate = jest.fn(() => {
       const now = new Date();
       const commitTs = now.getTime() - 1000 * 3600 * 24;
       return Promise.resolve(new Date(commitTs));

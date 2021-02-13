@@ -45,14 +45,15 @@ export class GuidedBranchRemovalAction implements NickelAction {
     new TableColumn("# Failed"),
   ];
 
-  act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new GuidedBranchRemoval(
-      project,
-      args instanceof Array ? args[0].toString() : args.toString()
-    ).prune();
+  act(project: NickelProject, args?: string[]): Promise<ReportLine> {
+    if (args) {
+      return new GuidedBranchRemoval(project, args[0]).prune();
+    } else {
+      return Promise.reject("No report file provided as input");
+    }
   }
 
-  post(reports: ReportLine[], args?: any): any {
+  post(): void {
     // Empty
   }
 }
@@ -122,39 +123,38 @@ class GuidedBranchRemoval {
     });
   }
 
-  prune(): Promise<ReportLine> {
-    return new Promise<ReportLine>(async (resolve) => {
-      let branch: string = "";
-      let removedBranches: string[] = [];
-      let notRemovedBranches: string[] = [];
+  async prune(): Promise<ReportLine> {
+    const project = this.project;
+    const branchesKept = this.branchesKept;
+    function line(
+      branch: string,
+      removedBranches: string[],
+      notRemovedBranches: string[],
+      status: GuidedBranchRemovalStatus
+    ) {
+      return new ReportLine({
+        Project: project.name,
+        Branch: branch,
+        Status: status,
+        "# Kept": branchesKept.length.toString(),
+        "# Removed": removedBranches.length.toString(),
+        "# Failed": notRemovedBranches.length.toString(),
+      });
+    }
 
-      let finish = (e: any, status: GuidedBranchRemovalStatus) => {
-        if (e) logger.warn(e);
-
-        resolve(
-          new ReportLine({
-            Project: this.project.name,
-            Branch: branch,
-            Status: status,
-            "# Kept": this.branchesKept.length.toString(),
-            "# Removed": removedBranches.length.toString(),
-            "# Failed": notRemovedBranches.length.toString(),
-          })
-        );
-      };
+    try {
+      const status = await this.project.repository.status();
+      const branch = status.branch;
 
       try {
-        const status = await this.project.repository.status();
-
-        branch = status.branch;
         if (status.modifiedFiles.length > 0) {
-          finish(null, GuidedBranchRemovalStatus.Dirty);
+          return line(branch, [], [], GuidedBranchRemovalStatus.Dirty);
         } else if (status.branch !== this.project.defaultBranch) {
-          finish(null, GuidedBranchRemovalStatus.Working);
+          return line(branch, [], [], GuidedBranchRemovalStatus.Working);
         } else if (this.branchesToRemove.length < 1) {
           logger.debug(`${this.project.name}: No branches to remove`);
-          finish(null, GuidedBranchRemovalStatus.Skipped);
-        } else if (this.branchesToRemove.length > 0) {
+          return line(branch, [], [], GuidedBranchRemovalStatus.Skipped);
+        } else {
           const fetchResult = await this.project.repository.fetch();
 
           const fetchInfo = this.constructFetchInfo(fetchResult);
@@ -164,6 +164,8 @@ class GuidedBranchRemoval {
           const deletePromises = this.requestBranchDeletes(branchNameMap);
           const deleteResponses = await Promise.all(deletePromises);
 
+          const removedBranches: string[] = [];
+          const notRemovedBranches: string[] = [];
           deleteResponses.forEach((deleteResponse) => {
             const remoteBranch = `${deleteResponse.remote}/${deleteResponse.branch}`;
             if (deleteResponse.deleted) {
@@ -178,12 +180,21 @@ class GuidedBranchRemoval {
               notRemovedBranches.push(remoteBranch);
             }
           });
-          finish(null, GuidedBranchRemovalStatus.Success);
+          return line(
+            branch,
+            removedBranches,
+            notRemovedBranches,
+            GuidedBranchRemovalStatus.Success
+          );
         }
       } catch (e) {
-        finish(e, GuidedBranchRemovalStatus.Failure);
+        logger.error(e);
+        return line(branch, [], [], GuidedBranchRemovalStatus.Failure);
       }
-    });
+    } catch (e) {
+      logger.error(e);
+      return line("", [], [], GuidedBranchRemovalStatus.Failure);
+    }
   }
 
   /**
@@ -194,8 +205,8 @@ class GuidedBranchRemoval {
    * @param fetchResult Parsed results from git fetch
    */
   private constructFetchInfo(fetchResult: FetchResult): FetchInfo {
-    let deletedBranches: string[] = [];
-    let addedBranches: string[] = [];
+    const deletedBranches: string[] = [];
+    const addedBranches: string[] = [];
     fetchResult.updatedBranches.forEach((fetchItem) => {
       if (fetchItem.flag === "pruned") {
         deletedBranches.push(fetchItem.trackingBranch);
@@ -214,7 +225,7 @@ class GuidedBranchRemoval {
    * @param fetch FetchInfo object built out of the fetch results
    */
   private constructBranchNameMap(fetch: FetchInfo): BranchNameMap {
-    let branchNameMap: BranchNameMap = {};
+    const branchNameMap: BranchNameMap = {};
     fetch.deleted.forEach((localBranch) => {
       const remoteBranch = fetch.added.find(
         (addedBranch) => addedBranch.toLowerCase() === localBranch.toLowerCase()
@@ -251,7 +262,8 @@ class GuidedBranchRemoval {
       const remote = remoteBranch.remote;
       const forRemote = branchNameMap[remote];
       const branch =
-        forRemote && forRemote.hasOwnProperty(remoteBranch.branch)
+        forRemote &&
+        Object.prototype.hasOwnProperty.call(forRemote, remoteBranch.branch)
           ? forRemote[remoteBranch.branch]
           : remoteBranch.branch;
       logger.debug(`${this.project.name}: Delete ${remote} ${branch}`);

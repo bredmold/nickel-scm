@@ -21,12 +21,12 @@ Global controls
  configScript     - Location of the configuration script
  selectedProjects - List of projects to select
  */
-let command: string = "";
-let commandArgs: any = null;
-let configScript: string = `${process.env["HOME"]}/nickel.js`;
+let command = "";
+let commandArgs: string[] = [];
+let configScript = `${process.env["HOME"]}/nickel.js`;
 let selectedProjects: string[] = [];
-let activeBranch: string = "";
-let selectedMark: string = "";
+let activeBranch = "";
+let selectedMark = "";
 
 /*
 Command-line parsing
@@ -80,7 +80,7 @@ if (!configScriptBytes) {
   logger.warn(`Unable to read config script at ${configScript}`);
 }
 
-let configContext = new ConfigContext();
+const configContext = new ConfigContext();
 vm.createContext(configContext);
 vm.runInContext(configScriptBytes, configContext);
 

@@ -3,6 +3,7 @@ import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
 import { NickelAction } from "./nickel-action";
 import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
+import { logger } from "../logger";
 
 export enum CleanupStatus {
   New = "clean-new",
@@ -29,42 +30,42 @@ export class RepositoryCleanupAction implements NickelAction {
     new TableColumn("Status"),
   ];
 
-  act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new Promise<ReportLine>(async (resolve) => {
-      let branch = "";
+  async act(project: NickelProject): Promise<ReportLine> {
+    function line(branch: string, status: CleanupStatus) {
+      return new ReportLine({
+        Project: project.name,
+        Branch: branch,
+        Status: status,
+      });
+    }
 
-      const finish = (e: any, status: CleanupStatus) => {
-        // TODO log e?
-        resolve(
-          new ReportLine({
-            Project: project.name,
-            Branch: branch,
-            Status: status,
-          })
-        );
-      };
+    try {
+      const status = await project.repository.status();
+      const branch = status.branch;
 
       try {
-        const status = await project.repository.status();
-        branch = status.branch;
         if (project.defaultBranch === status.branch) {
-          finish(null, CleanupStatus.Skipped);
+          return line(branch, CleanupStatus.Skipped);
         } else if (status.modifiedFiles.length > 0) {
-          finish(null, CleanupStatus.Dirty);
+          return line(branch, CleanupStatus.Dirty);
         } else {
           await project.repository.selectBranch(project.defaultBranch);
           await project.repository.pull();
           await project.repository.deleteLocalBranch(status.branch);
           await project.repository.prune("origin");
-          finish(null, CleanupStatus.Success);
+          return line(branch, CleanupStatus.Success);
         }
       } catch (e) {
-        finish(e, CleanupStatus.Failure);
+        logger.error(e);
+        return line(branch, CleanupStatus.Failure);
       }
-    });
+    } catch (e) {
+      logger.error(e);
+      return line("", CleanupStatus.Failure);
+    }
   }
 
-  post(reports: ReportLine[], args?: any): any {
+  post(): void {
     // Empty
   }
 }

@@ -30,7 +30,7 @@ export class NickelProject implements ReportingItem {
   readonly safeBranches: (string | RegExp)[];
   readonly marks: string[];
   readonly repository: GitRepository;
-  selected: boolean = false;
+  selected = false;
 
   constructor(c: NickelProjectConfig) {
     this.name = c.name;

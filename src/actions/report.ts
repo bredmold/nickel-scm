@@ -24,36 +24,18 @@ export class RepositoryReportAction implements NickelAction {
     new TableColumn("Marks"),
   ];
 
-  act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new Promise<ReportLine>(async (resolve) => {
-      let branch = "";
-      let modifiedFiles = [];
-      let commit = "";
-
-      const finish = function () {
-        resolve(
-          new ReportLine({
-            Project: project.name,
-            Branch: branch,
-            "# Mod": modifiedFiles.length.toString(),
-            Commit: commit,
-            Marks: project.marks.join(","),
-          })
-        );
-      };
-
-      try {
-        const status = await project.repository.status();
-        branch = status.branch;
-        modifiedFiles = status.modifiedFiles;
-        commit = status.commit;
-      } finally {
-        finish();
-      }
+  async act(project: NickelProject): Promise<ReportLine> {
+    const status = await project.repository.status();
+    return new ReportLine({
+      Project: project.name,
+      Branch: status.branch,
+      "# Mod": status.modifiedFiles.length.toString(),
+      Commit: status.commit,
+      Marks: project.marks.join(","),
     });
   }
 
-  post(reports: ReportLine[], args?: any): any {
+  post(): void {
     // Empty
   }
 }

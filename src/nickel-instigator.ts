@@ -1,4 +1,4 @@
-import { NickelReport, ReportLine } from "./nickel-report";
+import { NickelReport, ReportingItem, ReportLine } from "./nickel-report";
 
 import { NickelAction } from "./actions/nickel-action";
 import { NickelProject } from "./nickel-project";
@@ -12,10 +12,10 @@ import { logger } from "./logger";
 export class NickelInstigator {
   constructor(private readonly selectedItems: SelectedItem[]) {}
 
-  doIt(action: NickelAction, args: any) {
+  doIt(action: NickelAction, args: string[]): void {
     // Do eeet!
     const timer = new NickelTimer();
-    const promises: Promise<any>[] = this.selectedItems.map((selectedItem) => {
+    const promises: Promise<ReportingItem>[] = this.selectedItems.map((selectedItem) => {
       const item = selectedItem.item;
       if (item instanceof NickelProject) {
         if (selectedItem.selected) {
@@ -37,14 +37,14 @@ export class NickelInstigator {
       }
     });
 
-    Promise.all(promises).then((reports) => {
+    Promise.all(promises).then((reports: ReportingItem[]) => {
       const report = new NickelReport(action.columns);
       const table = report.buildReport(reports);
       console.log(table.render());
       const reportLines = reports.filter(
         (report) => report instanceof ReportLine
       );
-      action.post(reportLines, args);
+      action.post(reportLines as ReportLine[], args);
       logger.info(`${timer.elapsed() / 1000}s elapsed`);
     });
   }

@@ -30,10 +30,10 @@ describe("Cleanup Action", () => {
       })
     );
 
-    let selectedBranch: string = "";
+    let selectedBranch = "";
     project.repository.selectBranch = jest.fn((branch) => {
       selectedBranch = branch;
-      return Promise.resolve();
+      return Promise.resolve(true);
     });
 
     project.repository.pull = jest.fn(() =>
@@ -42,13 +42,13 @@ describe("Cleanup Action", () => {
       })
     );
 
-    let deletedBranch: string = "";
+    let deletedBranch = "";
     project.repository.deleteLocalBranch = jest.fn((branch) => {
       deletedBranch = branch;
-      return Promise.resolve();
+      return Promise.resolve(true);
     });
 
-    let pruned: string = "";
+    let pruned = "";
     project.repository.prune = jest.fn((origin) => {
       pruned = origin;
       return Promise.resolve([]);

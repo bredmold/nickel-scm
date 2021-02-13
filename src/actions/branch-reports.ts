@@ -14,7 +14,7 @@ export class BranchReportLine extends ReportLine {
   constructor(
     values: { [index: string]: string },
     public candidateBranches: string[],
-    selected: boolean = true
+    selected = true
   ) {
     super(values, selected);
   }
@@ -33,7 +33,7 @@ export class BranchReportWriter {
   ) {}
 
   writeReport(): void {
-    let processed: BranchReportDetails[] = [];
+    const processed: BranchReportDetails[] = [];
     this.reports.forEach((report) => {
       report.candidateBranches.forEach((branch) => {
         processed.push({

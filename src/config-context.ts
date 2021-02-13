@@ -3,15 +3,18 @@ import { ReportSeparator, ReportingItem } from "./nickel-report";
 import { NickelProject } from "./nickel-project";
 import { logger } from "./logger";
 
+type ConfigItem = string | string[];
+type OptionalConfiguration = { [index: string]: ConfigItem } | null;
+
 /**
  * Configuration context that provides variables and functions to the config script
  */
 export class ConfigContext {
   static reportItems: ReportingItem[] = [];
-  static root: string = "";
-  static defaultBranch: string = "master";
+  static root = "";
+  static defaultBranch = "master";
   static safeBranches: (string | RegExp)[] = [];
-  static commitPrefix: number = 12;
+  static commitPrefix = 12;
 
   /**
    * Set the root for the config context
@@ -34,11 +37,11 @@ export class ConfigContext {
    * @param {string} name The name of the project, or a full path
    * @param c Configuration
    */
-  project(name: string, c: any) {
+  project(name: string, c: OptionalConfiguration): void {
     let defaultBranch = ConfigContext.defaultBranch;
     let marks: string[] = [];
 
-    if (typeof c === "object") {
+    if (c != null) {
       logger.debug("[%s]: ctxt=%j", name, c);
 
       if (typeof c.defaultBranch === "string") {
@@ -47,7 +50,7 @@ export class ConfigContext {
       }
 
       if (Array.isArray(c.marks)) {
-        marks = c.marks.map((mark: any) => mark.toString());
+        marks = c.marks.map((mark: string) => mark.toString());
         logger.debug(`[${name}]: marks=${marks}`);
       }
     }
@@ -64,7 +67,7 @@ export class ConfigContext {
     );
   }
 
-  separator(name: string = "") {
+  separator(name = ""): void {
     ConfigContext.reportItems.push(new ReportSeparator(name));
   }
 }

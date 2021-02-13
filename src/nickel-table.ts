@@ -46,6 +46,7 @@ export enum CellAlignment {
   Right,
 }
 
+// eslint-disable-next-line no-control-regex
 const ANSI_PATTERN = /\u001b\[\d+m/;
 
 /**

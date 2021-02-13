@@ -60,7 +60,7 @@ describe("Git Repository", () => {
   });
 
   test("selectBranch", (done) => {
-    let actualCommand: string = "";
+    let actualCommand = "";
     runner.run = jest.fn((command) => {
       actualCommand = command;
       return Promise.resolve({
@@ -82,7 +82,7 @@ describe("Git Repository", () => {
   });
 
   test("deleteLocalBranch", (done) => {
-    let actualCommand: string = "";
+    let actualCommand = "";
     runner.run = jest.fn((command) => {
       actualCommand = command;
       return Promise.resolve({

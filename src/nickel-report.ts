@@ -39,7 +39,7 @@ export interface ReportingItem {
  * Models a report separator, including an optional label for the separator
  */
 export class ReportSeparator implements ReportingItem {
-  selected: boolean = true;
+  selected = true;
 
   /**
    * Build a report separator instance

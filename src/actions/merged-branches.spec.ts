@@ -83,7 +83,7 @@ describe("Merged Branche Report", () => {
             ["origin/merged"]
           ),
         ],
-        testOutputFile
+        [testOutputFile]
       );
 
       const branchReportContent: string = fs.readFileSync(testOutputFile, {

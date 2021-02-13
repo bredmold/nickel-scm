@@ -2,16 +2,19 @@ import * as Transport from "winston-transport";
 import * as winston from "winston";
 
 import { ShellRunner } from "./shell-runner";
-import { logger } from "../../logger";
 
+interface LogEvent {
+  message: string;
+  level: string;
+}
 class TestTransport extends Transport {
-  public readonly events: any[] = [];
+  public readonly events: LogEvent[] = [];
 
   constructor(opts: Transport.TransportStreamOptions) {
     super(opts);
   }
 
-  log(info: any, next: () => void) {
+  log(info: LogEvent, next: () => void) {
     this.events.push(info);
     next();
   }
@@ -19,13 +22,10 @@ class TestTransport extends Transport {
 
 describe("Shell Runner", () => {
   let runner: ShellRunner;
-  let logLevel: string;
   let testTransport: TestTransport;
   let testLogger: winston.Logger;
 
   beforeEach(() => {
-    logLevel = logger.level;
-
     testTransport = new TestTransport({});
     testTransport.level = "debug";
 

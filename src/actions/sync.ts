@@ -3,6 +3,7 @@ import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
 import { NickelAction } from "./nickel-action";
 import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
+import { logger } from "../logger";
 
 export enum SyncStatus {
   New = "sync-new",
@@ -31,39 +32,42 @@ export class RepositorySyncAction implements NickelAction {
     new TableColumn("Status"),
   ];
 
-  act(project: NickelProject, args?: any): Promise<ReportLine> {
-    return new Promise<ReportLine>(async (resolve) => {
-      let updatedFiles = [];
-      let branch = "";
+  async act(project: NickelProject): Promise<ReportLine> {
+    function line(
+      branch: string,
+      updatedFiles: string[],
+      status: SyncStatus
+    ): ReportLine {
+      return new ReportLine({
+        Project: project.name,
+        Branch: branch,
+        Updated: updatedFiles.length.toString(),
+        Status: status,
+      });
+    }
 
-      const finish = (e: any, status: SyncStatus) => {
-        resolve(
-          new ReportLine({
-            Project: project.name,
-            Branch: branch,
-            Updated: updatedFiles.length.toString(),
-            Status: status,
-          })
-        );
-      };
-
-      try {
-        const status = await project.repository.status();
-        branch = status.branch;
-        if (status.modifiedFiles.length > 0) {
-          finish(null, SyncStatus.Dirty);
-        } else {
+    try {
+      const status = await project.repository.status();
+      const branch = status.branch;
+      if (status.modifiedFiles.length > 0) {
+        return line(branch, [], SyncStatus.Dirty);
+      } else {
+        try {
           const pullResult = await project.repository.pull();
-          updatedFiles = pullResult.updatedFiles;
-          finish(null, SyncStatus.Success);
+          const updatedFiles = pullResult.updatedFiles;
+          return line(branch, updatedFiles, SyncStatus.Success);
+        } catch (e) {
+          logger.error(e);
+          return line(branch, [], SyncStatus.Failure);
         }
-      } catch (e) {
-        finish(e, SyncStatus.Failure);
       }
-    });
+    } catch (e) {
+      logger.error(e);
+      return line("", [], SyncStatus.Failure);
+    }
   }
 
-  post(reports: ReportLine[], args?: any): any {
+  post(): void {
     // Empty
   }
 }

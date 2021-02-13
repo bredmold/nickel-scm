@@ -30,7 +30,7 @@ export interface NickelSelector {
 
 function trueSelector(): NickelSelector {
   logger.debug(`No project selector`);
-  let selector = ((item) =>
+  const selector = ((item) =>
     Promise.resolve({ item: item, selected: true })) as NickelSelector;
   selector.criteria = "All projects";
   return selector;
@@ -38,7 +38,7 @@ function trueSelector(): NickelSelector {
 
 function projectListSelector(projects: string[]): NickelSelector {
   logger.debug(`Project list selector: ${projects}`);
-  let selector = ((item) => {
+  const selector = ((item) => {
     return item instanceof ReportSeparator
       ? Promise.resolve({ item: item, selected: false })
       : Promise.resolve({
@@ -52,20 +52,20 @@ function projectListSelector(projects: string[]): NickelSelector {
 
 function branchSelector(selectorBranch: string): NickelSelector {
   logger.debug(`Active branch selector: ${selectorBranch}`);
-  let selector = ((item) =>
-    new Promise(async (resolve) => {
-      if (item instanceof ReportSeparator) {
-        resolve({ item: item, selected: false });
-      } else {
-        const branch = await (<NickelProject>item).repository.branch();
+  const selector = ((item) => {
+    if (item instanceof ReportSeparator) {
+      return Promise.resolve({ item: item, selected: false });
+    } else {
+      return (<NickelProject>item).repository.branch().then((branch) => {
         logger.debug(
           `[${item.name}] branch=${branch} selected=${
             branch === selectorBranch
           }`
         );
-        resolve({ item: item, selected: branch === selectorBranch });
-      }
-    })) as NickelSelector;
+        return { item: item, selected: branch === selectorBranch };
+      });
+    }
+  }) as NickelSelector;
   selector.criteria = `active branch = ${selectorBranch}`;
   return selector;
 }
@@ -80,7 +80,7 @@ function markSelector(selectorMark: string): NickelSelector {
     return markIdx >= 0;
   }
 
-  let selector = ((item) => {
+  const selector = ((item) => {
     return item instanceof ReportSeparator
       ? Promise.resolve({ item: item, selected: false })
       : Promise.resolve({

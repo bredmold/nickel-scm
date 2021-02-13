@@ -25,7 +25,7 @@ export interface NickelAction {
    * @param project The project on which to act
    * @param args List of command arguments
    */
-  act(project: NickelProject, args?: any): Promise<ReportLine>;
+  act(project: NickelProject, args?: string[]): Promise<ReportLine>;
 
   /**
    * Perform an action after all other actions have completed
@@ -33,7 +33,7 @@ export interface NickelAction {
    * @param reports List of all reports generated
    * @param args List of command arguments
    */
-  post(reports: ReportLine[], args?: any): any;
+  post(reports: ReportLine[], args?: string[]): void;
 
   /**
    * Generic empty report in case the project was skipped

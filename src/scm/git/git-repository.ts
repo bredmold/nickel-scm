@@ -43,7 +43,7 @@ export interface RemoveRemoteBranchResult {
  * Remote branch reference, with origin name and branch name
  */
 export class RemoteBranch {
-  static fromBranchName(branchName: string) {
+  static fromBranchName(branchName: string): RemoteBranch {
     const normalized = branchName.replace(/^remotes\//, "");
     const pathElements = normalized.split(/\//);
     const remote = pathElements[0];
@@ -89,7 +89,7 @@ export class GitRepository {
 
     return lines.reduce(
       (pullResult: PullResult, line: string) => {
-        let match = line.match(updateRegex);
+        const match = line.match(updateRegex);
         if (match) {
           pullResult.updatedFiles.push(match[1]);
         }
@@ -178,7 +178,7 @@ export class GitRepository {
    * @param {string} branch Name of the branch to check out
    * @returns {Promise<any>} Promise that resolves (or rejects) with the command
    */
-  async selectBranch(branch: string): Promise<any> {
+  async selectBranch(branch: string): Promise<boolean> {
     await this.runner.run(`git checkout ${branch}`);
     return true;
   }
@@ -189,7 +189,7 @@ export class GitRepository {
    * @param {string} branch Name of the local branch to delete
    * @returns {Promise<any>} Promise that resolves (or rejects) with the command
    */
-  async deleteLocalBranch(branch: string): Promise<any> {
+  async deleteLocalBranch(branch: string): Promise<boolean> {
     await this.runner.run(`git branch -d ${branch}`);
     return true;
   }
@@ -293,11 +293,11 @@ export class GitRepository {
     };
   }
 
-  async remoteBranches(merged: boolean = false): Promise<string[]> {
+  async remoteBranches(merged = false): Promise<string[]> {
     const command = `git branch -r ${merged ? "--merged" : ""}`;
     const out = await this.runner.run(command);
     const lines: string[] = out.stdout.split(/\n/);
-    const branchRe = /^\s+([a-zA-Z0-9-\/._]+)$/;
+    const branchRe = /^\s+([a-zA-Z0-9-/._]+)$/;
 
     return lines
       .map((line) => {
