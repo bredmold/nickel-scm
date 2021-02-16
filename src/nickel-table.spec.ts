@@ -152,4 +152,25 @@ describe("Nickel Table", () => {
 
     expect(rendered).toBe(expectedLines.join("\n"));
   });
+
+  test("First row is a separator", () => {
+    const columns = [new TableColumn("one")];
+    const rows = [
+      new TableRow([new TableCell("s", CellAlignment.Left)], "sep"),
+      new TableRow([new TableCell("a")]),
+    ];
+    const table = new NickelTable(columns, rows);
+
+    const rendered = table.render();
+
+    const expectedLines = [
+      `╔═════╗`,
+      `║ ${chalk.bold("one")} ║`,
+      `╟─s───╢`,
+      `║   a ║`,
+      `╚═════╝`,
+    ];
+
+    expect(rendered).toBe(expectedLines.join("\n"));
+  });
 });

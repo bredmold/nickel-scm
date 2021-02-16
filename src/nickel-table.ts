@@ -87,10 +87,7 @@ export class TableCell {
  * Model a table row
  */
 export class TableRow {
-  constructor(
-    readonly cells: TableCell[],
-    private readonly tag: string = "data"
-  ) {}
+  constructor(readonly cells: TableCell[], readonly tag: string = "data") {}
 
   render(
     columnWidths: number[],
@@ -133,11 +130,20 @@ export class NickelTable {
       "data"
     );
 
-    const preamble: string[] = [
+    const preambleAlways = [
       emptyRow.render(this.columnWidths, config, "first"),
       headerRow.render(this.columnWidths, config),
-      emptyRow.render(this.columnWidths, config, "sep"),
     ];
+
+    const firstRowTag = this.rows[0].tag;
+    const preamble =
+      firstRowTag === "sep"
+        ? preambleAlways
+        : [
+            ...preambleAlways,
+            emptyRow.render(this.columnWidths, config, "sep"),
+          ];
+
     const dataLines: string[] = this.rows.map((row) =>
       row.render(this.columnWidths, config)
     );

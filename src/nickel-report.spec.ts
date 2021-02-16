@@ -33,7 +33,7 @@ describe("Nickel Report", () => {
 
     const table = report.buildReport(rows);
     expect(table.columns).toStrictEqual(columns);
-    expect(table.rows).toStrictEqual([new TableRow([new TableCell("test")])]);
+    expect(table.rows).toStrictEqual([new TableRow([new TableCell(" test")])]);
   });
 
   test("Two rows, one separator", () => {
@@ -45,9 +45,9 @@ describe("Nickel Report", () => {
 
     const table = report.buildReport(rows);
     expect(table.rows).toStrictEqual([
-      new TableRow([new TableCell("a")]),
+      new TableRow([new TableCell(" a")]),
       new TableRow([new TableCell("", CellAlignment.Left)], "sep"),
-      new TableRow([new TableCell("b")]),
+      new TableRow([new TableCell(" b")]),
     ]);
   });
 
@@ -60,12 +60,12 @@ describe("Nickel Report", () => {
 
     const table = report.buildReport(rows);
     expect(table.rows).toStrictEqual([
-      new TableRow([new TableCell("a")]),
+      new TableRow([new TableCell(" a")]),
       new TableRow(
         [new TableCell(` ${chalk.italic.bold("george")} `, CellAlignment.Left)],
         "sep"
       ),
-      new TableRow([new TableCell("b")]),
+      new TableRow([new TableCell(" b")]),
     ]);
   });
 
@@ -81,12 +81,12 @@ describe("Nickel Report", () => {
 
     const table = report.buildReport(rows);
     expect(table.rows).toStrictEqual([
-      new TableRow([new TableCell(`${chalk.green("sync-success")}`)]),
-      new TableRow([new TableCell(`${chalk.red("sync-fail")}`)]),
-      new TableRow([new TableCell(`${chalk.bgYellow.black("sync-dirty")}`)]),
-      new TableRow([new TableCell(`${chalk.green("clean-success")}`)]),
-      new TableRow([new TableCell(`${chalk.red("clean-failure")}`)]),
-      new TableRow([new TableCell(`${chalk.bgYellow.black("clean-dirty")}`)]),
+      new TableRow([new TableCell(` ${chalk.green("sync-success")}`)]),
+      new TableRow([new TableCell(` ${chalk.red("sync-fail")}`)]),
+      new TableRow([new TableCell(` ${chalk.bgYellow.black("sync-dirty")}`)]),
+      new TableRow([new TableCell(` ${chalk.green("clean-success")}`)]),
+      new TableRow([new TableCell(` ${chalk.red("clean-failure")}`)]),
+      new TableRow([new TableCell(` ${chalk.bgYellow.black("clean-dirty")}`)]),
     ]);
   });
 });

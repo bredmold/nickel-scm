@@ -87,7 +87,7 @@ describe("Merged Branche Report", () => {
       );
 
       const branchReportContent: string = fs.readFileSync(testOutputFile, {
-        encoding: "UTF8",
+        encoding: "utf8",
       });
       const branchReport = JSON.parse(branchReportContent);
 

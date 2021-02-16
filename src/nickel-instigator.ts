@@ -1,4 +1,4 @@
-import { NickelReport, ReportingItem, ReportLine } from "./nickel-report";
+import { NickelReport, ReportLine, ReportingItem } from "./nickel-report";
 
 import { NickelAction } from "./actions/nickel-action";
 import { NickelProject } from "./nickel-project";
@@ -15,27 +15,29 @@ export class NickelInstigator {
   doIt(action: NickelAction, args: string[]): void {
     // Do eeet!
     const timer = new NickelTimer();
-    const promises: Promise<ReportingItem>[] = this.selectedItems.map((selectedItem) => {
-      const item = selectedItem.item;
-      if (item instanceof NickelProject) {
-        if (selectedItem.selected) {
-          return action.act(<NickelProject>item, args);
+    const promises: Promise<ReportingItem>[] = this.selectedItems.map(
+      (selectedItem) => {
+        const item = selectedItem.item;
+        if (item instanceof NickelProject) {
+          if (selectedItem.selected) {
+            return action.act(<NickelProject>item, args);
+          } else {
+            // TODO Perform a more robust deep-copy of the skipReport object
+            const values: { [index: string]: string } = {};
+            Object.assign(values, action.skipReport.values);
+            values["Project"] = item.name;
+
+            const report: ReportLine = new ReportLine(values, false);
+            Object.assign(report, action.skipReport);
+
+            return Promise.resolve(report);
+          }
         } else {
-          // TODO Perform a more robust deep-copy of the skipReport object
-          const values: { [index: string]: string } = {};
-          Object.assign(values, action.skipReport.values);
-          values["Project"] = item.name;
-
-          const report: ReportLine = new ReportLine(values, false);
-          Object.assign(report, action.skipReport);
-
-          return Promise.resolve(report);
+          // Assume it's a separator
+          return Promise.resolve(item);
         }
-      } else {
-        // Assume it's a separator
-        return Promise.resolve(item);
       }
-    });
+    );
 
     Promise.all(promises).then((reports: ReportingItem[]) => {
       const report = new NickelReport(action.columns);

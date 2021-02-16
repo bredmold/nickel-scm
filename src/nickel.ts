@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import * as fs from "fs";
+import * as path from "path";
 import * as program from "commander";
 import * as vm from "vm";
 
@@ -23,7 +24,7 @@ Global controls
  */
 let command = "";
 let commandArgs: string[] = [];
-let configScript = `${process.env["HOME"]}/nickel.js`;
+let configScript: string | undefined = undefined;
 let selectedProjects: string[] = [];
 let activeBranch = "";
 let selectedMark = "";
@@ -75,14 +76,58 @@ if (command === "") {
 Parse the configuration file
  */
 
-const configScriptBytes = fs.readFileSync(configScript, { encoding: "utf-8" });
-if (!configScriptBytes) {
-  logger.warn(`Unable to read config script at ${configScript}`);
+/**
+ * This searches in three locations for the configuration script
+ *
+ * 1. If present, wherever the command-line option is that points to the config script
+ * 2. $HOME/.nickel.js
+ * 3. $HOME/nickel.js
+ *
+ * @param configScriptOption Command-line option indicating the configuration script
+ * @returns Config script as a string
+ * @throws If the configuration script can't be located
+ */
+function findConfigScript(configScriptOption?: string): string {
+  const home = process.env["HOME"];
+  const defaultSearchPath = [
+    home + path.sep + ".nickel.js",
+    home + path.sep + "nickel.js",
+  ];
+  const searchPath = configScriptOption
+    ? [configScriptOption, ...defaultSearchPath]
+    : defaultSearchPath;
+
+  const configPath = searchPath.find((path) => {
+    if (fs.existsSync(path)) {
+      const stats = fs.statSync(path);
+      return stats.isFile();
+    } else {
+      return false;
+    }
+  });
+
+  if (configPath) {
+    return configPath;
+  } else {
+    throw `Unable to read config script: option=${configScriptOption}`;
+  }
 }
 
-const configContext = new ConfigContext();
-vm.createContext(configContext);
-vm.runInContext(configScriptBytes, configContext);
+try {
+  const configScriptPath = findConfigScript(configScript);
+  const configScriptContent = fs.readFileSync(configScriptPath, {
+    encoding: "utf-8",
+  });
+
+  const configContext = new ConfigContext();
+  vm.createContext(configContext);
+  vm.runInContext(configScriptContent, configContext, {
+    filename: configScriptPath,
+  });
+} catch (e) {
+  logger.error(`message - ${e.message}, stack trace - ${e.stack}`);
+  process.exit(1);
+}
 
 /*
 Do the things!

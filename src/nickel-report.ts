@@ -98,7 +98,7 @@ export class NickelReport {
    * @param row Data row in object form
    */
   private processRow(row: ReportLine): TableRow {
-    const cells = this.columns.map((column) => {
+    const cells = this.columns.map((column, idx) => {
       let value = row.get(column.title);
 
       // Value transformations
@@ -113,7 +113,9 @@ export class NickelReport {
         value = chalk.bgYellow.black(value);
       }
 
-      return new TableCell(value.toString());
+      const renderedValue =
+        idx == 0 ? " " + value.toString() : value.toString();
+      return new TableCell(renderedValue);
     });
     return new TableRow(cells, "data");
   }
