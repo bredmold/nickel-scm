@@ -21,14 +21,16 @@ This should give the standard help message for nickel.
 
 ### Configure
 
-Configuration is done using a JS configuration file. The default location of this file is
+Configuration is done using a JS source file with some pre-defined calls available. Nickel will search for this file in the following locations:
+1. Wherever the `--config` command-line argument points
+1. `${HOME}/.nickel.js`
+1. `${HOME}/nickel.js`
 
-`${HOME}/nickel.js`
-
+#### The Old Way
 The content of this file is a series of project declarations. For example:
 
 ```javascript
-root = "c:/Dev/Lexipol";
+root = "c:/Dev/Code";
 defaultBranch = "develop";
 
 project("project-base");
@@ -49,6 +51,37 @@ project("ops-project");
 The first line declares where the projects live. If you have projects in multiple locations,
 root can be changed in the middle of the file and will be picked up by subsequent calls to
 `project(...)`.
+
+#### The New Way
+
+```javascript
+projectRoot("c:/Dev", root => {
+  root.defaultBranch("develop");
+
+  root.projects("Code", code => {
+    code.git("project-base");
+    code.git("project-commons");
+    code.git("project-service");
+  });
+
+  root.projects("thing", thing => {
+    thing.separator(true);
+
+    thing.git("thing-base");
+    thing.git("thing-commons");
+    thing.git("thing-service");
+  });
+
+  root.projects("Ops", ops => {
+    ops.label("Operations");
+    ops.separator(true);
+    ops.defaultBranch("master");
+
+    ops.git("ops-project");
+  });
+});
+```
+
 
 ## Run
 
@@ -255,62 +288,9 @@ npm version patch && npm run build && npm publish
 
 These are features I have in mind for the future. I have no schedule for getting to them.
 
-- Expand the marks feature to make it more robust
-  - Implicit marking based on filesystem location
-  - Implicit marking based on project inspection
-  - Default marks similar to current filesystem root
 - Create and push a branch across projects
 - Check out an existing remote branch across projects
-
-### Configuration
-
-Nested configuration around folders. Here's a proposed bit of example configuration:
-```javascript
-root("/home/bredmold/Projects", projectsDir => {
-  projectsDir.repositoryDir("work", work => {
-    work.label("Company Name");
-    work.git("models");
-    work.git("service-impl", repo => {
-      repo.label("Service Implementation");
-    });
-    work.svn("legacy-service");
-  });
-
-  projectsDir.repositoryDir("personal", personal => {
-    personal.label("Personal Projects");
-    personal.addRepositories();
-  });
-});
-```
-
-There's a lot to unpack in this example
-
-* Function `root()`
-    * Accepts an argument giving the filesystem path of a project root
-    * Accepts a second argument that is a callback function with one argument
-        * Argument `projectsDir` is an object that hold configuration context
-    * Method `repositoryDir()` recurses into a sub-directory containing more projects
-        * The method implicitly creates a separator in the report
-        * Accepts a directory name, and a callback function as arguments
-        * The callback function takes a context argument
-    * Method `git()` declares a Git repository, taking an argument with the directory name
-        * Optional second argument is a callback function that takes a config context
-    * Method `svn()` declares a SubVersion repository
-        * Similar to Git, it takes an optional callback function for additional configuration
-        * This is the *most* aspirational item in the proposed configuration (supporting non-Git VCS)
-
-Note that the resulting table display will still not be hierarchichal. Here's the expectation
-```
-╔═════════════════════════╤═════════╤═════════╤══════════════╗
-║                 Project │  Branch │ Updated │       Status ║
-╟─ Company Name ──────────┼─────────┼─────────┼──────────────╢
-║                  models │  master │       0 │ sync-success ║
-║  Service Implementation │ PRJ-123 │       1 │ sync-success ║
-║          legacy-service │  master │      12 │ sync-success ║
-╟─ Personal Projects ─────┼─────────┼─────────┼──────────────╢
-║        found-repository │ develop │       0 │ sync-success ║
-╚═════════════════════════╧═════════╧═════════╧══════════════╝
-```
+- Ability to add a separator anywhere in the structure configuration model
 
 ### Combined Search for Branches
 
