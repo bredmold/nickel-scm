@@ -13,8 +13,23 @@ A clear and concise description of what the problem is. Ex. I'm always frustrate
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Proposed command-line structure**
+If appropriate, propose a command-line structure that might work for this feature.
+```bash
+nickel [global flags] command [command flags]
+```
+
+**Proposed configuration structure**
+If appropriate, propose configuration file content here. If there are no configuration changes proposed, delete this section.
+
+```javascript
+newFlag = 'new flag value';
+```
+
+**Corner cases and failure behavior**
+Describe anticipated corner cases, and appropriate behavior for those cases.
+
+Describe likely failure scenarios and how the application should behave if those circumstances are detected.
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
