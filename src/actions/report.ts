@@ -7,15 +7,18 @@ import { TableColumn } from "../nickel-table";
 export class RepositoryReportAction implements NickelAction {
   readonly command = "report";
   readonly description = "Local repository report";
-  readonly skipReport = new ReportLine(
-    {
-      Project: EMPTY_PROJECT.name,
-      "# Mod": "0",
-      Branch: "",
-      Commit: "",
-    },
-    false
-  );
+  skipReport(project: NickelProject): ReportLine {
+    return new ReportLine(
+      {
+        Project: project.name,
+        Branch: "",
+        "# Mod": "0",
+        Commit: "",
+        Marks: ""
+      },
+      false
+    );
+  }
   readonly columns: TableColumn[] = [
     new TableColumn("Project"),
     new TableColumn("Branch"),

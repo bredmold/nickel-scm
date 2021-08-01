@@ -16,14 +16,16 @@ export enum CleanupStatus {
 export class RepositoryCleanupAction implements NickelAction {
   readonly command = "cleanup";
   readonly description = "Retire unused branches";
-  readonly skipReport = new ReportLine(
-    {
-      Project: EMPTY_PROJECT.name,
-      Branch: "",
-      Status: CleanupStatus.Skipped,
-    },
-    false
-  );
+  skipReport(project: NickelProject): ReportLine {
+    return new ReportLine(
+      {
+        Project: project.name,
+        Branch: "",
+        Status: CleanupStatus.Skipped,
+      },
+      false
+    );
+  }
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Branch"),

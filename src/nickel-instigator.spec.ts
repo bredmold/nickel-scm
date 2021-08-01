@@ -38,7 +38,9 @@ describe("Nickel Instigator", () => {
       readonly columns = [new TableColumn("test")];
       readonly command = "test";
       readonly description = "test";
-      readonly skipReport = new ReportLine({ test: "a" }, false);
+      skipReport(project: NickelProject) {
+        return new ReportLine({ test: project.name }, false);
+      }
 
       act(): Promise<ReportLine> {
         actCount += 1;
@@ -60,10 +62,9 @@ describe("Nickel Instigator", () => {
       readonly columns = [new TableColumn("test")];
       readonly command = "test";
       readonly description = "test";
-      readonly skipReport = new ReportLine(
-        { Project: "test", test: "a" },
-        false
-      );
+      skipReport(project: NickelProject) {
+        return new ReportLine({ Project: project.name, test: "a" }, false);
+      }
 
       act(): Promise<ReportLine> {
         done.fail("act should not be called");

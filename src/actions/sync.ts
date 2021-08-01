@@ -16,15 +16,17 @@ export enum SyncStatus {
 export class RepositorySyncAction implements NickelAction {
   readonly command = "sync";
   readonly description = "Sync all projects";
-  readonly skipReport = new ReportLine(
-    {
-      Project: EMPTY_PROJECT.name,
-      Updated: "0",
-      Branch: "",
-      Status: SyncStatus.Skipped,
-    },
-    false
-  );
+  skipReport(project: NickelProject): ReportLine {
+    return new ReportLine(
+      {
+        Project: project.name,
+        Updated: "0",
+        Branch: "",
+        Status: SyncStatus.Skipped,
+      },
+      false
+    );
+  }
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Branch"),

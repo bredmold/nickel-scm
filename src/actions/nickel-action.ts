@@ -38,7 +38,7 @@ export interface NickelAction {
   /**
    * Generic empty report in case the project was skipped
    */
-  readonly skipReport: ReportLine;
+  skipReport(project: NickelProject): ReportLine;
 
   /**
    * Column titles

@@ -13,15 +13,17 @@ import { logger } from "../logger";
 export class MergedBranchesReportAction implements NickelAction {
   readonly command = "mergedReport <reportFile>";
   readonly description = "Generated a merged branches report";
-  readonly skipReport = new BranchReportLine(
-    {
-      Project: EMPTY_PROJECT.name,
-      Status: BranchReportStatus.Skipped,
-      "# Candidates": "0",
-    },
-    [],
-    false
-  );
+  skipReport(project: NickelProject): ReportLine {
+    return new BranchReportLine(
+      {
+        Project: project.name,
+        Status: BranchReportStatus.Skipped,
+        "# Candidates": "0",
+      },
+      [],
+      false
+    );
+  }
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Status"),

@@ -283,25 +283,3 @@ npm run coverage
 ```bash
 npm version patch && npm run build && npm publish
 ```
-
-## Future Plans
-
-These are features I have in mind for the future. I have no schedule for getting to them.
-
-- Create and push a branch across projects
-- Check out an existing remote branch across projects
-- Ability to add a separator anywhere in the structure configuration model
-
-### Combined Search for Branches
-
-Instead of having different specialized reports for branches, have a branch searching feature that can apply various criteria. Ideally, the feature optimizes certain requests "under the hood", in order to search efficiently when Git already supplies the desired search.
-
-```bash
-nickel branches --merged --report=merged.json # Search for merged branches, and save the result to merged.json
-nickel branches --old --days=60               # Search for branches at least 60 days old, with no saved report (only stdout)
-nickel branches --email='bredmold@gmail.com'  # Branches with an author email or committer email equal to bredmold@gmail.com
-```
-
-The report feature generates a JSON document suitable for use with the [guidedRemove](#guidedRemove) command.
-
-This is a generalization of some existing features.

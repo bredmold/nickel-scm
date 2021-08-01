@@ -25,17 +25,19 @@ export enum GuidedBranchRemovalStatus {
 export class GuidedBranchRemovalAction implements NickelAction {
   readonly command = "guidedRemove <reportFile>";
   readonly description = "Remove branches based on a merged branches report";
-  readonly skipReport = new ReportLine(
-    {
-      Project: EMPTY_PROJECT.name,
-      Branch: "",
-      Status: GuidedBranchRemovalStatus.Skipped,
-      "# Kept": "0",
-      "# Removed": "0",
-      "# Failed": "0",
-    },
-    false
-  );
+  skipReport(project: NickelProject): ReportLine {
+    return new ReportLine(
+      {
+        Project: project.name,
+        Branch: "",
+        Status: GuidedBranchRemovalStatus.Skipped,
+        "# Kept": "0",
+        "# Removed": "0",
+        "# Failed": "0",
+      },
+      false
+    );
+  }
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Branch"),
