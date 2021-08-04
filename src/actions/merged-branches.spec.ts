@@ -18,6 +18,7 @@ describe("Merged Branche Report", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: [],
+      pruneOnFetch: false,
     });
     action = new MergedBranchesReportAction();
   });

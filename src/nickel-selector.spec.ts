@@ -14,6 +14,7 @@ describe("Nickel Selector", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: ["a", "b"],
+      pruneOnFetch: false,
     });
 
     separator = new ReportSeparator("test");

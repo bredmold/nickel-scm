@@ -14,6 +14,7 @@ describe("Cleanup Action", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: [],
+      pruneOnFetch: false,
     });
     action = new RepositoryCleanupAction();
   });
