@@ -32,6 +32,7 @@ The content of this file is a series of project declarations. For example:
 ```javascript
 root = "c:/Dev/Code";
 defaultBranch = "develop";
+pruneOnFetch = true;
 
 project("project-base");
 project("project-commons");
@@ -44,7 +45,7 @@ project("thing-commons", { marks: ["thing"] });
 project("thing-service", { marks: ["thing"] });
 
 separator("Ops"); // Draw a horizontal line, labeled with the word 'Ops'
-defaultBranch = "master";
+defaultBranch = "main";
 project("ops-project");
 ```
 
@@ -57,6 +58,7 @@ root can be changed in the middle of the file and will be picked up by subsequen
 ```javascript
 projectRoot("c:/Dev", root => {
   root.defaultBranch("develop");
+  root.pruneOnFetch(false);
 
   root.projects("Code", code => {
     code.git("project-base");
@@ -75,7 +77,7 @@ projectRoot("c:/Dev", root => {
   root.projects("Ops", ops => {
     ops.label("Operations");
     ops.separator(true);
-    ops.defaultBranch("master");
+    ops.defaultBranch("main");
 
     ops.git("ops-project");
   });

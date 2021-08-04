@@ -18,6 +18,7 @@ describe("Old Branches Report", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: [],
+      pruneOnFetch: false,
     });
     action = new OldBranchesReportAction();
   });

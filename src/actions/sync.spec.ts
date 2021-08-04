@@ -16,6 +16,7 @@ describe("Sync Action", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: [],
+      pruneOnFetch: false,
     });
     action = new RepositorySyncAction();
   });

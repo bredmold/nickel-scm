@@ -21,6 +21,9 @@ export interface NickelProjectConfig {
 
   /** Semantic tagging structure - allow projects to be chosen based on marks */
   marks: string[];
+
+  /** If true, then fetch operations (e.g. pull) should be called with the --prune option */
+  pruneOnFetch: boolean;
 }
 
 export class NickelProject implements ReportingItem {
@@ -41,7 +44,8 @@ export class NickelProject implements ReportingItem {
     this.repository = new GitRepository(
       this.path,
       new ShellRunner(this.path),
-      c.commitPrefix
+      c.commitPrefix,
+      c.pruneOnFetch
     );
 
     // Make sure the default branch is always "safe"
@@ -56,4 +60,5 @@ export const EMPTY_PROJECT: NickelProject = new NickelProject({
   safeBranches: ["master"],
   commitPrefix: -1,
   marks: [],
+  pruneOnFetch: false,
 });

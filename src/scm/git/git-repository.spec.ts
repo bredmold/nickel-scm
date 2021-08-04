@@ -9,7 +9,7 @@ describe("Git Repository", () => {
   beforeEach(() => {
     const path = "/application/path";
     runner = new ShellRunner(path);
-    repository = new GitRepository(path, runner, 12);
+    repository = new GitRepository(path, runner, 12, false);
   });
 
   test("pull", () => {
@@ -31,6 +31,27 @@ describe("Git Repository", () => {
         "src/main/scala/com/example/Main.scala",
         "src/main/scala/com/example/cli/info.scala",
       ],
+    });
+  });
+
+  test("pull with prune", () => {
+    runner.run = jest.fn((cmd: string) => {
+      expect(cmd).toMatch(/ --prune/);
+
+      return Promise.resolve({
+        stdout: [
+          "From github.com:bredmold/census",
+          " - [deleted]         (none)     -> origin/foo",
+          "Already up to date.",
+        ].join("\n"),
+        stderr: "",
+      });
+    });
+
+    return expect(
+      repository.withPruneOnFetch(true).pull()
+    ).resolves.toStrictEqual({
+      updatedFiles: [],
     });
   });
 

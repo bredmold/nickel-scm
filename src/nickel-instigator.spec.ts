@@ -20,6 +20,7 @@ describe("Nickel Instigator", () => {
           safeBranches: [],
           commitPrefix: -1,
           marks: [],
+          pruneOnFetch: false,
         }),
         selected: true,
       },

@@ -1,6 +1,5 @@
 import * as fs from "fs";
 
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
 import {
   FetchResult,
   RemoteBranch,
@@ -9,6 +8,7 @@ import {
 
 import { BranchReportDetails } from "./branch-reports";
 import { NickelAction } from "./nickel-action";
+import { NickelProject } from "../nickel-project";
 import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";

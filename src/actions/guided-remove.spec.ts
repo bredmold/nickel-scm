@@ -21,6 +21,7 @@ describe("Guided Remove", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: [],
+      pruneOnFetch: false,
     });
     action = new GuidedBranchRemovalAction();
   });
