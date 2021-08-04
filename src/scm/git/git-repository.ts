@@ -74,8 +74,23 @@ export class GitRepository {
   constructor(
     private readonly path: string,
     private readonly runner: ShellRunner,
-    private readonly commitPrefix: number
+    private readonly commitPrefix: number,
+    private readonly pruneOnFetch: boolean
   ) {}
+
+  /**
+   * Return a new repository with the desired pruneOnFetch behavior
+   *
+   * @param pruneOnFetch If true, add the --prune option to commands that fetch (e.g. pull)
+   */
+  withPruneOnFetch(pruneOnFetch: boolean): GitRepository {
+    return new GitRepository(
+      this.path,
+      this.runner,
+      this.commitPrefix,
+      pruneOnFetch
+    );
+  }
 
   /**
    * Perform a Git pull operation on the given repository
@@ -84,7 +99,8 @@ export class GitRepository {
    */
   async pull(): Promise<PullResult> {
     const updateRegex = /^ ([a-zA-Z0-9/.-_]*)\s+\|/;
-    const out = await this.runner.run("git pull --ff-only");
+    const pruneOption = this.pruneOnFetch ? "--prune" : "";
+    const out = await this.runner.run(`git pull --ff-only ${pruneOption}`);
     const lines = out.stdout.split(/\n/);
 
     return lines.reduce(

@@ -1,6 +1,5 @@
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
-
 import { NickelAction } from "./nickel-action";
+import { NickelProject } from "../nickel-project";
 import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 
@@ -14,7 +13,7 @@ export class RepositoryReportAction implements NickelAction {
         Branch: "",
         "# Mod": "0",
         Commit: "",
-        Marks: ""
+        Marks: "",
       },
       false
     );

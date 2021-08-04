@@ -16,6 +16,7 @@ describe("Report Action", () => {
       safeBranches: [],
       commitPrefix: -1,
       marks: ["a", "b"],
+      pruneOnFetch: false,
     });
     action = new RepositoryReportAction();
   });
@@ -30,7 +31,7 @@ describe("Report Action", () => {
           Branch: "",
           "# Mod": "0",
           Commit: "",
-          Marks: ""
+          Marks: "",
         },
         false
       )

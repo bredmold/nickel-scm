@@ -75,6 +75,23 @@ describe("DirectoryContext", () => {
       expect(childContext.defaultBranch()).toStrictEqual("develop");
     });
   });
+
+  test("default pruneOnFetch", () => {
+    expect(context.pruneOnFetch()).toStrictEqual(false);
+  });
+
+  test("explicit pruneOnFetch", () => {
+    expect(context.pruneOnFetch(true)).toStrictEqual(true);
+    expect(context.pruneOnFetch()).toStrictEqual(true);
+  });
+
+  test("parent pruneOnFetch", () => {
+    context.projects("src", (childContext) => {
+      expect(childContext.pruneOnFetch()).toStrictEqual(false);
+      context.pruneOnFetch(true);
+      expect(childContext.pruneOnFetch()).toStrictEqual(true);
+    });
+  });
 });
 
 describe("RepositoryContext", () => {
@@ -95,6 +112,7 @@ describe("RepositoryContext", () => {
         safeBranches: [],
         commitPrefix: 12,
         marks: [path.basename(parent.root)],
+        pruneOnFetch: false,
       });
     });
   });
@@ -126,6 +144,11 @@ describe("ConfigContext", () => {
   test("set safeBranches", () => {
     context.safeBranches = ["uat"];
     expect(ConfigContext.safeBranches).toStrictEqual(["uat"]);
+  });
+
+  test("set pruneOnFetch", () => {
+    context.pruneOnFetch = true;
+    expect(ConfigContext.pruneOnFetch).toStrictEqual(true);
   });
 
   test("separator", () => {

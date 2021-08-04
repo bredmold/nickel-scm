@@ -17,6 +17,7 @@ abstract class PathContext {
   private _safeBranches: (string | RegExp)[] = [];
   private _commitPrefix?: number;
   private _label?: string;
+  private _pruneOnFetch?: boolean;
 
   constructor(
     public readonly root: string,
@@ -92,6 +93,14 @@ abstract class PathContext {
 
     if (this._label) return this._label;
     else return this.name();
+  }
+
+  pruneOnFetch(pruneOnFetch?: boolean): boolean {
+    if (typeof pruneOnFetch === "boolean") this._pruneOnFetch = pruneOnFetch;
+
+    if (typeof this._pruneOnFetch === "boolean") return this._pruneOnFetch;
+    else if (this.parent) return this.parent.pruneOnFetch();
+    else return false;
   }
 
   /**
@@ -196,6 +205,7 @@ export class RepositoryContext extends PathContext {
       safeBranches: this.safeBranches(),
       commitPrefix: this.commitPrefix(),
       marks: [this._parent.name()],
+      pruneOnFetch: this.pruneOnFetch(),
     };
   }
 }
@@ -209,6 +219,7 @@ export class ConfigContext {
   static defaultBranch = "master";
   static safeBranches: (string | RegExp)[] = [];
   static commitPrefix = 12;
+  static pruneOnFetch = false;
 
   /**
    * Set the root for the config context
@@ -231,6 +242,14 @@ export class ConfigContext {
    */
   set safeBranches(safeBranches: (string | RegExp)[]) {
     ConfigContext.safeBranches = safeBranches;
+  }
+
+  /**
+   * If true, then fetch operations (e.g. pull) should be called with --prune option
+   * @deprecated
+   */
+  set pruneOnFetch(pruneOnFetch: boolean) {
+    ConfigContext.pruneOnFetch = pruneOnFetch;
   }
 
   /**
@@ -266,6 +285,7 @@ export class ConfigContext {
         safeBranches: ConfigContext.safeBranches,
         commitPrefix: ConfigContext.commitPrefix,
         marks: marks,
+        pruneOnFetch: ConfigContext.pruneOnFetch,
       })
     );
   }
