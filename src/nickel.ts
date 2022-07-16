@@ -2,12 +2,12 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as program from "commander";
 import * as vm from "vm";
 
 import { SelectedItem, nickelSelector } from "./nickel-selector";
 
 import { ALL_ACTIONS } from "./actions/nickel-action";
+import { Command } from "commander";
 import { ConfigContext } from "./config-context";
 import { NickelInstigator } from "./nickel-instigator";
 import { ReportingItem } from "./nickel-report";
@@ -24,33 +24,22 @@ Global controls
  */
 let command = "";
 let commandArgs: string[] = [];
-let configScript: string | undefined = undefined;
-let selectedProjects: string[] = [];
-let activeBranch = "";
-let selectedMark = "";
 
 /*
 Command-line parsing
  */
+const program = new Command();
 program
   .description("nickel-scm: Manage local Git repositories")
   .version(pkg.version)
   .option("--config <config>", "Configuration file")
-  .option("--projects <projects>", "List of projects")
+  .option("--projects <projects...>", "List of projects")
   .option(
     "--active-branch <activeBranch>",
     "Select projects with this active branch"
   )
-  .option("--level <level>", "Log level")
-  .option("--mark <mark>", "Select projects with this mark")
-  .on("option:level", () => (logger.level = program.level))
-  .on("option:config", () => (configScript = program.config))
-  .on("option:active-branch", () => (activeBranch = program.activeBranch))
-  .on(
-    "option:projects",
-    () => (selectedProjects = program.projects.replace(/\s+/, "").split("s*s*"))
-  )
-  .on("option:mark", () => (selectedMark = program.mark));
+  .option("--level <level>", "Log level", "info")
+  .option("--mark <mark>", "Select projects with this mark");
 
 ALL_ACTIONS.forEach((nickelAction) => {
   program
@@ -64,7 +53,14 @@ ALL_ACTIONS.forEach((nickelAction) => {
 });
 
 program.parse(process.argv);
+const opts = program.opts();
 
+const selectedProjects: string[] = opts.projects || [];
+const configScript: string | undefined = opts.config;
+const activeBranch: string = opts.activeBranch || "";
+const selectedMark: string = opts.mark || "";
+
+logger.level = opts.level;
 logger.info(`Log level is ${logger.level}`);
 
 if (command === "") {
@@ -124,7 +120,7 @@ try {
   vm.runInContext(configScriptContent, configContext, {
     filename: configScriptPath,
   });
-} catch (e) {
+} catch (e: any) {
   logger.error(`message - ${e.message}, stack trace - ${e.stack}`);
   process.exit(1);
 }
@@ -161,7 +157,7 @@ async function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
     }
 
     return selectedItems;
-  } catch (e) {
+  } catch (e: any) {
     logger.error(e);
     process.exit(1);
   }

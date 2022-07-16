@@ -44,7 +44,8 @@ export class MergedBranchesReportAction implements NickelAction {
 
     try {
       await project.repository.fetch();
-      const remoteBranches: string[] = await project.repository.remoteMergedBranches();
+      const remoteBranches: string[] =
+        await project.repository.remoteMergedBranches();
       // List of regex values that check for 'safe' branches
       const safeBranchRes: RegExp[] = project.safeBranches.map((safeBranch) => {
         return typeof safeBranch === "string"

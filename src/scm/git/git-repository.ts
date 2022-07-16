@@ -116,7 +116,8 @@ export class GitRepository {
   }
 
   async fetch(): Promise<FetchResult> {
-    const branchRegex = /^ ([ +\-t*!=]) (\[?[a-zA-Z0-9 .]+]?)\s+([a-zA-Z0-9-_./]+|\(none\))\s+->\s+([a-zA-Z0-9-_./]+)\s*(.*)?$/;
+    const branchRegex =
+      /^ ([ +\-t*!=]) (\[?[a-zA-Z0-9 .]+]?)\s+([a-zA-Z0-9-_./]+|\(none\))\s+->\s+([a-zA-Z0-9-_./]+)\s*(.*)?$/;
     const out = await this.runner.run("git fetch --prune");
 
     const lines = out.stderr.split(/\n/);
@@ -251,7 +252,8 @@ export class GitRepository {
     const localBranchRe = /^# branch.head ([a-zA-Z0-9_/-]+)$/;
     const remoteBranchRe = /^# branch.upstream ([a-zA-Z0-9_/-]+)$/;
     const aheadBehindRe = /^# branch.ab \+(\d+) -(\d+)$/;
-    const fileLineRe = /^([12]) [ .MADRCU?!]{2} N\.\.\. \d+ \d+ \d+ [a-fA-F0-9]+ [a-fA-F0-9]+ (.*)$/;
+    const fileLineRe =
+      /^([12]) [ .MADRCU?!]{2} N\.\.\. \d+ \d+ \d+ [a-fA-F0-9]+ [a-fA-F0-9]+ (.*)$/;
     const renameRe = /^\w\d+ ([a-zA-Z0-9_/.-]+)\t([a-zA-Z0-9_/.-]+)$/;
 
     const out = await this.runner.run("git status --porcelain=2 -b");
