@@ -92,9 +92,8 @@ class GuidedBranchRemoval {
     const branchReportRaw: string = fs.readFileSync(branchReportFilename, {
       encoding: "utf-8",
     });
-    const branchInstructions: BranchReportDetails[] = JSON.parse(
-      branchReportRaw
-    );
+    const branchInstructions: BranchReportDetails[] =
+      JSON.parse(branchReportRaw);
 
     // Filter the branch instructions - selecting only "non-safe" branches for the current project
     this.branchesKept = [];
@@ -160,9 +159,8 @@ class GuidedBranchRemoval {
           const fetchResult = await this.project.repository.fetch();
 
           const fetchInfo = this.constructFetchInfo(fetchResult);
-          const branchNameMap: BranchNameMap = this.constructBranchNameMap(
-            fetchInfo
-          );
+          const branchNameMap: BranchNameMap =
+            this.constructBranchNameMap(fetchInfo);
           const deletePromises = this.requestBranchDeletes(branchNameMap);
           const deleteResponses = await Promise.all(deletePromises);
 

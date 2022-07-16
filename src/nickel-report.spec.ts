@@ -1,3 +1,5 @@
+import * as ch from "chalk";
+
 import {
   CellAlignment,
   TableCell,
@@ -13,7 +15,6 @@ import {
 
 import { CleanupStatus } from "./actions/cleanup";
 import { SyncStatus } from "./actions/sync";
-import chalk from "chalk";
 
 describe("Nickel Report", () => {
   let columns: TableColumn[];
@@ -52,6 +53,7 @@ describe("Nickel Report", () => {
   });
 
   test("Named separator", () => {
+    const chalk = new ch.Instance({ level: 1 });
     const rows: ReportingItem[] = [
       new ReportLine({ test: "a" }),
       new ReportSeparator("george"),
@@ -70,6 +72,7 @@ describe("Nickel Report", () => {
   });
 
   test("Automatic highlighting", () => {
+    const chalk = new ch.Instance({ level: 1 });
     const rows = [
       new ReportLine({ test: SyncStatus.Success }),
       new ReportLine({ test: SyncStatus.Failure }),

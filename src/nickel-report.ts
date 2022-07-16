@@ -1,3 +1,5 @@
+import * as chalk from "chalk";
+
 import {
   CellAlignment,
   NickelTable,
@@ -5,7 +7,6 @@ import {
   TableColumn,
   TableRow,
 } from "./nickel-table";
-import chalk, { Level } from "chalk";
 
 import { CleanupStatus } from "./actions/cleanup";
 import { SyncStatus } from "./actions/sync";
@@ -57,9 +58,10 @@ export class ReportSeparator implements ReportingItem {
  *   values = Printable header value
  */
 export class NickelReport {
+  private readonly chalk;
+
   constructor(private readonly columns: TableColumn[]) {
-    chalk.enabled = true;
-    chalk.level = Level.Basic;
+    this.chalk = new chalk.Instance({ level: 1 });
   }
 
   /**
@@ -75,7 +77,7 @@ export class NickelReport {
         return this.processSeparator(<ReportSeparator>row);
       }
     });
-    return new NickelTable(this.columns, tableRows);
+    return new NickelTable(this.columns, tableRows, this.chalk);
   }
 
   /**
@@ -86,7 +88,7 @@ export class NickelReport {
   private processSeparator(sep: ReportSeparator): TableRow {
     const sectionText = sep.name.match(/^\s*$/)
       ? ""
-      : ` ${chalk.italic.bold(sep.name)} `;
+      : ` ${this.chalk.italic.bold(sep.name)} `;
     const head = new TableCell(sectionText, CellAlignment.Left);
     const tail = this.columns.slice(1).map(() => new TableCell(""));
     return new TableRow([head].concat(tail), "sep");
@@ -103,14 +105,14 @@ export class NickelReport {
 
       // Value transformations
       if (value === SyncStatus.Success || value === CleanupStatus.Success) {
-        value = chalk.green(value);
+        value = this.chalk.green(value);
       } else if (
         value === SyncStatus.Failure ||
         value == CleanupStatus.Failure
       ) {
-        value = chalk.red(value);
+        value = this.chalk.red(value);
       } else if (value === SyncStatus.Dirty || value === CleanupStatus.Dirty) {
-        value = chalk.bgYellow.black(value);
+        value = this.chalk.bgYellow.black(value);
       }
 
       const renderedValue =

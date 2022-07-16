@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 export class RowConfig {
   constructor(
@@ -110,7 +110,11 @@ export class TableRow {
 export class NickelTable {
   private readonly columnWidths: number[];
 
-  constructor(readonly columns: TableColumn[], readonly rows: TableRow[]) {
+  constructor(
+    readonly columns: TableColumn[],
+    readonly rows: TableRow[],
+    private readonly chalk: chalk.Chalk
+  ) {
     const titleWidths = this.columns.map((col) => col.title.length);
     this.columnWidths = this.buildColumnWidths(titleWidths, 0);
   }
@@ -126,7 +130,7 @@ export class NickelTable {
       "empty"
     );
     const headerRow = new TableRow(
-      this.columns.map((col) => new TableCell(chalk.bold(col.title))),
+      this.columns.map((col) => new TableCell(this.chalk.bold(col.title))),
       "data"
     );
 
