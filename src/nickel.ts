@@ -33,7 +33,11 @@ program
   .description("nickel-scm: Manage local Git repositories")
   .version(pkg.version)
   .option("--config <config>", "Configuration file")
-  .option("--projects <projects...>", "List of projects")
+  .option("--project <project...>", "Select a project by name")
+  .option(
+    "--project-dir <dir...>",
+    "Select projects under the indicated folder"
+  )
   .option(
     "--active-branch <activeBranch>",
     "Select projects with this active branch"
@@ -55,7 +59,8 @@ ALL_ACTIONS.forEach((nickelAction) => {
 program.parse(process.argv);
 const opts = program.opts();
 
-const selectedProjects: string[] = opts.projects || [];
+const selectedProjects: string[] = opts.project || [];
+const selectedPaths: string[] = opts.projectDir || [];
 const configScript: string | undefined = opts.config;
 const activeBranch: string = opts.activeBranch || "";
 const selectedMark: string = opts.mark || "";
@@ -139,16 +144,16 @@ async function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
   try {
     const selector = nickelSelector({
       projects: selectedProjects,
+      paths: selectedPaths,
       branch: activeBranch,
       mark: selectedMark,
     });
 
     const selectorPromises = items.map((item) => selector(item));
     const selectedItems = await Promise.all(selectorPromises);
-    const selected: number = selectedItems.reduce(
-      (sum, item_2) => sum + (item_2.selected ? 1 : 0),
-      0
-    );
+    const selected: number = selectedItems.filter(
+      (item) => item.selected
+    ).length;
     logger.debug(`Selected ${selected} projects`);
 
     if (selected === 0) {

@@ -1,3 +1,5 @@
+import * as path from "path";
+
 import { ReportSeparator, ReportingItem } from "./nickel-report";
 
 import { NickelProject } from "./nickel-project";
@@ -14,6 +16,9 @@ export interface SelectedItem {
 export interface SelectorConfig {
   /** Projects in this list are selected */
   readonly projects: string[];
+
+  /** Paths containing projects */
+  readonly paths: string[];
 
   /** Select based on this branch name */
   readonly branch: string;
@@ -50,20 +55,40 @@ function projectListSelector(projects: string[]): NickelSelector {
   return selector;
 }
 
-function branchSelector(selectorBranch: string): NickelSelector {
-  logger.debug(`Active branch selector: ${selectorBranch}`);
+function projectPathSelector(paths: string[]): NickelSelector {
+  logger.debug(`Project path selector: ${paths}`);
   const selector = ((item) => {
     if (item instanceof ReportSeparator) {
       return Promise.resolve({ item: item, selected: false });
     } else {
-      return (<NickelProject>item).repository.branch().then((branch) => {
-        logger.debug(
-          `[${item.name}] branch=${branch} selected=${
-            branch === selectorBranch
-          }`
-        );
-        return { item: item, selected: branch === selectorBranch };
+      const project = item as NickelProject;
+      const matchingPaths = paths
+        .map((p) => path.normalize(p))
+        .map((p) => (path.isAbsolute(p) ? p : path.resolve(p)))
+        .filter((p) => project.path.startsWith(p));
+
+      return Promise.resolve({
+        item: item,
+        selected: matchingPaths.length > 0,
       });
+    }
+  }) as NickelSelector;
+  selector.criteria = `in path list: ${paths}`;
+  return selector;
+}
+
+function branchSelector(selectorBranch: string): NickelSelector {
+  logger.debug(`Active branch selector: ${selectorBranch}`);
+  const selector = (async (item) => {
+    if (item instanceof ReportSeparator) {
+      return { item: item, selected: false };
+    } else {
+      const project = item as NickelProject;
+      const branch = await project.repository.branch();
+      logger.debug(
+        `[${item.name}] branch=${branch} selected=${branch === selectorBranch}`
+      );
+      return { item: item, selected: branch === selectorBranch };
     }
   }) as NickelSelector;
   selector.criteria = `active branch = ${selectorBranch}`;
@@ -97,16 +122,20 @@ function markSelector(selectorMark: string): NickelSelector {
  */
 export function nickelSelector(config: SelectorConfig): NickelSelector {
   const haveSelectedProjects = config.projects.length > 0;
+  const haveSelectedPaths = config.paths.length > 0;
   const haveActiveBranch = config.branch.trim().length > 0;
   const haveSelectedMark = config.mark.trim().length > 0;
 
   const selectorCount: number =
     (haveSelectedProjects ? 1 : 0) +
+    (haveSelectedPaths ? 1 : 0) +
     (haveActiveBranch ? 1 : 0) +
     (haveSelectedMark ? 1 : 0);
 
   if (selectorCount > 1) {
-    throw `Conflicting selectors: projects=${config.projects} branch=${config.branch} mark=${config.mark}`;
+    throw `Conflicting selectors: projects=${config.projects} paths=${config.paths} branch=${config.branch} mark=${config.mark}`;
+  } else if (haveSelectedPaths) {
+    return projectPathSelector(config.paths);
   } else if (haveSelectedProjects) {
     return projectListSelector(config.projects);
   } else if (haveActiveBranch) {

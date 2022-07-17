@@ -97,11 +97,12 @@ nickel-scm: Manage local Git repositories
 Options:
   -V, --version                   output the version number
   --config <config>               Configuration file
-  --projects <projects>           List of projects
+  --project <project...>          Select a project by name
+  --project-dir <dir...>          Select projects under the indicated folder
   --active-branch <activeBranch>  Select projects with this active branch
-  --level <level>                 Log level
+  --level <level>                 Log level (default: "info")
   --mark <mark>                   Select projects with this mark
-  -h, --help                      output usage information
+  -h, --help                      display help for command
 
 Commands:
   sync                            Sync all projects
@@ -110,6 +111,7 @@ Commands:
   mergedReport <reportFile>       Generated a merged branches report
   guidedRemove <reportFile>       Remove branches based on a merged branches report
   oldBranches <reportFile> [age]  Generate a list of branches older than a certain age
+  help [command]                  display help for command
 ```
 
 The most common form of the command is `nickel sync`. This will sync all the repositories listed

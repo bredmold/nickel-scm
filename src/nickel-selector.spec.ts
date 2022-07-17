@@ -20,122 +20,204 @@ describe("Nickel Selector", () => {
     separator = new ReportSeparator("test");
   });
 
-  test("No selector => all projects selected", () => {
-    const selector = nickelSelector({ projects: [], branch: "", mark: "" });
+  test("No selector => all projects selected", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: [],
+      branch: "",
+      mark: "",
+    });
 
     expect(selector).toHaveProperty("criteria", "All projects");
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: true,
     });
   });
 
-  test("project list selector positive match", () => {
+  test("project list selector positive match", async () => {
     const selector = nickelSelector({
       projects: ["test"],
+      paths: [],
       branch: "",
       mark: "",
     });
 
     expect(selector).toHaveProperty("criteria", "in list: test");
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: true,
     });
   });
 
-  test("project list selector negative match", () => {
+  test("project list selector negative match", async () => {
     const selector = nickelSelector({
       projects: ["nope"],
+      paths: [],
       branch: "",
       mark: "",
     });
 
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: false,
     });
   });
 
-  test("project list separator", () => {
+  test("project list separator", async () => {
     const selector = nickelSelector({
       projects: ["test"],
+      paths: [],
       branch: "",
       mark: "",
     });
 
-    return expect(selector(separator)).resolves.toStrictEqual({
+    const selection = await selector(separator);
+    expect(selection).toStrictEqual({
       item: separator,
       selected: false,
     });
   });
 
-  test("active branch selector positive match", () => {
+  test("path list selector positive match", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: ["/application"],
+      branch: "",
+      mark: "",
+    });
+
+    expect(selector).toHaveProperty("criteria", "in path list: /application");
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
+      item: project,
+      selected: true,
+    });
+  });
+
+  test("path list selector negative match", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: ["/nope"],
+      branch: "",
+      mark: "",
+    });
+
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
+      item: project,
+      selected: false,
+    });
+  });
+
+  test("path list separator", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: ["/application"],
+      branch: "",
+      mark: "",
+    });
+
+    const selection = await selector(separator);
+    expect(selection).toStrictEqual({
+      item: separator,
+      selected: false,
+    });
+  });
+
+  test("active branch selector positive match", async () => {
     project.repository.branch = jest.fn(() => Promise.resolve("master"));
 
     const selector = nickelSelector({
       projects: [],
+      paths: [],
       branch: "master",
       mark: "",
     });
 
     expect(selector).toHaveProperty("criteria", "active branch = master");
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: true,
     });
   });
 
-  test("active branch selector negative match", () => {
+  test("active branch selector negative match", async () => {
     project.repository.branch = jest.fn(() => Promise.resolve("not-master"));
 
     const selector = nickelSelector({
       projects: [],
+      paths: [],
       branch: "master",
       mark: "",
     });
 
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: false,
     });
   });
 
-  test("active branch separator", () => {
+  test("active branch separator", async () => {
     const selector = nickelSelector({
       projects: [],
+      paths: [],
       branch: "master",
       mark: "",
     });
 
-    return expect(selector(separator)).resolves.toStrictEqual({
+    const selection = await selector(separator);
+    expect(selection).toStrictEqual({
       item: separator,
       selected: false,
     });
   });
 
-  test("mark positive", () => {
-    const selector = nickelSelector({ projects: [], branch: "", mark: "a" });
+  test("mark positive", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: [],
+      branch: "",
+      mark: "a",
+    });
 
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: true,
     });
   });
 
-  test("mark negative", () => {
-    const selector = nickelSelector({ projects: [], branch: "", mark: "no" });
+  test("mark negative", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: [],
+      branch: "",
+      mark: "no",
+    });
 
-    return expect(selector(project)).resolves.toStrictEqual({
+    const selection = await selector(project);
+    expect(selection).toStrictEqual({
       item: project,
       selected: false,
     });
   });
 
-  test("mark separator", () => {
-    const selector = nickelSelector({ projects: [], branch: "", mark: "a" });
+  test("mark separator", async () => {
+    const selector = nickelSelector({
+      projects: [],
+      paths: [],
+      branch: "",
+      mark: "a",
+    });
 
-    return expect(selector(separator)).resolves.toStrictEqual({
+    const selection = await selector(separator);
+    expect(selection).toStrictEqual({
       item: separator,
       selected: false,
     });
@@ -143,7 +225,12 @@ describe("Nickel Selector", () => {
 
   test("invalid matcher spec", () => {
     expect(() =>
-      nickelSelector({ projects: ["project"], branch: "master", mark: "" })
+      nickelSelector({
+        projects: ["project"],
+        paths: [],
+        branch: "master",
+        mark: "",
+      })
     ).toThrow();
   });
 });
