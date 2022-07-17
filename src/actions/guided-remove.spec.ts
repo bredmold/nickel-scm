@@ -26,7 +26,7 @@ describe("Guided Remove", () => {
     action = new GuidedBranchRemovalAction();
   });
 
-  test("Empty report", async (done) => {
+  test("Empty report", async () => {
     project.repository.status = jest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
@@ -60,11 +60,11 @@ describe("Guided Remove", () => {
         })
       );
     } finally {
-      fs.unlink(tmpFile, () => done());
+      fs.unlinkSync(tmpFile);
     }
   });
 
-  test("One branch, to be kept", async (done) => {
+  test("One branch, to be kept", async () => {
     project.repository.status = jest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
@@ -107,11 +107,11 @@ describe("Guided Remove", () => {
         })
       );
     } finally {
-      fs.unlink(tmpFile, () => done());
+      fs.unlinkSync(tmpFile);
     }
   });
 
-  test("One branch, to delete", async (done) => {
+  test("One branch, to delete", async () => {
     project.repository.status = jest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
@@ -167,11 +167,11 @@ describe("Guided Remove", () => {
         })
       );
     } finally {
-      fs.unlink(tmpFile, () => done());
+      fs.unlinkSync(tmpFile);
     }
   });
 
-  test("Fetch result show name change", async (done) => {
+  test("Fetch result show name change", async () => {
     project.repository.status = jest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
@@ -242,7 +242,7 @@ describe("Guided Remove", () => {
         })
       );
     } finally {
-      fs.unlink(tmpFile, () => done());
+      fs.unlinkSync(tmpFile);
     }
   });
 });
