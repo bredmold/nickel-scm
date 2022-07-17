@@ -22,11 +22,13 @@ This should give the standard help message for nickel.
 ### Configure
 
 Configuration is done using a JS source file with some pre-defined calls available. Nickel will search for this file in the following locations:
+
 1. Wherever the `--config` command-line argument points
 1. `${HOME}/.nickel.js`
 1. `${HOME}/nickel.js`
 
 #### The Old Way
+
 The content of this file is a series of project declarations. For example:
 
 ```javascript
@@ -84,7 +86,6 @@ projectRoot("c:/Dev", root => {
 });
 ```
 
-
 ## Run
 
 Here's the standard help message.
@@ -126,7 +127,8 @@ There are two command-line options that allow you to select the list of projects
 
 | Option            | Description                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------- |
-| `--projects`      | Select projects by name (if there are duplicates, this will select all matching projects)   |
+| `--project`       | Select projects by name (multiple names may be given)                                       |
+| `--project-dir`   | Select projects by filesystem location (multiple paths may be given)                        |
 | `--active-branch` | Select projects by active branch (this will query each project as part of project selection |
 
 ### report
@@ -273,11 +275,13 @@ npm run build && npm install -g
 ## Tests
 
 Run unit tests:
+
 ```bash
 npm run test
 ```
 
 Run unit tests with coverage:
+
 ```bash
 npm run coverage
 ```
