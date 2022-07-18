@@ -13,8 +13,6 @@ export enum CleanupStatus {
 }
 
 export class RepositoryCleanupAction implements NickelAction {
-  readonly command = "cleanup";
-  readonly description = "Retire unused branches";
   skipReport(project: NickelProject): ReportLine {
     return new ReportLine(
       {

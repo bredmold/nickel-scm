@@ -12,7 +12,7 @@ import { logger } from "./logger";
 export class NickelInstigator {
   constructor(private readonly selectedItems: SelectedItem[]) {}
 
-  doIt(action: NickelAction, args: string[]): void {
+  async doIt(action: NickelAction): Promise<void> {
     // Do eeet!
     const timer = new NickelTimer();
     const promises: Promise<ReportingItem>[] = this.selectedItems.map(
@@ -20,7 +20,7 @@ export class NickelInstigator {
         const item = selectedItem.item;
         if (item instanceof NickelProject) {
           if (selectedItem.selected) {
-            return action.act(<NickelProject>item, args);
+            return action.act(<NickelProject>item);
           } else {
             return Promise.resolve(action.skipReport(<NickelProject>item));
           }
@@ -31,15 +31,14 @@ export class NickelInstigator {
       }
     );
 
-    Promise.all(promises).then((reports: ReportingItem[]) => {
-      const report = new NickelReport(action.columns);
-      const table = report.buildReport(reports);
-      console.log(table.render());
-      const reportLines = reports.filter(
-        (report) => report instanceof ReportLine
-      );
-      action.post(reportLines as ReportLine[], args);
-      logger.info(`${timer.elapsed() / 1000}s elapsed`);
-    });
+    const reports: ReportingItem[] = await Promise.all(promises);
+    const report = new NickelReport(action.columns);
+    const table = report.buildReport(reports);
+    console.log(table.render());
+    const reportLines = reports.filter(
+      (report) => report instanceof ReportLine
+    );
+    action.post(reportLines as ReportLine[]);
+    logger.info(`${timer.elapsed() / 1000}s elapsed`);
   }
 }

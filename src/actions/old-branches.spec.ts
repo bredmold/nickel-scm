@@ -9,8 +9,10 @@ import { OldBranchesReportAction } from "./old-branches";
 describe("Old Branches Report", () => {
   let project: NickelProject;
   let action: OldBranchesReportAction;
+  let testOutputFile: string;
 
   beforeEach(() => {
+    testOutputFile = tmp.tmpNameSync();
     project = new NickelProject({
       name: "test",
       path: "/application/path",
@@ -20,10 +22,14 @@ describe("Old Branches Report", () => {
       marks: [],
       pruneOnFetch: false,
     });
-    action = new OldBranchesReportAction();
+    action = new OldBranchesReportAction(testOutputFile, 25);
   });
 
-  test("No old branches", () => {
+  afterEach(() => {
+    if (fs.existsSync(testOutputFile)) fs.unlinkSync(testOutputFile);
+  });
+
+  test("No old branches", async () => {
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
@@ -40,7 +46,8 @@ describe("Old Branches Report", () => {
       return Promise.resolve(new Date(commitTs));
     });
 
-    return expect(action.act(project)).resolves.toStrictEqual(
+    const reportLine = await action.act(project);
+    expect(reportLine).toStrictEqual(
       new BranchReportLine(
         {
           Project: "test",
@@ -70,9 +77,7 @@ describe("Old Branches Report", () => {
       return Promise.resolve(new Date(commitTs));
     });
 
-    return expect(
-      action.act(project, ["foo.json", "25"])
-    ).resolves.toStrictEqual(
+    return expect(action.act(project)).resolves.toStrictEqual(
       new BranchReportLine(
         {
           Project: "test",
@@ -84,34 +89,25 @@ describe("Old Branches Report", () => {
     );
   });
 
-  test("Report writer", (done) => {
-    const testOutputFile = tmp.tmpNameSync();
+  test("Report writer", () => {
+    action.post([
+      new BranchReportLine(
+        {
+          Project: "test",
+          Status: BranchReportStatus.Success,
+          "# Candidates": "1",
+        },
+        ["origin/old"]
+      ),
+    ]);
 
-    try {
-      action.post(
-        [
-          new BranchReportLine(
-            {
-              Project: "test",
-              Status: BranchReportStatus.Success,
-              "# Candidates": "1",
-            },
-            ["origin/old"]
-          ),
-        ],
-        [testOutputFile]
-      );
+    const branchReportContent: string = fs.readFileSync(testOutputFile, {
+      encoding: "utf8",
+    });
+    const branchReport = JSON.parse(branchReportContent);
 
-      const branchReportContent: string = fs.readFileSync(testOutputFile, {
-        encoding: "utf8",
-      });
-      const branchReport = JSON.parse(branchReportContent);
-
-      expect(branchReport).toStrictEqual([
-        { project: "test", branch: "origin/old", keep: false },
-      ]);
-    } finally {
-      fs.unlink(testOutputFile, () => done());
-    }
+    expect(branchReport).toStrictEqual([
+      { project: "test", branch: "origin/old", keep: false },
+    ]);
   });
 });

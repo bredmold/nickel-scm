@@ -33,7 +33,7 @@ describe("Nickel Instigator", () => {
     instigator = new NickelInstigator(items);
   });
 
-  test("doTheThing", (done) => {
+  test("doTheThing", async () => {
     let actCount = 0;
     const action = new (class implements NickelAction {
       readonly columns = [new TableColumn("test")];
@@ -51,14 +51,14 @@ describe("Nickel Instigator", () => {
       post(reports: ReportLine[]): void {
         expect(actCount).toStrictEqual(1);
         expect(reports).toStrictEqual([new ReportLine({ test: "b" })]);
-        done();
       }
     })();
 
-    instigator.doIt(action, []);
+    expect.assertions(2);
+    await instigator.doIt(action);
   });
 
-  test("skipped project", (done) => {
+  test("skipped project", async () => {
     const action = new (class implements NickelAction {
       readonly columns = [new TableColumn("test")];
       readonly command = "test";
@@ -68,7 +68,6 @@ describe("Nickel Instigator", () => {
       }
 
       act(): Promise<ReportLine> {
-        done.fail("act should not be called");
         return Promise.reject("fail");
       }
 
@@ -76,13 +75,13 @@ describe("Nickel Instigator", () => {
         expect(reports).toStrictEqual([
           new ReportLine({ Project: "test", test: "a" }, false),
         ]);
-        done();
       }
     })();
 
     items = items.map((item) => ({ item: item.item, selected: false }));
     instigator = new NickelInstigator(items);
 
-    instigator.doIt(action, []);
+    expect.assertions(1);
+    await instigator.doIt(action);
   });
 });

@@ -23,8 +23,8 @@ export enum GuidedBranchRemovalStatus {
 }
 
 export class GuidedBranchRemovalAction implements NickelAction {
-  readonly command = "guidedRemove <reportFile>";
-  readonly description = "Remove branches based on a merged branches report";
+  constructor(private readonly reportFile: string) {}
+
   skipReport(project: NickelProject): ReportLine {
     return new ReportLine(
       {
@@ -38,6 +38,7 @@ export class GuidedBranchRemovalAction implements NickelAction {
       false
     );
   }
+
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Branch"),
@@ -47,12 +48,8 @@ export class GuidedBranchRemovalAction implements NickelAction {
     new TableColumn("# Failed"),
   ];
 
-  act(project: NickelProject, args?: string[]): Promise<ReportLine> {
-    if (args) {
-      return new GuidedBranchRemoval(project, args[0]).prune();
-    } else {
-      return Promise.reject("No report file provided as input");
-    }
+  act(project: NickelProject): Promise<ReportLine> {
+    return new GuidedBranchRemoval(project, this.reportFile).prune();
   }
 
   post(): void {
@@ -127,6 +124,7 @@ class GuidedBranchRemoval {
   async prune(): Promise<ReportLine> {
     const project = this.project;
     const branchesKept = this.branchesKept;
+
     function line(
       branch: string,
       removedBranches: string[],

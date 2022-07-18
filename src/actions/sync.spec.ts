@@ -22,8 +22,6 @@ describe("Sync Action", () => {
   });
 
   test("basics", () => {
-    expect(action.command).toStrictEqual("sync");
-    expect(action.description).toStrictEqual("Sync all projects");
     expect(action.skipReport(EMPTY_PROJECT)).toStrictEqual(
       new ReportLine(
         {

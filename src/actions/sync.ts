@@ -13,8 +13,6 @@ export enum SyncStatus {
 }
 
 export class RepositorySyncAction implements NickelAction {
-  readonly command = "sync";
-  readonly description = "Sync all projects";
   skipReport(project: NickelProject): ReportLine {
     return new ReportLine(
       {

@@ -146,3 +146,28 @@ export function nickelSelector(config: SelectorConfig): NickelSelector {
     return trueSelector();
   }
 }
+
+/**
+ * Filter the list of projects based on selection criteria
+ *
+ * @param config Selection configuration
+ * @param items List of configured reporting items
+ * @return A promise containing projects merged with selection criteria
+ */
+export async function selectItems(
+  config: SelectorConfig,
+  items: ReportingItem[]
+): Promise<SelectedItem[]> {
+  const selector = nickelSelector(config);
+
+  const selectorPromises = items.map((item) => selector(item));
+  const selectedItems = await Promise.all(selectorPromises);
+  const selected: number = selectedItems.filter((item) => item.selected).length;
+  logger.debug(`Selected ${selected} projects`);
+
+  if (selected === 0) {
+    throw `No projects meet selection criteria: ${selector.criteria}`;
+  } else {
+    return selectedItems;
+  }
+}

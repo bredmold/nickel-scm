@@ -4,26 +4,24 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vm from "vm";
 
-import { SelectedItem, nickelSelector } from "./nickel-selector";
-
-import { ALL_ACTIONS } from "./actions/nickel-action";
 import { Command } from "commander";
 import { ConfigContext } from "./config-context";
+import { GuidedBranchRemovalAction } from "./actions/guided-remove";
+import { MergedBranchesReportAction } from "./actions/merged-branches";
+import { NickelAction } from "./actions/nickel-action";
 import { NickelInstigator } from "./nickel-instigator";
-import { ReportingItem } from "./nickel-report";
+import { OldBranchesReportAction } from "./actions/old-branches";
+import { RepositoryCleanupAction } from "./actions/cleanup";
+import { RepositorySyncAction } from "./actions/sync";
 import { logger } from "./logger";
+import { selectItems } from "./nickel-selector";
 
 import pkg = require("../package.json");
 
 /*
-Global controls
- command          - the selected command
- commandArgs      - command arguments
- configScript     - Location of the configuration script
- selectedProjects - List of projects to select
+The action to run for this command
  */
-let command = "";
-let commandArgs: string[] = [];
+let action: NickelAction | undefined = undefined;
 
 /*
 Command-line parsing
@@ -45,30 +43,81 @@ program
   .option("--level <level>", "Log level", "info")
   .option("--mark <mark>", "Select projects with this mark");
 
-ALL_ACTIONS.forEach((nickelAction) => {
-  program
-    .command(nickelAction.command)
-    .action((...args) => {
-      command = nickelAction.command;
-      commandArgs = args;
-      logger.debug(`cmd=${nickelAction.command} args=${commandArgs}`);
-    })
-    .description(nickelAction.description);
-});
+program
+  .command("sync")
+  .description("Sync all projects")
+  .action(() => {
+    logger.debug("cmd=sync");
+    action = new RepositorySyncAction();
+  });
+
+program
+  .command("report")
+  .description("Local repository report")
+  .action(() => {
+    logger.debug("cmd=report");
+    action = new RepositorySyncAction();
+  });
+
+program
+  .command("cleanup")
+  .description("Retire unused branches")
+  .action(() => {
+    logger.debug("cmd=cleanup");
+    action = new RepositoryCleanupAction();
+  });
+
+program
+  .command("mergedReport")
+  .argument("<reportFile>", "Branch report to generate")
+  .description("Generate a merged branches report")
+  .action((reportFile: string) => {
+    logger.debug(`cmd=mergedBranches reportFile=${reportFile}`);
+    action = new MergedBranchesReportAction(reportFile);
+  });
+
+program
+  .command("guidedRemove")
+  .argument("<reportFile>", "Report file to consume")
+  .description("Remove branches based on a branch report")
+  .action((reportFile: string) => {
+    logger.debug(`cmd=guidedRemove reportFile=${reportFile}`);
+    action = new GuidedBranchRemovalAction(reportFile);
+  });
+
+program
+  .command("oldBranches")
+  .description("Generate a list of branches older than a certain age")
+  .argument("<reportFile>", "Branch report to generate")
+  .argument("[age]", "Age of latest commit (in days)", 60)
+  .action((reportFile: string, age: number) => {
+    logger.debug(`cmd=oldBranches reportFile=${reportFile} age=${age}`);
+    action = new OldBranchesReportAction(reportFile, age);
+  });
 
 program.parse(process.argv);
 const opts = program.opts();
 
+/*
+Project selection options
+ selectedProjects - Project names
+ selectedPaths    - Filesystem paths
+ activeBranch     - Branch name
+ selectedMark     - Marks from configuration
+
+Other options
+ configScript     - Config script override location
+ */
 const selectedProjects: string[] = opts.project || [];
 const selectedPaths: string[] = opts.projectDir || [];
-const configScript: string | undefined = opts.config;
 const activeBranch: string = opts.activeBranch || "";
 const selectedMark: string = opts.mark || "";
+const configScript: string | undefined = opts.config;
 
 logger.level = opts.level;
 logger.info(`Log level is ${logger.level}`);
 
-if (command === "") {
+if (action === undefined) {
   logger.error("No actions were specified");
   process.exit(1);
 }
@@ -114,7 +163,7 @@ function findConfigScript(configScriptOption?: string): string {
   }
 }
 
-try {
+async function main() {
   const configScriptPath = findConfigScript(configScript);
   const configScriptContent = fs.readFileSync(configScriptPath, {
     encoding: "utf-8",
@@ -125,57 +174,30 @@ try {
   vm.runInContext(configScriptContent, configContext, {
     filename: configScriptPath,
   });
-} catch (e: any) {
-  logger.error(`message - ${e.message}, stack trace - ${e.stack}`);
-  process.exit(1);
-}
 
-/*
-Do the things!
- */
+  /*
+  Do the things!
+   */
 
-/**
- * Filter the list of projects based on selection criteria
- *
- * @param items List of configured reporting items
- * @return A promise containing projects merged with selection criteria
- */
-async function selectItems(items: ReportingItem[]): Promise<SelectedItem[]> {
-  try {
-    const selector = nickelSelector({
+  const selectedItems = await selectItems(
+    {
       projects: selectedProjects,
       paths: selectedPaths,
       branch: activeBranch,
       mark: selectedMark,
-    });
+    },
+    ConfigContext.reportItems
+  );
+  const instigator = new NickelInstigator(selectedItems);
+  await instigator.doIt(action as NickelAction);
+}
 
-    const selectorPromises = items.map((item) => selector(item));
-    const selectedItems = await Promise.all(selectorPromises);
-    const selected: number = selectedItems.filter(
-      (item) => item.selected
-    ).length;
-    logger.debug(`Selected ${selected} projects`);
-
-    if (selected === 0) {
-      logger.error(`No projects meet selection criteria: ${selector.criteria}`);
-      process.exit(1);
-    }
-
-    return selectedItems;
-  } catch (e: any) {
+main().then(
+  () => {
+    logger.debug("Done");
+  },
+  (e) => {
     logger.error(e);
     process.exit(1);
   }
-}
-
-selectItems(ConfigContext.reportItems).then((selectedItems: SelectedItem[]) => {
-  const action = ALL_ACTIONS.find(
-    (nickelAction) => nickelAction.command === command
-  );
-  if (action === undefined) {
-    logger.error("this never happens");
-  } else {
-    const instigator = new NickelInstigator(selectedItems);
-    instigator.doIt(action, commandArgs);
-  }
-});
+);

@@ -11,8 +11,8 @@ import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";
 
 export class MergedBranchesReportAction implements NickelAction {
-  readonly command = "mergedReport <reportFile>";
-  readonly description = "Generated a merged branches report";
+  constructor(private readonly reportFile: string) {}
+
   skipReport(project: NickelProject): ReportLine {
     return new BranchReportLine(
       {
@@ -24,6 +24,7 @@ export class MergedBranchesReportAction implements NickelAction {
       false
     );
   }
+
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Status"),
@@ -75,14 +76,10 @@ export class MergedBranchesReportAction implements NickelAction {
     }
   }
 
-  post(reports: ReportLine[], args?: string[]): void {
-    if (args) {
-      new BranchReportWriter(
-        <BranchReportLine[]>reports,
-        args[0]
-      ).writeReport();
-    } else {
-      logger.error("Report file was not provided");
-    }
+  post(reports: ReportLine[]): void {
+    new BranchReportWriter(
+      <BranchReportLine[]>reports,
+      this.reportFile
+    ).writeReport();
   }
 }

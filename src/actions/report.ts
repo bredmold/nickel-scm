@@ -4,8 +4,6 @@ import { ReportLine } from "../nickel-report";
 import { TableColumn } from "../nickel-table";
 
 export class RepositoryReportAction implements NickelAction {
-  readonly command = "report";
-  readonly description = "Local repository report";
   skipReport(project: NickelProject): ReportLine {
     return new ReportLine(
       {

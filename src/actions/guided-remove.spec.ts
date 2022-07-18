@@ -12,8 +12,10 @@ import { ReportLine } from "../nickel-report";
 describe("Guided Remove", () => {
   let project: NickelProject;
   let action: GuidedBranchRemovalAction;
+  let tmpFile: string;
 
   beforeEach(() => {
+    tmpFile = tmp.tmpNameSync();
     project = new NickelProject({
       name: "test",
       path: "/application/path",
@@ -23,7 +25,11 @@ describe("Guided Remove", () => {
       marks: [],
       pruneOnFetch: false,
     });
-    action = new GuidedBranchRemovalAction();
+    action = new GuidedBranchRemovalAction(tmpFile);
+  });
+
+  afterEach(() => {
+    if (fs.existsSync(tmpFile)) fs.unlinkSync(tmpFile);
   });
 
   test("Empty report", async () => {
@@ -44,24 +50,19 @@ describe("Guided Remove", () => {
       })
     );
 
-    const tmpFile = tmp.tmpNameSync();
-    try {
-      fs.writeFileSync(tmpFile, "[]");
+    fs.writeFileSync(tmpFile, "[]");
 
-      const reportLine = await action.act(project, [tmpFile]);
-      expect(reportLine).toStrictEqual(
-        new ReportLine({
-          Project: "test",
-          Branch: "master",
-          Status: GuidedBranchRemovalStatus.Skipped,
-          "# Kept": "0",
-          "# Removed": "0",
-          "# Failed": "0",
-        })
-      );
-    } finally {
-      fs.unlinkSync(tmpFile);
-    }
+    const reportLine = await action.act(project);
+    expect(reportLine).toStrictEqual(
+      new ReportLine({
+        Project: "test",
+        Branch: "master",
+        Status: GuidedBranchRemovalStatus.Skipped,
+        "# Kept": "0",
+        "# Removed": "0",
+        "# Failed": "0",
+      })
+    );
   });
 
   test("One branch, to be kept", async () => {
@@ -82,33 +83,28 @@ describe("Guided Remove", () => {
       })
     );
 
-    const tmpFile = tmp.tmpNameSync();
-    try {
-      fs.writeFileSync(
-        tmpFile,
-        JSON.stringify([
-          {
-            project: "test",
-            branch: "origin/nope",
-            keep: true,
-          },
-        ])
-      );
+    fs.writeFileSync(
+      tmpFile,
+      JSON.stringify([
+        {
+          project: "test",
+          branch: "origin/nope",
+          keep: true,
+        },
+      ])
+    );
 
-      const reportLine = await action.act(project, [tmpFile]);
-      expect(reportLine).toStrictEqual(
-        new ReportLine({
-          Project: "test",
-          Branch: "master",
-          Status: GuidedBranchRemovalStatus.Skipped,
-          "# Kept": "1",
-          "# Removed": "0",
-          "# Failed": "0",
-        })
-      );
-    } finally {
-      fs.unlinkSync(tmpFile);
-    }
+    const reportLine = await action.act(project);
+    expect(reportLine).toStrictEqual(
+      new ReportLine({
+        Project: "test",
+        Branch: "master",
+        Status: GuidedBranchRemovalStatus.Skipped,
+        "# Kept": "1",
+        "# Removed": "0",
+        "# Failed": "0",
+      })
+    );
   });
 
   test("One branch, to delete", async () => {
@@ -142,33 +138,28 @@ describe("Guided Remove", () => {
       }
     });
 
-    const tmpFile = tmp.tmpNameSync();
-    try {
-      fs.writeFileSync(
-        tmpFile,
-        JSON.stringify([
-          {
-            project: "test",
-            branch: "origin/nope",
-            keep: false,
-          },
-        ])
-      );
+    fs.writeFileSync(
+      tmpFile,
+      JSON.stringify([
+        {
+          project: "test",
+          branch: "origin/nope",
+          keep: false,
+        },
+      ])
+    );
 
-      const reportLine = await action.act(project, [tmpFile]);
-      expect(reportLine).toStrictEqual(
-        new ReportLine({
-          Project: "test",
-          Branch: "master",
-          Status: GuidedBranchRemovalStatus.Success,
-          "# Kept": "0",
-          "# Removed": "1",
-          "# Failed": "0",
-        })
-      );
-    } finally {
-      fs.unlinkSync(tmpFile);
-    }
+    const reportLine = await action.act(project);
+    expect(reportLine).toStrictEqual(
+      new ReportLine({
+        Project: "test",
+        Branch: "master",
+        Status: GuidedBranchRemovalStatus.Success,
+        "# Kept": "0",
+        "# Removed": "1",
+        "# Failed": "0",
+      })
+    );
   });
 
   test("Fetch result show name change", async () => {
@@ -217,32 +208,27 @@ describe("Guided Remove", () => {
       }
     });
 
-    const tmpFile = tmp.tmpNameSync();
-    try {
-      fs.writeFileSync(
-        tmpFile,
-        JSON.stringify([
-          {
-            project: "test",
-            branch: "origin/Feature/test",
-            keep: false,
-          },
-        ])
-      );
+    fs.writeFileSync(
+      tmpFile,
+      JSON.stringify([
+        {
+          project: "test",
+          branch: "origin/Feature/test",
+          keep: false,
+        },
+      ])
+    );
 
-      const reportLine = await action.act(project, [tmpFile]);
-      expect(reportLine).toStrictEqual(
-        new ReportLine({
-          Project: "test",
-          Branch: "master",
-          Status: GuidedBranchRemovalStatus.Success,
-          "# Kept": "0",
-          "# Removed": "1",
-          "# Failed": "0",
-        })
-      );
-    } finally {
-      fs.unlinkSync(tmpFile);
-    }
+    const reportLine = await action.act(project);
+    expect(reportLine).toStrictEqual(
+      new ReportLine({
+        Project: "test",
+        Branch: "master",
+        Status: GuidedBranchRemovalStatus.Success,
+        "# Kept": "0",
+        "# Removed": "1",
+        "# Failed": "0",
+      })
+    );
   });
 });

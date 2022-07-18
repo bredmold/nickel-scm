@@ -22,8 +22,6 @@ describe("Report Action", () => {
   });
 
   test("basics", () => {
-    expect(action.command).toStrictEqual("report");
-    expect(action.description).toStrictEqual("Local repository report");
     expect(action.skipReport(EMPTY_PROJECT)).toStrictEqual(
       new ReportLine(
         {

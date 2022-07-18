@@ -16,8 +16,11 @@ import { logger } from "../logger";
  *   - item 1: age in days
  */
 export class OldBranchesReportAction implements NickelAction {
-  readonly command = "oldBranches <reportFile> [age]";
-  readonly description = "Generate a list of branches older than a certain age";
+  constructor(
+    private readonly reportFile: string,
+    private readonly age: number
+  ) {}
+
   skipReport(project: NickelProject): ReportLine {
     return new BranchReportLine(
       {
@@ -29,44 +32,22 @@ export class OldBranchesReportAction implements NickelAction {
       false
     );
   }
+
   readonly columns = [
     new TableColumn("Project"),
     new TableColumn("Status"),
     new TableColumn("# Candidates"),
   ];
 
-  act(project: NickelProject, args?: string[]): Promise<ReportLine> {
-    let age = 60;
-    if (args instanceof Array && args.length > 1) {
-      const ageArg: string = args[1];
-      if (ageArg.match(/^\d+$/)) {
-        const ageParsed: number = Number.parseInt(ageArg);
-        if (ageParsed >= 1) {
-          age = ageParsed;
-        } else {
-          logger.warn(
-            `Supplied age is invalid, substituting a default: ${ageParsed}`
-          );
-        }
-      } else {
-        logger.warn(
-          `Supplied age is not numeric, substituting a default: ${ageArg}`
-        );
-      }
-    }
-
-    return new OldBranchesReport(project, age).report();
+  act(project: NickelProject): Promise<ReportLine> {
+    return new OldBranchesReport(project, this.age).report();
   }
 
-  post(reports: ReportLine[], args?: string[]): void {
-    if (args) {
-      new BranchReportWriter(
-        <BranchReportLine[]>reports,
-        args[0]
-      ).writeReport();
-    } else {
-      logger.error("No branch report file specified");
-    }
+  post(reports: ReportLine[]): void {
+    new BranchReportWriter(
+      <BranchReportLine[]>reports,
+      this.reportFile
+    ).writeReport();
   }
 }
 
@@ -80,6 +61,7 @@ class OldBranchesReport {
 
   async report(): Promise<ReportLine> {
     const project = this.project.name;
+
     function line(status: BranchReportStatus, candidateBranches: string[]) {
       return new BranchReportLine(
         {

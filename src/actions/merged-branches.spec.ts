@@ -9,8 +9,10 @@ import { NickelProject } from "../nickel-project";
 describe("Merged Branche Report", () => {
   let project: NickelProject;
   let action: MergedBranchesReportAction;
+  let testOutputFile: string;
 
   beforeEach(() => {
+    testOutputFile = tmp.tmpNameSync();
     project = new NickelProject({
       name: "test",
       path: "/application/path",
@@ -20,7 +22,11 @@ describe("Merged Branche Report", () => {
       marks: [],
       pruneOnFetch: false,
     });
-    action = new MergedBranchesReportAction();
+    action = new MergedBranchesReportAction(testOutputFile);
+  });
+
+  afterEach(() => {
+    if (fs.existsSync(testOutputFile)) fs.unlinkSync(testOutputFile);
   });
 
   test("No updated branches", () => {
@@ -69,34 +75,25 @@ describe("Merged Branche Report", () => {
     );
   });
 
-  test("Write the report", (done) => {
-    const testOutputFile = tmp.tmpNameSync();
+  test("Write the report", () => {
+    action.post([
+      new BranchReportLine(
+        {
+          Project: "test",
+          Status: BranchReportStatus.Success,
+          "# Candidates": "1",
+        },
+        ["origin/merged"]
+      ),
+    ]);
 
-    try {
-      action.post(
-        [
-          new BranchReportLine(
-            {
-              Project: "test",
-              Status: BranchReportStatus.Success,
-              "# Candidates": "1",
-            },
-            ["origin/merged"]
-          ),
-        ],
-        [testOutputFile]
-      );
+    const branchReportContent: string = fs.readFileSync(testOutputFile, {
+      encoding: "utf8",
+    });
+    const branchReport = JSON.parse(branchReportContent);
 
-      const branchReportContent: string = fs.readFileSync(testOutputFile, {
-        encoding: "utf8",
-      });
-      const branchReport = JSON.parse(branchReportContent);
-
-      expect(branchReport).toStrictEqual([
-        { project: "test", branch: "origin/merged", keep: false },
-      ]);
-    } finally {
-      fs.unlink(testOutputFile, () => done());
-    }
+    expect(branchReport).toStrictEqual([
+      { project: "test", branch: "origin/merged", keep: false },
+    ]);
   });
 });
