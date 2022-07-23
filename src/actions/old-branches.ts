@@ -16,10 +16,7 @@ import { logger } from "../logger";
  *   - item 1: age in days
  */
 export class OldBranchesReportAction implements NickelAction {
-  constructor(
-    private readonly reportFile: string,
-    private readonly age: number
-  ) {}
+  constructor(readonly reportFile: string, readonly age: number) {}
 
   skipReport(project: NickelProject): ReportLine {
     return new BranchReportLine(

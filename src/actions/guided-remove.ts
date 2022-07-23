@@ -23,7 +23,7 @@ export enum GuidedBranchRemovalStatus {
 }
 
 export class GuidedBranchRemovalAction implements NickelAction {
-  constructor(private readonly reportFile: string) {}
+  constructor(readonly reportFile: string) {}
 
   skipReport(project: NickelProject): ReportLine {
     return new ReportLine(

@@ -11,7 +11,7 @@ import { TableColumn } from "../nickel-table";
 import { logger } from "../logger";
 
 export class MergedBranchesReportAction implements NickelAction {
-  constructor(private readonly reportFile: string) {}
+  constructor(readonly reportFile: string) {}
 
   skipReport(project: NickelProject): ReportLine {
     return new BranchReportLine(
