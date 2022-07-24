@@ -11,7 +11,10 @@
     "test": "jest",
     "coverage": "jest --coverage",
     "format": "prettier --write '**/*.ts'",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "preversion": "npm run test",
+    "version": "npm run build",
+    "postversion": "git push && git push --tags && npm publish"
   },
   "bin": {
     "nickel": "dist/src/nickel.js"
