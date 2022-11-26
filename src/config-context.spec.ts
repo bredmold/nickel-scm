@@ -92,6 +92,20 @@ describe("DirectoryContext", () => {
       expect(childContext.pruneOnFetch()).toStrictEqual(true);
     });
   });
+
+  describe("getReportItems", () => {
+    test("empty list", () => {
+      expect(context.getReportItems()).toStrictEqual([]);
+    });
+
+    test("with separator", () => {
+      context.separator(true);
+      const items = context.getReportItems();
+      expect(items).toHaveLength(1);
+      expect(items[0]).toBeInstanceOf(ReportSeparator);
+      expect(items[0].name).toStrictEqual(context.name());
+    });
+  });
 });
 
 describe("RepositoryContext", () => {
@@ -163,8 +177,7 @@ describe("ConfigContext", () => {
 
   test("project", () => {
     const cwd = process.cwd();
-    const parent = path.dirname(cwd);
-    context.root = parent;
+    context.root = path.dirname(cwd);
     context.project("nickel-scm", {
       defaultBranch: "develop",
       marks: ["test"],
@@ -197,7 +210,8 @@ describe("ConfigContext", () => {
       });
     });
 
-    expect(ConfigContext.reportItems).toHaveLength(1);
+    expect(ConfigContext.reportItems).toHaveLength(2);
     expect(ConfigContext.reportItems[0]).toBeInstanceOf(ReportSeparator);
+    expect(ConfigContext.reportItems[1]).toBeInstanceOf(NickelProject);
   });
 });

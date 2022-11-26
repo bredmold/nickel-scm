@@ -19,12 +19,14 @@ abstract class PathContext {
   private _label?: string;
   private _pruneOnFetch?: boolean;
 
-  constructor(
+  protected constructor(
     public readonly root: string,
     private readonly parent?: PathContext
   ) {
     const stats = fs.statSync(this.root);
     if (!stats.isDirectory()) throw `Not a directory: ${this.root}`;
+
+    logger.debug("path context: %s", this.root);
   }
 
   /**
@@ -116,11 +118,16 @@ abstract class PathContext {
   name(): string {
     return path.basename(this.root);
   }
+
+  /**
+   * Return a list of reporting items attached to this context
+   */
+  abstract getReportItems(): ReportingItem[];
 }
 
 export class DirectoryContext extends PathContext {
   private _separator = false;
-  private readonly _repositories: RepositoryContext[] = [];
+  private readonly _children: PathContext[] = [];
 
   constructor(root: string, parent?: DirectoryContext) {
     super(root, parent);
@@ -138,10 +145,20 @@ export class DirectoryContext extends PathContext {
   }
 
   /**
-   * Return the list of child repositories for this context
+   * Return all the reporting items (repositories and separators) for this context
    */
-  repositories(): RepositoryContext[] {
-    return this._repositories;
+  getReportItems(): ReportingItem[] {
+    const items: ReportingItem[] = [];
+
+    if (this.separator()) items.push(new ReportSeparator(this.label()));
+    logger.debug("%s: separator=%s", this.name(), this.separator());
+
+    const childItems: ReportingItem[][] = this._children.map((child) =>
+      child.getReportItems()
+    );
+    items.push(...childItems.flat());
+
+    return items;
   }
 
   /**
@@ -155,16 +172,7 @@ export class DirectoryContext extends PathContext {
     const childContext = new DirectoryContext(childPath, this);
     contextFn(childContext);
 
-    if (childContext.separator()) {
-      ConfigContext.reportItems.push(new ReportSeparator(childContext.label()));
-    }
-
-    childContext
-      .repositories()
-      .map(
-        (repoContext) => new NickelProject(repoContext.toNickelProjectConfig())
-      )
-      .forEach((project) => ConfigContext.reportItems.push(project));
+    this._children.push(childContext);
   }
 
   /**
@@ -180,12 +188,13 @@ export class DirectoryContext extends PathContext {
       contextFn(childContext);
     }
 
-    this._repositories.push(childContext);
+    this._children.push(childContext);
   }
 }
 
 export class RepositoryContext extends PathContext {
   private readonly _parent: DirectoryContext;
+
   constructor(root: string, parent: DirectoryContext) {
     super(root, parent);
 
@@ -207,6 +216,10 @@ export class RepositoryContext extends PathContext {
       marks: [this._parent.name()],
       pruneOnFetch: this.pruneOnFetch(),
     };
+  }
+
+  getReportItems(): ReportingItem[] {
+    return [new NickelProject(this.toNickelProjectConfig())];
   }
 }
 
@@ -312,5 +325,6 @@ export class ConfigContext {
   ): void {
     const rootContext = new DirectoryContext(root);
     contextFn(rootContext);
+    ConfigContext.reportItems.push(...rootContext.getReportItems());
   }
 }

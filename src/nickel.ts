@@ -57,6 +57,7 @@ function findConfigScript(configScriptOption?: string): string {
 
   const configPath = searchPath.find((path) => {
     if (fs.existsSync(path)) {
+      logger.debug("findConfigScript: %s is a file", path);
       const stats = fs.statSync(path);
       return stats.isFile();
     } else {
@@ -87,6 +88,7 @@ async function main() {
   Do the things!
    */
 
+  logger.debug("reportItems = %j", ConfigContext.reportItems);
   const selectedItems = await selectItems(
     options.selectors,
     ConfigContext.reportItems
