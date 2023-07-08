@@ -28,7 +28,7 @@ describe("Cleanup Action", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     let selectedBranch = "";
@@ -40,7 +40,7 @@ describe("Cleanup Action", () => {
     project.repository.pull = jest.fn(() =>
       Promise.resolve({
         updatedFiles: [],
-      })
+      }),
     );
 
     let deletedBranch = "";
@@ -65,11 +65,11 @@ describe("Cleanup Action", () => {
             Project: "test",
             Branch: "test",
             Status: "clean-success",
-          })
+          }),
         );
         done();
       },
-      (e) => done(e)
+      (e) => done(e),
     );
   });
 
@@ -82,7 +82,7 @@ describe("Cleanup Action", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -90,7 +90,7 @@ describe("Cleanup Action", () => {
         Project: "test",
         Branch: "master",
         Status: "clean-skip",
-      })
+      }),
     );
   });
 
@@ -103,7 +103,7 @@ describe("Cleanup Action", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -111,7 +111,7 @@ describe("Cleanup Action", () => {
         Project: "test",
         Branch: "test",
         Status: "clean-dirty",
-      })
+      }),
     );
   });
 });

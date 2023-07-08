@@ -33,7 +33,7 @@ describe("Shell Runner", () => {
       level: "debug",
       format: winston.format.combine(
         winston.format.splat(),
-        winston.format.simple()
+        winston.format.simple(),
       ),
 
       transports: [new winston.transports.Console(), testTransport],
@@ -72,7 +72,7 @@ describe("Shell Runner", () => {
 
   test("run stderr", () => {
     return expect(
-      runner.run('bash -c "echo test 1>&2"')
+      runner.run('bash -c "echo test 1>&2"'),
     ).resolves.toStrictEqual({
       stdout: "",
       stderr: "test\n",
@@ -87,10 +87,10 @@ describe("Shell Runner", () => {
       (error) => {
         expect(error.code).toStrictEqual(1);
         expect(error.message).toStrictEqual(
-          'Command failed: bash -c "exit 1"\n'
+          'Command failed: bash -c "exit 1"\n',
         );
         done();
-      }
+      },
     );
   });
 
@@ -107,7 +107,7 @@ describe("Shell Runner", () => {
         ]);
         done();
       },
-      (error) => done.fail(error)
+      (error) => done.fail(error),
     );
   });
 });

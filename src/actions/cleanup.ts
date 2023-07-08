@@ -20,7 +20,7 @@ export class RepositoryCleanupAction implements NickelAction {
         Branch: "",
         Status: CleanupStatus.Skipped,
       },
-      false
+      false,
     );
   }
   readonly columns = [

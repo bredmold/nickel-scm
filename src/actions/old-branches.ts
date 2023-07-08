@@ -16,7 +16,10 @@ import { logger } from "../logger";
  *   - item 1: age in days
  */
 export class OldBranchesReportAction implements NickelAction {
-  constructor(readonly reportFile: string, readonly age: number) {}
+  constructor(
+    readonly reportFile: string,
+    readonly age: number,
+  ) {}
 
   skipReport(project: NickelProject): ReportLine {
     return new BranchReportLine(
@@ -26,7 +29,7 @@ export class OldBranchesReportAction implements NickelAction {
         "# Candidates": "0",
       },
       [],
-      false
+      false,
     );
   }
 
@@ -43,7 +46,7 @@ export class OldBranchesReportAction implements NickelAction {
   post(reports: ReportLine[]): void {
     new BranchReportWriter(
       <BranchReportLine[]>reports,
-      this.reportFile
+      this.reportFile,
     ).writeReport();
   }
 }
@@ -51,7 +54,7 @@ export class OldBranchesReportAction implements NickelAction {
 class OldBranchesReport {
   constructor(
     private readonly project: NickelProject,
-    private readonly age: number
+    private readonly age: number,
   ) {
     logger.debug(`old branch report: age=${this.age}`);
   }
@@ -66,7 +69,7 @@ class OldBranchesReport {
           Status: status,
           "# Candidates": candidateBranches.length.toString(),
         },
-        candidateBranches
+        candidateBranches,
       );
     }
 
@@ -77,7 +80,7 @@ class OldBranchesReport {
       const logPromises = trackingBranches.map((branch) =>
         this.project.repository.committerDate(branch).then((date) => {
           return { branch: branch, logDate: date };
-        })
+        }),
       );
 
       const now = new Date();
@@ -95,14 +98,14 @@ class OldBranchesReport {
             const remote = elements[0];
             const trackingBranch = elements.slice(1).join("/");
             logger.info(
-              `${this.project.name}: Candidate ${remote} ${trackingBranch} (${ageInDays} days)`
+              `${this.project.name}: Candidate ${remote} ${trackingBranch} (${ageInDays} days)`,
             );
             candidates.push(branch);
           }
 
           return candidates;
         },
-        []
+        [],
       );
 
       return line(BranchReportStatus.Success, candidateBranches);

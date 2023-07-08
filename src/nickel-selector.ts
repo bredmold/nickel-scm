@@ -86,7 +86,7 @@ function branchSelector(selectorBranch: string): NickelSelector {
       const project = item as NickelProject;
       const branch = await project.repository.branch();
       logger.debug(
-        `[${item.name}] branch=${branch} selected=${branch === selectorBranch}`
+        `[${item.name}] branch=${branch} selected=${branch === selectorBranch}`,
       );
       return { item: item, selected: branch === selectorBranch };
     }
@@ -100,7 +100,7 @@ function markSelector(selectorMark: string): NickelSelector {
 
   function isMarked(project: NickelProject): boolean {
     const markIdx = project.marks.findIndex(
-      (projectMark) => projectMark === selectorMark
+      (projectMark) => projectMark === selectorMark,
     );
     return markIdx >= 0;
   }
@@ -156,7 +156,7 @@ export function nickelSelector(config: SelectorConfig): NickelSelector {
  */
 export async function selectItems(
   config: SelectorConfig,
-  items: ReportingItem[]
+  items: ReportingItem[],
 ): Promise<SelectedItem[]> {
   const selector = nickelSelector(config);
 

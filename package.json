@@ -14,7 +14,8 @@
     "lint": "eslint . --ext .ts",
     "preversion": "npm run test",
     "version": "npm run build",
-    "postversion": "git push && git push --tags && npm publish"
+    "postversion": "git push && git push --tags && npm publish",
+    "nickel": "node dist/src/nickel.js"
   },
   "bin": {
     "nickel": "dist/src/nickel.js"

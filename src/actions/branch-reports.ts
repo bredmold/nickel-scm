@@ -14,7 +14,7 @@ export class BranchReportLine extends ReportLine {
   constructor(
     values: { [index: string]: string },
     public candidateBranches: string[],
-    selected = true
+    selected = true,
   ) {
     super(values, selected);
   }
@@ -29,7 +29,7 @@ export interface BranchReportDetails {
 export class BranchReportWriter {
   constructor(
     private reports: BranchReportLine[],
-    private readonly reportFile: string
+    private readonly reportFile: string,
   ) {}
 
   writeReport(): void {

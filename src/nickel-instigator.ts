@@ -28,7 +28,7 @@ export class NickelInstigator {
           // Assume it's a separator
           return Promise.resolve(item);
         }
-      }
+      },
     );
 
     const reports: ReportingItem[] = await Promise.all(promises);
@@ -36,7 +36,7 @@ export class NickelInstigator {
     const table = report.buildReport(reports);
     console.log(table.render());
     const reportLines = reports.filter(
-      (report) => report instanceof ReportLine
+      (report) => report instanceof ReportLine,
     );
     action.post(reportLines as ReportLine[]);
     logger.info(`${timer.elapsed() / 1000}s elapsed`);

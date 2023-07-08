@@ -31,8 +31,8 @@ describe("Report Action", () => {
           Commit: "",
           Marks: "",
         },
-        false
-      )
+        false,
+      ),
     );
     expect(action.columns).toStrictEqual([
       new TableColumn("Project"),
@@ -52,7 +52,7 @@ describe("Report Action", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -62,7 +62,7 @@ describe("Report Action", () => {
         "# Mod": "0",
         Commit: "123456789012",
         Marks: "a,b",
-      })
+      }),
     );
   });
 });

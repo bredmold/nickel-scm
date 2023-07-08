@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
 
 import { NickelProject, NickelProjectConfig } from "./nickel-project";
 import { ReportSeparator, ReportingItem } from "./nickel-report";
@@ -10,6 +11,23 @@ type ConfigItem = string | string[];
 type OptionalConfiguration = { [index: string]: ConfigItem } | null;
 
 /**
+ * Normalize a path based on well known rules
+ *
+ * @param userPath The user-supplied path to resolve
+ * @returns Normalized path
+ */
+function normalizePath(userPath: string): string {
+  let p = userPath;
+
+  if (p.startsWith("~/")) {
+    p = p.substring(2);
+    p = path.resolve(os.homedir(), p);
+  }
+
+  return p;
+}
+
+/**
  * Root context for a set of projects
  */
 abstract class PathContext {
@@ -18,11 +36,15 @@ abstract class PathContext {
   private _commitPrefix?: number;
   private _label?: string;
   private _pruneOnFetch?: boolean;
+  public readonly root: string;
 
   protected constructor(
-    public readonly root: string,
-    private readonly parent?: PathContext
+    root: string,
+    private readonly parent?: PathContext,
   ) {
+    this.root = normalizePath(root);
+    if (!fs.existsSync(this.root)) throw `No such file: ${this.root}`;
+
     const stats = fs.statSync(this.root);
     if (!stats.isDirectory()) throw `Not a directory: ${this.root}`;
 
@@ -154,7 +176,7 @@ export class DirectoryContext extends PathContext {
     logger.debug("%s: separator=%s", this.name(), this.separator());
 
     const childItems: ReportingItem[][] = this._children.map((child) =>
-      child.getReportItems()
+      child.getReportItems(),
     );
     items.push(...childItems.flat());
 
@@ -299,7 +321,7 @@ export class ConfigContext {
         commitPrefix: ConfigContext.commitPrefix,
         marks: marks,
         pruneOnFetch: ConfigContext.pruneOnFetch,
-      })
+      }),
     );
   }
 
@@ -321,7 +343,7 @@ export class ConfigContext {
    */
   projectRoot(
     root: string,
-    contextFn: (context: DirectoryContext) => void
+    contextFn: (context: DirectoryContext) => void,
   ): void {
     const rootContext = new DirectoryContext(root);
     contextFn(rootContext);

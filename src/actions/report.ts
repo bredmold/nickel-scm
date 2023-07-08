@@ -13,7 +13,7 @@ export class RepositoryReportAction implements NickelAction {
         Commit: "",
         Marks: "",
       },
-      false
+      false,
     );
   }
   readonly columns: TableColumn[] = [

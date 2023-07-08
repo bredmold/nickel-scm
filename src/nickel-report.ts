@@ -19,7 +19,7 @@ export class ReportLine implements ReportingItem {
 
   constructor(
     public readonly values: { [index: string]: string },
-    public readonly selected: boolean = true
+    public readonly selected: boolean = true,
   ) {
     this.name = values["Project"];
   }

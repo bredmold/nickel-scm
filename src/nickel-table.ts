@@ -5,7 +5,7 @@ export class RowConfig {
     readonly left: string,
     readonly right: string,
     readonly sep: string,
-    readonly pad: string
+    readonly pad: string,
   ) {}
 }
 
@@ -57,7 +57,7 @@ export class TableCell {
 
   constructor(
     private readonly data: string,
-    private readonly align: CellAlignment = CellAlignment.Right
+    private readonly align: CellAlignment = CellAlignment.Right,
   ) {
     this.size = this.lengthInternal();
   }
@@ -87,17 +87,20 @@ export class TableCell {
  * Model a table row
  */
 export class TableRow {
-  constructor(readonly cells: TableCell[], readonly tag: string = "data") {}
+  constructor(
+    readonly cells: TableCell[],
+    readonly tag: string = "data",
+  ) {}
 
   render(
     columnWidths: number[],
     tableConfig: TableConfig,
-    override: string | null = null
+    override: string | null = null,
   ): string {
     const tag = override ? override : this.tag;
     const rowConfig = tableConfig[tag];
     const renderedCells = this.cells.map((cell, i) =>
-      cell.render(columnWidths[i], rowConfig.pad)
+      cell.render(columnWidths[i], rowConfig.pad),
     );
     const rowContent = renderedCells.join(rowConfig.sep);
     return rowConfig.left + rowContent + rowConfig.right;
@@ -113,7 +116,7 @@ export class NickelTable {
   constructor(
     readonly columns: TableColumn[],
     readonly rows: TableRow[],
-    private readonly chalk: chalk.Chalk
+    private readonly chalk: chalk.Chalk,
   ) {
     const titleWidths = this.columns.map((col) => col.title.length);
     this.columnWidths = this.buildColumnWidths(titleWidths, 0);
@@ -127,11 +130,11 @@ export class NickelTable {
   render(config: TableConfig = CONFIG): string {
     const emptyRow = new TableRow(
       this.columns.map(() => new TableCell("")),
-      "empty"
+      "empty",
     );
     const headerRow = new TableRow(
       this.columns.map((col) => new TableCell(this.chalk.bold(col.title))),
-      "data"
+      "data",
     );
 
     const preambleAlways = [
@@ -149,7 +152,7 @@ export class NickelTable {
           ];
 
     const dataLines: string[] = this.rows.map((row) =>
-      row.render(this.columnWidths, config)
+      row.render(this.columnWidths, config),
     );
     const lastLine = emptyRow.render(this.columnWidths, config, "last");
 

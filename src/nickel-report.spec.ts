@@ -65,7 +65,7 @@ describe("Nickel Report", () => {
       new TableRow([new TableCell(" a")]),
       new TableRow(
         [new TableCell(` ${chalk.italic.bold("george")} `, CellAlignment.Left)],
-        "sep"
+        "sep",
       ),
       new TableRow([new TableCell(" b")]),
     ]);

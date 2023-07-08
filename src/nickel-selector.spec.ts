@@ -232,7 +232,7 @@ describe("Nickel Selector", () => {
           paths: [],
           branch: "master",
           mark: "",
-        })
+        }),
       ).toThrow();
     });
   });
@@ -241,7 +241,7 @@ describe("Nickel Selector", () => {
     test("Happy path", async () => {
       const items = await selectItems(
         { projects: [], paths: [], branch: "", mark: "" },
-        [project]
+        [project],
       );
       expect(items).toStrictEqual([{ item: project, selected: true }]);
     });
@@ -251,7 +251,7 @@ describe("Nickel Selector", () => {
       try {
         await selectItems(
           { projects: ["nope"], paths: [], branch: "", mark: "" },
-          [project]
+          [project],
         );
       } catch (e) {
         expect(e).toMatch(/^No projects meet selection criteria: /);

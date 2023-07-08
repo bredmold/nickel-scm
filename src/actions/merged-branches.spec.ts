@@ -33,11 +33,11 @@ describe("Merged Branche Report", () => {
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     project.repository.remoteMergedBranches = jest.fn(() =>
-      Promise.resolve([])
+      Promise.resolve([]),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -47,8 +47,8 @@ describe("Merged Branche Report", () => {
           Status: BranchReportStatus.Success,
           "# Candidates": "0",
         },
-        []
-      )
+        [],
+      ),
     );
   });
 
@@ -56,11 +56,11 @@ describe("Merged Branche Report", () => {
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     project.repository.remoteMergedBranches = jest.fn(() =>
-      Promise.resolve(["origin/master", "origin/merged"])
+      Promise.resolve(["origin/master", "origin/merged"]),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -70,8 +70,8 @@ describe("Merged Branche Report", () => {
           Status: BranchReportStatus.Success,
           "# Candidates": "1",
         },
-        ["origin/merged"]
-      )
+        ["origin/merged"],
+      ),
     );
   });
 
@@ -83,7 +83,7 @@ describe("Merged Branche Report", () => {
           Status: BranchReportStatus.Success,
           "# Candidates": "1",
         },
-        ["origin/merged"]
+        ["origin/merged"],
       ),
     ]);
 

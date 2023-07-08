@@ -33,11 +33,11 @@ describe("Old Branches Report", () => {
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     project.repository.remoteBranches = jest.fn(() =>
-      Promise.resolve(["origin/master"])
+      Promise.resolve(["origin/master"]),
     );
 
     project.repository.committerDate = jest.fn(() => {
@@ -54,8 +54,8 @@ describe("Old Branches Report", () => {
           Status: BranchReportStatus.Success,
           "# Candidates": "0",
         },
-        []
-      )
+        [],
+      ),
     );
   });
 
@@ -63,11 +63,11 @@ describe("Old Branches Report", () => {
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     project.repository.remoteBranches = jest.fn(() =>
-      Promise.resolve(["origin/master", "origin/old"])
+      Promise.resolve(["origin/master", "origin/old"]),
     );
 
     project.repository.committerDate = jest.fn((branch) => {
@@ -84,8 +84,8 @@ describe("Old Branches Report", () => {
           Status: BranchReportStatus.Success,
           "# Candidates": "1",
         },
-        ["origin/old"]
-      )
+        ["origin/old"],
+      ),
     );
   });
 
@@ -97,7 +97,7 @@ describe("Old Branches Report", () => {
           Status: BranchReportStatus.Success,
           "# Candidates": "1",
         },
-        ["origin/old"]
+        ["origin/old"],
       ),
     ]);
 

@@ -29,18 +29,18 @@ export function parseCommandLine(args: string[]): CommandLine {
     .option("--project <project...>", "Select a project by name")
     .option(
       "--project-dir <dir...>",
-      "Select projects under the indicated folder"
+      "Select projects under the indicated folder",
     )
     .option(
       "--active-branch <activeBranch>",
-      "Select projects with this active branch"
+      "Select projects with this active branch",
     )
     .option("--mark <mark>", "Select projects with this mark")
     .option("--config <config>", "Configuration file")
     .addOption(
       new Option("--level <level", "Log level")
         .default("info")
-        .choices(["debug", "info", "warn", "error"])
+        .choices(["debug", "info", "warn", "error"]),
     )
     .exitOverride();
 
@@ -93,7 +93,7 @@ export function parseCommandLine(args: string[]): CommandLine {
     .addArgument(
       new Argument("[age]", "Age of latest commit, in days")
         .default(60)
-        .argParser((age) => parseInt(age))
+        .argParser((age) => parseInt(age)),
     )
     .action((reportFile: string, age: number) => {
       logger.debug(`cmd=oldBranches reportFile=${reportFile} age=${age}`);

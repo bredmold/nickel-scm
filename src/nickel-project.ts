@@ -45,7 +45,7 @@ export class NickelProject implements ReportingItem {
       this.path,
       new ShellRunner(this.path),
       c.commitPrefix,
-      c.pruneOnFetch
+      c.pruneOnFetch,
     );
 
     // Make sure the default branch is always "safe"

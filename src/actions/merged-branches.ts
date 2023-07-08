@@ -21,7 +21,7 @@ export class MergedBranchesReportAction implements NickelAction {
         "# Candidates": "0",
       },
       [],
-      false
+      false,
     );
   }
 
@@ -39,7 +39,7 @@ export class MergedBranchesReportAction implements NickelAction {
           Status: status,
           "# Candidates": candidateBranches.length.toString(),
         },
-        candidateBranches
+        candidateBranches,
       );
     }
 
@@ -56,7 +56,7 @@ export class MergedBranchesReportAction implements NickelAction {
 
       const candidateBranches = remoteBranches.filter((branch) => {
         const safeIdx = safeBranchRes.findIndex(
-          (safeBranchRe) => branch.match(safeBranchRe) != null
+          (safeBranchRe) => branch.match(safeBranchRe) != null,
         );
         if (safeIdx < 0) {
           const elements = branch.split(/\//);
@@ -79,7 +79,7 @@ export class MergedBranchesReportAction implements NickelAction {
   post(reports: ReportLine[]): void {
     new BranchReportWriter(
       <BranchReportLine[]>reports,
-      this.reportFile
+      this.reportFile,
     ).writeReport();
   }
 }

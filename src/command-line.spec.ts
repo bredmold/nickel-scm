@@ -98,7 +98,7 @@ describe("parseCommandLine", () => {
         "oldBranches",
         "report.json",
         "nope",
-      ])
+      ]),
     ).toThrow("Invalid age");
   });
 
@@ -131,7 +131,7 @@ describe("parseCommandLine", () => {
         "command-line.spec.ts",
         "--level=nope",
         "sync",
-      ])
+      ]),
     ).toThrow(CommanderError);
   });
 

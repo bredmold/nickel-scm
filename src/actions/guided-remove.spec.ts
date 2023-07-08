@@ -41,13 +41,13 @@ describe("Guided Remove", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     fs.writeFileSync(tmpFile, "[]");
@@ -61,7 +61,7 @@ describe("Guided Remove", () => {
         "# Kept": "0",
         "# Removed": "0",
         "# Failed": "0",
-      })
+      }),
     );
   });
 
@@ -74,13 +74,13 @@ describe("Guided Remove", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     fs.writeFileSync(
@@ -91,7 +91,7 @@ describe("Guided Remove", () => {
           branch: "origin/nope",
           keep: true,
         },
-      ])
+      ]),
     );
 
     const reportLine = await action.act(project);
@@ -103,7 +103,7 @@ describe("Guided Remove", () => {
         "# Kept": "1",
         "# Removed": "0",
         "# Failed": "0",
-      })
+      }),
     );
   });
 
@@ -116,13 +116,13 @@ describe("Guided Remove", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     project.repository.fetch = jest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
-      })
+      }),
     );
 
     project.repository.removeRemoteBranch = jest.fn((remote, branch) => {
@@ -146,7 +146,7 @@ describe("Guided Remove", () => {
           branch: "origin/nope",
           keep: false,
         },
-      ])
+      ]),
     );
 
     const reportLine = await action.act(project);
@@ -158,7 +158,7 @@ describe("Guided Remove", () => {
         "# Kept": "0",
         "# Removed": "1",
         "# Failed": "0",
-      })
+      }),
     );
   });
 
@@ -171,7 +171,7 @@ describe("Guided Remove", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     // Local and remote branch names differ on case
@@ -192,7 +192,7 @@ describe("Guided Remove", () => {
             trackingBranch: "origin/Feature/test",
           },
         ],
-      })
+      }),
     );
 
     project.repository.removeRemoteBranch = jest.fn((remote, branch) => {
@@ -216,7 +216,7 @@ describe("Guided Remove", () => {
           branch: "origin/Feature/test",
           keep: false,
         },
-      ])
+      ]),
     );
 
     const reportLine = await action.act(project);
@@ -228,7 +228,7 @@ describe("Guided Remove", () => {
         "# Kept": "0",
         "# Removed": "1",
         "# Failed": "0",
-      })
+      }),
     );
   });
 });

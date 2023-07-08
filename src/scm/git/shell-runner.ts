@@ -11,7 +11,7 @@ export interface ProcessResult {
 export class ShellRunner {
   constructor(
     private readonly path: string,
-    private readonly log: winston.Logger = logger
+    private readonly log: winston.Logger = logger,
   ) {}
 
   run(command: string): Promise<ProcessResult> {
@@ -29,7 +29,7 @@ export class ShellRunner {
           } else {
             resolve({ stdout: stdout, stderr: stderr });
           }
-        }
+        },
       );
     });
   }

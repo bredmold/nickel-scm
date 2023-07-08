@@ -91,7 +91,7 @@ async function main() {
   logger.debug("reportItems = %j", ConfigContext.reportItems);
   const selectedItems = await selectItems(
     options.selectors,
-    ConfigContext.reportItems
+    ConfigContext.reportItems,
   );
   const instigator = new NickelInstigator(selectedItems);
   await instigator.doIt(options.action);
@@ -104,5 +104,5 @@ main().then(
   (e) => {
     logger.error(e);
     process.exit(1);
-  }
+  },
 );

@@ -21,7 +21,7 @@ export class RepositorySyncAction implements NickelAction {
         Branch: "",
         Status: SyncStatus.Skipped,
       },
-      false
+      false,
     );
   }
   readonly columns = [
@@ -35,7 +35,7 @@ export class RepositorySyncAction implements NickelAction {
     function line(
       branch: string,
       updatedFiles: string[],
-      status: SyncStatus
+      status: SyncStatus,
     ): ReportLine {
       return new ReportLine({
         Project: project.name,

@@ -49,7 +49,7 @@ describe("Git Repository", () => {
     });
 
     return expect(
-      repository.withPruneOnFetch(true).pull()
+      repository.withPruneOnFetch(true).pull(),
     ).resolves.toStrictEqual({
       updatedFiles: [],
     });
@@ -67,7 +67,7 @@ describe("Git Repository", () => {
           "1 AM N... 000000 100644 100644 0000000000000000000000000000000000000000 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 src/logger.ts",
         ].join("\n"),
         stderr: "",
-      })
+      }),
     );
 
     return expect(repository.status()).resolves.toStrictEqual({
@@ -98,7 +98,7 @@ describe("Git Repository", () => {
         expect(actualCommand).toBe("git checkout testBranch");
         done();
       },
-      (e) => done(e)
+      (e) => done(e),
     );
   });
 
@@ -121,7 +121,7 @@ describe("Git Repository", () => {
         expect(actualCommand).toBe("git branch -d testBranch");
         done();
       },
-      (e) => done(e)
+      (e) => done(e),
     );
   });
 
@@ -134,7 +134,7 @@ describe("Git Repository", () => {
           " * [pruned] origin/test-branch",
         ].join("\n"),
         stderr: "",
-      })
+      }),
     );
 
     return expect(repository.prune("origin")).resolves.toStrictEqual([
@@ -147,7 +147,7 @@ describe("Git Repository", () => {
       Promise.resolve({
         stdout: "test-branch\n",
         stderr: "",
-      })
+      }),
     );
 
     return expect(repository.branch()).resolves.toStrictEqual("test-branch");
@@ -158,7 +158,7 @@ describe("Git Repository", () => {
       Promise.resolve({
         stdout: "15be9b216cbaaeb16706bcf3d6eb2031b325c5f4\n",
         stderr: "",
-      })
+      }),
     );
 
     return expect(repository.commit()).resolves.toStrictEqual("15be9b216cba");
@@ -168,10 +168,10 @@ describe("Git Repository", () => {
     runner.run = jest.fn(() =>
       Promise.resolve({
         stdout: ["  origin/HEAD -> origin/master", "  origin/test-branch"].join(
-          "\n"
+          "\n",
         ),
         stderr: "",
-      })
+      }),
     );
 
     return expect(repository.remoteMergedBranches()).resolves.toStrictEqual([
@@ -184,7 +184,7 @@ describe("Git Repository", () => {
       Promise.resolve({
         stdout: "2020-03-11T20:25:07+00:00\n",
         stderr: "",
-      })
+      }),
     );
 
     const expectedDate = new Date();
@@ -197,7 +197,7 @@ describe("Git Repository", () => {
     expectedDate.setUTCMilliseconds(0);
 
     return expect(repository.committerDate("master")).resolves.toStrictEqual(
-      expectedDate
+      expectedDate,
     );
   });
 
@@ -210,7 +210,7 @@ describe("Git Repository", () => {
           "  remotes/origin/master",
         ].join("\n"),
         stderr: "",
-      })
+      }),
     );
 
     return expect(repository.allBranches()).resolves.toStrictEqual({
@@ -228,7 +228,7 @@ describe("Git Repository", () => {
           " - [deleted]         (none) -> origin/test",
           " * [new branch]      test2  -> origin/test2",
         ].join("\n"),
-      })
+      }),
     );
 
     return expect(repository.fetch()).resolves.toStrictEqual({
@@ -254,17 +254,17 @@ describe("Git Repository", () => {
       Promise.resolve({
         stdout: "",
         stderr: "",
-      })
+      }),
     );
 
     repository.removeRemoteBranch("origin", "test").then(
       () => {
         expect(runner.run).toHaveBeenCalledWith(
-          "git push --delete origin test"
+          "git push --delete origin test",
         );
         done();
       },
-      (e) => done.fail(e)
+      (e) => done.fail(e),
     );
   });
 });

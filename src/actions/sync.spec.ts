@@ -30,8 +30,8 @@ describe("Sync Action", () => {
           Branch: "",
           Status: SyncStatus.Skipped,
         },
-        false
-      )
+        false,
+      ),
     );
     expect(action.columns).toStrictEqual([
       new TableColumn("Project"),
@@ -50,13 +50,13 @@ describe("Sync Action", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     project.repository.pull = jest.fn(() =>
       Promise.resolve({
         updatedFiles: [],
-      })
+      }),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -65,7 +65,7 @@ describe("Sync Action", () => {
         Branch: "master",
         Updated: "0",
         Status: "sync-success",
-      })
+      }),
     );
   });
 
@@ -78,7 +78,7 @@ describe("Sync Action", () => {
         commit: "123456789012",
         ahead: 0,
         behind: 0,
-      })
+      }),
     );
 
     return expect(action.act(project)).resolves.toStrictEqual(
@@ -87,7 +87,7 @@ describe("Sync Action", () => {
         Branch: "master",
         Updated: "0",
         Status: "sync-dirty",
-      })
+      }),
     );
   });
 });

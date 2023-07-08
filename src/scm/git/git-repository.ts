@@ -52,7 +52,10 @@ export class RemoteBranch {
     return new RemoteBranch(remote, branch);
   }
 
-  constructor(public remote: string, public branch: string) {}
+  constructor(
+    public remote: string,
+    public branch: string,
+  ) {}
 
   toString(): string {
     return `${this.remote}/${this.branch}`;
@@ -75,7 +78,7 @@ export class GitRepository {
     private readonly path: string,
     private readonly runner: ShellRunner,
     private readonly commitPrefix: number,
-    private readonly pruneOnFetch: boolean
+    private readonly pruneOnFetch: boolean,
   ) {}
 
   /**
@@ -88,7 +91,7 @@ export class GitRepository {
       this.path,
       this.runner,
       this.commitPrefix,
-      pruneOnFetch
+      pruneOnFetch,
     );
   }
 
@@ -111,7 +114,7 @@ export class GitRepository {
         }
         return pullResult;
       },
-      { updatedFiles: [] }
+      { updatedFiles: [] },
     );
   }
 
@@ -164,7 +167,7 @@ export class GitRepository {
         }
         return result;
       },
-      { updatedBranches: [] }
+      { updatedBranches: [] },
     );
 
     logger.debug(`fetchItems=${JSON.stringify(result.updatedBranches)}`);
@@ -179,7 +182,7 @@ export class GitRepository {
    */
   async removeRemoteBranch(
     remote: string,
-    branch: string
+    branch: string,
   ): Promise<RemoveRemoteBranchResult> {
     try {
       await this.runner.run(`git push --delete ${remote} ${branch}`);
@@ -361,7 +364,7 @@ export class GitRepository {
 
         return branches;
       },
-      { local: [], remote: [] }
+      { local: [], remote: [] },
     );
   }
 
@@ -372,7 +375,7 @@ export class GitRepository {
    */
   async committerDate(branch: string): Promise<Date> {
     const out = await this.runner.run(
-      `git log -n 1 --pretty=format:%cI ${branch}`
+      `git log -n 1 --pretty=format:%cI ${branch}`,
     );
     const trimmed = out.stdout.trim();
     return new Date(trimmed);

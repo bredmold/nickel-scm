@@ -35,7 +35,7 @@ export class GuidedBranchRemovalAction implements NickelAction {
         "# Removed": "0",
         "# Failed": "0",
       },
-      false
+      false,
     );
   }
 
@@ -75,7 +75,7 @@ class GuidedBranchRemoval {
 
   constructor(
     private readonly project: NickelProject,
-    branchReportFilename: string
+    branchReportFilename: string,
   ) {
     // List of regex values that check for 'safe' branches
     const safeBranchRes: RegExp[] = this.project.safeBranches.map(
@@ -83,7 +83,7 @@ class GuidedBranchRemoval {
         return typeof safeBranch === "string"
           ? new RegExp(`^origin/${safeBranch}$`)
           : safeBranch;
-      }
+      },
     );
 
     const branchReportRaw: string = fs.readFileSync(branchReportFilename, {
@@ -104,16 +104,16 @@ class GuidedBranchRemoval {
         } else {
           const branch = bi.branch;
           const safeIdx = safeBranchRes.findIndex(
-            (safeBranchRe) => branch.match(safeBranchRe) != null
+            (safeBranchRe) => branch.match(safeBranchRe) != null,
           );
           if (safeIdx < 0) {
             const branchToRemove: RemoteBranch = RemoteBranch.fromBranchName(
-              bi.branch
+              bi.branch,
             );
             logger.debug(`${JSON.stringify(branchToRemove)}`);
             this.branchesToRemove.push(branchToRemove);
             logger.info(
-              `${this.project.name}: Will attempt to remove branch ${bi.branch}`
+              `${this.project.name}: Will attempt to remove branch ${bi.branch}`,
             );
           }
         }
@@ -129,7 +129,7 @@ class GuidedBranchRemoval {
       branch: string,
       removedBranches: string[],
       notRemovedBranches: string[],
-      status: GuidedBranchRemovalStatus
+      status: GuidedBranchRemovalStatus,
     ) {
       return new ReportLine({
         Project: project.name,
@@ -168,12 +168,12 @@ class GuidedBranchRemoval {
             const remoteBranch = `${deleteResponse.remote}/${deleteResponse.branch}`;
             if (deleteResponse.deleted) {
               logger.info(
-                `${this.project.name}: Deleted ${deleteResponse.remote} ${deleteResponse.branch}`
+                `${this.project.name}: Deleted ${deleteResponse.remote} ${deleteResponse.branch}`,
               );
               removedBranches.push(remoteBranch);
             } else {
               logger.warn(
-                `${this.project.name}: Failed to remove branch ${deleteResponse.remote} ${deleteResponse.branch}`
+                `${this.project.name}: Failed to remove branch ${deleteResponse.remote} ${deleteResponse.branch}`,
               );
               notRemovedBranches.push(remoteBranch);
             }
@@ -182,7 +182,7 @@ class GuidedBranchRemoval {
             branch,
             removedBranches,
             notRemovedBranches,
-            GuidedBranchRemovalStatus.Success
+            GuidedBranchRemovalStatus.Success,
           );
         }
       } catch (e) {
@@ -226,7 +226,8 @@ class GuidedBranchRemoval {
     const branchNameMap: BranchNameMap = {};
     fetch.deleted.forEach((localBranch) => {
       const remoteBranch = fetch.added.find(
-        (addedBranch) => addedBranch.toLowerCase() === localBranch.toLowerCase()
+        (addedBranch) =>
+          addedBranch.toLowerCase() === localBranch.toLowerCase(),
       );
       if (remoteBranch) {
         const remoteBranchParts = remoteBranch.split(/\//);
@@ -254,7 +255,7 @@ class GuidedBranchRemoval {
    * @param branchNameMap Supplemental information giving the remote names of some branches
    */
   private requestBranchDeletes(
-    branchNameMap: BranchNameMap
+    branchNameMap: BranchNameMap,
   ): Promise<RemoveRemoteBranchResult>[] {
     return this.branchesToRemove.map((remoteBranch) => {
       const remote = remoteBranch.remote;
