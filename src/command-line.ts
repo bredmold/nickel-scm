@@ -104,12 +104,8 @@ export function parseCommandLine(args: string[]): CommandLine {
   program.parse(args);
   const opts = program.opts();
 
-  if (action === undefined) {
-    throw "No actions were specified";
-  }
-
   return {
-    action: action,
+    action: action!,
     selectors: {
       projects: opts.project || [],
       paths: opts.projectDir || [],

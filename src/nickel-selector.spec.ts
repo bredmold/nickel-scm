@@ -1,13 +1,27 @@
+import { cwd } from "process";
 import { nickelSelector, selectItems } from "./nickel-selector";
 
 import { NickelProject } from "./nickel-project";
 import { ReportSeparator } from "./nickel-report";
 
+jest.mock("process", () => {
+  const actual = jest.requireActual("process");
+
+  return {
+    ...actual,
+    cwd: jest.fn(),
+  };
+});
+
 describe("Nickel Selector", () => {
+  const mockCwd = jest.mocked(cwd);
+
   let project: NickelProject;
   let separator: ReportSeparator;
 
   beforeEach(() => {
+    mockCwd.mockReset();
+
     project = new NickelProject({
       name: "test",
       path: "/application/path",
@@ -93,6 +107,24 @@ describe("Nickel Selector", () => {
       });
 
       expect(selector).toHaveProperty("criteria", "in path list: /application");
+      const selection = await selector(project);
+      expect(selection).toStrictEqual({
+        item: project,
+        selected: true,
+      });
+    });
+
+    test("path list selector relative path match", async () => {
+      const selector = nickelSelector({
+        projects: [],
+        paths: ["."],
+        branch: "",
+        mark: "",
+      });
+
+      mockCwd.mockReturnValueOnce("/application");
+
+      expect(selector).toHaveProperty("criteria", "in path list: .");
       const selection = await selector(project);
       expect(selection).toStrictEqual({
         item: project,
