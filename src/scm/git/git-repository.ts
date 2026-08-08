@@ -187,7 +187,7 @@ export class GitRepository {
     try {
       await this.runner.run(`git push --delete ${remote} ${branch}`);
       return { remote: remote, branch: branch, deleted: true };
-    } catch (error) {
+    } catch {
       return { remote: remote, branch: branch, deleted: false };
     }
   }

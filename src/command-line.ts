@@ -10,7 +10,7 @@ import { RepositorySyncAction } from "./actions/sync";
 import { SelectorConfig } from "./nickel-selector";
 import { logger } from "./logger";
 
-import pkg = require("../package.json");
+import pkg from "../package.json";
 
 export interface CommandLine {
   readonly action: NickelAction;

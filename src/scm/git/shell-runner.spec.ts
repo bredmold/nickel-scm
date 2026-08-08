@@ -1,4 +1,4 @@
-import * as Transport from "winston-transport";
+import Transport from "winston-transport";
 import * as winston from "winston";
 
 import { ShellRunner } from "./shell-runner";
