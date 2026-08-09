@@ -2,10 +2,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-import { NickelProject, NickelProjectConfig } from "./nickel-project";
-import { ReportSeparator, ReportingItem } from "./nickel-report";
+import { NickelProject, NickelProjectConfig } from "./nickel-project.js";
+import { ReportSeparator, ReportingItem } from "./nickel-report.js";
 
-import { logger } from "./logger";
+import { logger } from "./logger.js";
 
 type ConfigItem = string | string[];
 type OptionalConfiguration = { [index: string]: ConfigItem } | null;

@@ -1,10 +1,10 @@
-import { ReportLine, ReportSeparator } from "./nickel-report";
+import { ReportLine, ReportSeparator } from "./nickel-report.js";
 
-import { NickelAction } from "./actions/nickel-action";
-import { NickelInstigator } from "./nickel-instigator";
-import { NickelProject } from "./nickel-project";
-import { SelectedItem } from "./nickel-selector";
-import { TableColumn } from "./nickel-table";
+import { NickelAction } from "./actions/nickel-action.js";
+import { NickelInstigator } from "./nickel-instigator.js";
+import { NickelProject } from "./nickel-project.js";
+import { SelectedItem } from "./nickel-selector.js";
+import { TableColumn } from "./nickel-table.js";
 
 describe("Nickel Instigator", () => {
   let items: SelectedItem[];

@@ -6,10 +6,10 @@ import {
   TableCell,
   TableColumn,
   TableRow,
-} from "./nickel-table";
+} from "./nickel-table.js";
 
-import { CleanupStatus } from "./actions/cleanup";
-import { SyncStatus } from "./actions/sync";
+import { CleanupStatus } from "./actions/cleanup.js";
+import { SyncStatus } from "./actions/sync.js";
 
 /**
  * Returns a collection of name/value pairs

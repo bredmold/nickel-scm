@@ -1,4 +1,4 @@
-import * as ch from "chalk";
+import ch from "chalk";
 
 import {
   CellAlignment,
@@ -6,7 +6,7 @@ import {
   TableCell,
   TableColumn,
   TableRow,
-} from "./nickel-table";
+} from "./nickel-table.js";
 
 describe("Nickel Table", () => {
   test("Simplest table", () => {

@@ -5,6 +5,6 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig({
-    files: ['**/*.{js,ts}'],
+    files: ['src/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
 });

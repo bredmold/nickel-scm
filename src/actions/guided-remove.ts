@@ -4,14 +4,14 @@ import {
   FetchResult,
   RemoteBranch,
   RemoveRemoteBranchResult,
-} from "../scm/git/git-repository";
+} from "../scm/git/git-repository.js";
 
-import { BranchReportDetails } from "./branch-reports";
-import { NickelAction } from "./nickel-action";
-import { NickelProject } from "../nickel-project";
-import { ReportLine } from "../nickel-report";
-import { TableColumn } from "../nickel-table";
-import { logger } from "../logger";
+import { BranchReportDetails } from "./branch-reports.js";
+import { NickelAction } from "./nickel-action.js";
+import { NickelProject } from "../nickel-project.js";
+import { ReportLine } from "../nickel-report.js";
+import { TableColumn } from "../nickel-table.js";
+import { logger } from "../logger.js";
 
 export enum GuidedBranchRemovalStatus {
   New = "guided-merge-new",

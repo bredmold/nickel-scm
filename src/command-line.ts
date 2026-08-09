@@ -1,16 +1,16 @@
 import { Argument, Command, Option } from "commander";
 
-import { GuidedBranchRemovalAction } from "./actions/guided-remove";
-import { MergedBranchesReportAction } from "./actions/merged-branches";
-import { NickelAction } from "./actions/nickel-action";
-import { OldBranchesReportAction } from "./actions/old-branches";
-import { RepositoryCleanupAction } from "./actions/cleanup";
-import { RepositoryReportAction } from "./actions/report";
-import { RepositorySyncAction } from "./actions/sync";
-import { SelectorConfig } from "./nickel-selector";
-import { logger } from "./logger";
+import { GuidedBranchRemovalAction } from "./actions/guided-remove.js";
+import { MergedBranchesReportAction } from "./actions/merged-branches.js";
+import { NickelAction } from "./actions/nickel-action.js";
+import { OldBranchesReportAction } from "./actions/old-branches.js";
+import { RepositoryCleanupAction } from "./actions/cleanup.js";
+import { RepositoryReportAction } from "./actions/report.js";
+import { RepositorySyncAction } from "./actions/sync.js";
+import { SelectorConfig } from "./nickel-selector.js";
+import { logger } from "./logger.js";
 
-import pkg from "../package.json";
+import pkg from "../package.json" with { type: "json" };
 
 export interface CommandLine {
   readonly action: NickelAction;

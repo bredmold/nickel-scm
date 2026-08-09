@@ -1,10 +1,10 @@
 import * as path from "path";
 import * as process from "process";
 
-import { ConfigContext, DirectoryContext } from "./config-context";
+import { ConfigContext, DirectoryContext } from "./config-context.js";
 
-import { NickelProject } from "./nickel-project";
-import { ReportSeparator } from "./nickel-report";
+import { NickelProject } from "./nickel-project.js";
+import { ReportSeparator } from "./nickel-report.js";
 
 describe("DirectoryContext", () => {
   let context: DirectoryContext;

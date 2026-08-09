@@ -1,7 +1,7 @@
 import Transport from "winston-transport";
 import * as winston from "winston";
 
-import { ShellRunner } from "./shell-runner";
+import { ShellRunner } from "./shell-runner.js";
 
 interface LogEvent {
   message: string;

@@ -1,6 +1,6 @@
-import { GitRepository } from "./scm/git/git-repository";
-import { ReportingItem } from "./nickel-report";
-import { ShellRunner } from "./scm/git/shell-runner";
+import { GitRepository } from "./scm/git/git-repository.js";
+import { ReportingItem } from "./nickel-report.js";
+import { ShellRunner } from "./scm/git/shell-runner.js";
 
 /** Configuration values that can be passed in for a project */
 export interface NickelProjectConfig {

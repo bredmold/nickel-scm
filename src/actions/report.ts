@@ -1,7 +1,7 @@
-import { NickelAction } from "./nickel-action";
-import { NickelProject } from "../nickel-project";
-import { ReportLine } from "../nickel-report";
-import { TableColumn } from "../nickel-table";
+import { NickelAction } from "./nickel-action.js";
+import { NickelProject } from "../nickel-project.js";
+import { ReportLine } from "../nickel-report.js";
+import { TableColumn } from "../nickel-table.js";
 
 export class RepositoryReportAction implements NickelAction {
   skipReport(project: NickelProject): ReportLine {

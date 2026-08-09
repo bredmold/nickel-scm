@@ -1,5 +1,5 @@
-import { ShellRunner } from "./shell-runner";
-import { logger } from "../../logger";
+import { ShellRunner } from "./shell-runner.js";
+import { logger } from "../../logger.js";
 
 /** Results of a pull */
 export interface PullResult {

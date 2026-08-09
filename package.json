@@ -1,5 +1,6 @@
 {
   "name": "nickel-scm",
+  "type": "module",
   "version": "0.14.4",
   "description": "Handle tasks on multiple local Git repositories",
   "repository": {
@@ -8,8 +9,8 @@
   },
   "scripts": {
     "build": "tsc && chmod a+x dist/src/nickel.js",
-    "test": "jest",
-    "coverage": "jest --coverage",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write '**/*.ts'",
     "lint": "eslint . --ext .ts",
     "preversion": "npm run test",

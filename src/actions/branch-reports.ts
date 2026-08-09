@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
-import { ReportLine } from "../nickel-report";
-import { logger } from "../logger";
+import { ReportLine } from "../nickel-report.js";
+import { logger } from "../logger.js";
 
 export enum BranchReportStatus {
   New = "report-new",

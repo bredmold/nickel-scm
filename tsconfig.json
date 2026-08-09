@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "lib": ["es2017", "es2015", "es6"],
+    "target": "es2022",
+    "lib": ["es2022"],
     "esModuleInterop": true,
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "./dist",
     "sourceMap": true,
     "strict": true,
+    "isolatedModules": true,
     "resolveJsonModule": true
   },
   "include": ["package.json", "src/**/*.ts"],

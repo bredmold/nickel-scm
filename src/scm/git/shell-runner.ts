@@ -1,7 +1,7 @@
 import * as child_process from "child_process";
 import * as winston from "winston";
 
-import { logger } from "../../logger";
+import { logger } from "../../logger.js";
 
 export interface ProcessResult {
   stdout: string;

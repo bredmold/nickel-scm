@@ -1,8 +1,8 @@
-import { NickelAction } from "./nickel-action";
-import { NickelProject } from "../nickel-project";
-import { ReportLine } from "../nickel-report";
-import { TableColumn } from "../nickel-table";
-import { logger } from "../logger";
+import { NickelAction } from "./nickel-action.js";
+import { NickelProject } from "../nickel-project.js";
+import { ReportLine } from "../nickel-report.js";
+import { TableColumn } from "../nickel-table.js";
+import { logger } from "../logger.js";
 
 export enum SyncStatus {
   New = "sync-new",

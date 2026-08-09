@@ -1,10 +1,10 @@
 import * as path from "path";
 import * as process from "process";
 
-import { ReportSeparator, ReportingItem } from "./nickel-report";
+import { ReportSeparator, ReportingItem } from "./nickel-report.js";
 
-import { NickelProject } from "./nickel-project";
-import { logger } from "./logger";
+import { NickelProject } from "./nickel-project.js";
+import { logger } from "./logger.js";
 
 export interface SelectedItem {
   readonly item: ReportingItem;

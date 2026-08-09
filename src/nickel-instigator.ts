@@ -1,10 +1,10 @@
-import { NickelReport, ReportLine, ReportingItem } from "./nickel-report";
+import { NickelReport, ReportLine, ReportingItem } from "./nickel-report.js";
 
-import { NickelAction } from "./actions/nickel-action";
-import { NickelProject } from "./nickel-project";
-import { NickelTimer } from "./nickel-timer";
-import { SelectedItem } from "./nickel-selector";
-import { logger } from "./logger";
+import { NickelAction } from "./actions/nickel-action.js";
+import { NickelProject } from "./nickel-project.js";
+import { NickelTimer } from "./nickel-timer.js";
+import { SelectedItem } from "./nickel-selector.js";
+import { logger } from "./logger.js";
 
 /**
  * Nickel Instigator - perform actions across all projects

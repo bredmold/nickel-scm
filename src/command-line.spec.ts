@@ -1,11 +1,11 @@
 import { CommanderError } from "commander";
-import { GuidedBranchRemovalAction } from "./actions/guided-remove";
-import { MergedBranchesReportAction } from "./actions/merged-branches";
-import { OldBranchesReportAction } from "./actions/old-branches";
-import { RepositoryCleanupAction } from "./actions/cleanup";
-import { RepositoryReportAction } from "./actions/report";
-import { RepositorySyncAction } from "./actions/sync";
-import { parseCommandLine } from "./command-line";
+import { GuidedBranchRemovalAction } from "./actions/guided-remove.js";
+import { MergedBranchesReportAction } from "./actions/merged-branches.js";
+import { OldBranchesReportAction } from "./actions/old-branches.js";
+import { RepositoryCleanupAction } from "./actions/cleanup.js";
+import { RepositoryReportAction } from "./actions/report.js";
+import { RepositorySyncAction } from "./actions/sync.js";
+import { parseCommandLine } from "./command-line.js";
 
 describe("parseCommandLine", () => {
   test("report action", () => {

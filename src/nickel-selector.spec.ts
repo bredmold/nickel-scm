@@ -1,23 +1,19 @@
-import { cwd } from "process";
-import { nickelSelector, selectItems } from "./nickel-selector";
+import { jest } from "@jest/globals";
+import type { NickelProject as NickelProjectType } from "./nickel-project.js";
+import type { ReportSeparator as ReportSeparatorType } from "./nickel-report.js";
 
-import { NickelProject } from "./nickel-project";
-import { ReportSeparator } from "./nickel-report";
+jest.unstable_mockModule("process", () => ({ cwd: jest.fn() }));
 
-jest.mock("process", () => {
-  const actual = jest.requireActual("process");
-
-  return {
-    ...actual,
-    cwd: jest.fn(),
-  };
-});
+const { cwd } = await import("process");
+const { nickelSelector, selectItems } = await import("./nickel-selector.js");
+const { NickelProject } = await import("./nickel-project.js");
+const { ReportSeparator } = await import("./nickel-report.js");
 
 describe("Nickel Selector", () => {
   const mockCwd = jest.mocked(cwd);
 
-  let project: NickelProject;
-  let separator: ReportSeparator;
+  let project: NickelProjectType;
+  let separator: ReportSeparatorType;
 
   beforeEach(() => {
     mockCwd.mockReset();

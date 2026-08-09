@@ -1,20 +1,20 @@
-import * as ch from "chalk";
+import ch from "chalk";
 
 import {
   CellAlignment,
   TableCell,
   TableColumn,
   TableRow,
-} from "./nickel-table";
+} from "./nickel-table.js";
 import {
   NickelReport,
   ReportLine,
   ReportSeparator,
   ReportingItem,
-} from "./nickel-report";
+} from "./nickel-report.js";
 
-import { CleanupStatus } from "./actions/cleanup";
-import { SyncStatus } from "./actions/sync";
+import { CleanupStatus } from "./actions/cleanup.js";
+import { SyncStatus } from "./actions/sync.js";
 
 describe("Nickel Report", () => {
   let columns: TableColumn[];

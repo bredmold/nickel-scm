@@ -1,6 +1,6 @@
-import { GitRepository, RemoteBranch } from "./git-repository";
+import { GitRepository, RemoteBranch } from "./git-repository.js";
 
-import { ShellRunner } from "./shell-runner";
+import { ShellRunner } from "./shell-runner.js";
 
 describe("Git Repository", () => {
   let runner: ShellRunner;
