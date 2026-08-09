@@ -10,6 +10,7 @@ import {
 
 import { CleanupStatus } from "./actions/cleanup.js";
 import { SyncStatus } from "./actions/sync.js";
+import { Chalk } from "chalk";
 
 /**
  * Returns a collection of name/value pairs
@@ -61,7 +62,7 @@ export class NickelReport {
   private readonly chalk;
 
   constructor(private readonly columns: TableColumn[]) {
-    this.chalk = new chalk.Instance({ level: 1 });
+    this.chalk = new Chalk({ level: 1 });
   }
 
   /**

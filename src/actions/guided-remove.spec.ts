@@ -1,13 +1,14 @@
+import { jest } from "@jest/globals";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
 import {
   GuidedBranchRemovalAction,
   GuidedBranchRemovalStatus,
-} from "./guided-remove";
+} from "./guided-remove.js";
 
-import { NickelProject } from "../nickel-project";
-import { ReportLine } from "../nickel-report";
+import { NickelProject } from "../nickel-project.js";
+import { ReportLine } from "../nickel-report.js";
 
 describe("Guided Remove", () => {
   let project: NickelProject;

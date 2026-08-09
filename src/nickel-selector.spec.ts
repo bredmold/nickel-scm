@@ -2,9 +2,12 @@ import { jest } from "@jest/globals";
 import type { NickelProject as NickelProjectType } from "./nickel-project.js";
 import type { ReportSeparator as ReportSeparatorType } from "./nickel-report.js";
 
-jest.unstable_mockModule("process", () => ({ cwd: jest.fn() }));
+jest.unstable_mockModule("node:process", () => ({
+  default: globalThis.process,
+  cwd: jest.fn(),
+}));
 
-const { cwd } = await import("process");
+const { cwd } = await import("node:process");
 const { nickelSelector, selectItems } = await import("./nickel-selector.js");
 const { NickelProject } = await import("./nickel-project.js");
 const { ReportSeparator } = await import("./nickel-report.js");

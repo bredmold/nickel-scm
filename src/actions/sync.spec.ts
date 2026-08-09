@@ -1,8 +1,9 @@
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
-import { RepositorySyncAction, SyncStatus } from "./sync";
+import { jest } from "@jest/globals";
+import { EMPTY_PROJECT, NickelProject } from "../nickel-project.js";
+import { RepositorySyncAction, SyncStatus } from "./sync.js";
 
-import { ReportLine } from "../nickel-report";
-import { TableColumn } from "../nickel-table";
+import { ReportLine } from "../nickel-report.js";
+import { TableColumn } from "../nickel-table.js";
 
 describe("Sync Action", () => {
   let project: NickelProject;

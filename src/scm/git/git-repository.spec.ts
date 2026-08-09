@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { GitRepository, RemoteBranch } from "./git-repository.js";
 
 import { ShellRunner } from "./shell-runner.js";
@@ -82,7 +83,7 @@ describe("Git Repository", () => {
 
   test("selectBranch", (done) => {
     let actualCommand = "";
-    runner.run = jest.fn((command) => {
+    runner.run = jest.fn((command: string) => {
       actualCommand = command;
       return Promise.resolve({
         stdout: [
@@ -104,7 +105,7 @@ describe("Git Repository", () => {
 
   test("deleteLocalBranch", (done) => {
     let actualCommand = "";
-    runner.run = jest.fn((command) => {
+    runner.run = jest.fn((command: string) => {
       actualCommand = command;
       return Promise.resolve({
         stdout: [

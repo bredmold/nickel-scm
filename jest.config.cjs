@@ -6,7 +6,6 @@ module.exports = {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.mjs"],
   transform: {
     "^.+\\.tsx?$": ["ts-jest", {
       useESM: true,

@@ -1,6 +1,7 @@
-import { NickelProject } from "../nickel-project";
-import { ReportLine } from "../nickel-report";
-import { RepositoryCleanupAction } from "./cleanup";
+import { jest } from "@jest/globals";
+import { NickelProject } from "../nickel-project.js";
+import { ReportLine } from "../nickel-report.js";
+import { RepositoryCleanupAction } from "./cleanup.js";
 
 describe("Cleanup Action", () => {
   let project: NickelProject;
@@ -32,7 +33,7 @@ describe("Cleanup Action", () => {
     );
 
     let selectedBranch = "";
-    project.repository.selectBranch = jest.fn((branch) => {
+    project.repository.selectBranch = jest.fn((branch: string) => {
       selectedBranch = branch;
       return Promise.resolve(true);
     });
@@ -44,13 +45,13 @@ describe("Cleanup Action", () => {
     );
 
     let deletedBranch = "";
-    project.repository.deleteLocalBranch = jest.fn((branch) => {
+    project.repository.deleteLocalBranch = jest.fn((branch: string) => {
       deletedBranch = branch;
       return Promise.resolve(true);
     });
 
     let pruned = "";
-    project.repository.prune = jest.fn((origin) => {
+    project.repository.prune = jest.fn((origin: string) => {
       pruned = origin;
       return Promise.resolve([]);
     });

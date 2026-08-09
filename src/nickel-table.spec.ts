@@ -1,4 +1,5 @@
-import ch from "chalk";
+import { expect, test, describe } from "@jest/globals";
+import { Chalk } from "chalk";
 
 import {
   CellAlignment,
@@ -10,7 +11,7 @@ import {
 
 describe("Nickel Table", () => {
   test("Simplest table", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("a")];
     const rows = [new TableRow([new TableCell("b")])];
     const table = new NickelTable(columns, rows, chalk);
@@ -28,7 +29,7 @@ describe("Nickel Table", () => {
   });
 
   test("2x2 Table", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("a"), new TableColumn("b")];
     const rows = [
       new TableRow([new TableCell("c"), new TableCell("d")]),
@@ -51,7 +52,7 @@ describe("Nickel Table", () => {
   });
 
   test("Table with separator row", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("a"), new TableColumn("b")];
     const rows = [
       new TableRow([new TableCell("c"), new TableCell("d")]),
@@ -76,7 +77,7 @@ describe("Nickel Table", () => {
   });
 
   test("Separator row with content", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("a"), new TableColumn("b")];
     const rows = [
       new TableRow([new TableCell("c"), new TableCell("d")]),
@@ -101,7 +102,7 @@ describe("Nickel Table", () => {
   });
 
   test("Table with left aligned and right aligned cells", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("one"), new TableColumn("two")];
     const rows = [
       new TableRow([
@@ -125,7 +126,7 @@ describe("Nickel Table", () => {
   });
 
   test("Invalid row length", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("one"), new TableColumn("two")];
     const rows = [new TableRow([new TableCell("c")])];
 
@@ -133,7 +134,7 @@ describe("Nickel Table", () => {
   });
 
   test("Cell with chalk content", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("one"), new TableColumn("two")];
     const rows = [
       new TableRow([
@@ -157,7 +158,7 @@ describe("Nickel Table", () => {
   });
 
   test("First row is a separator", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const columns = [new TableColumn("one")];
     const rows = [
       new TableRow([new TableCell("s", CellAlignment.Left)], "sep"),

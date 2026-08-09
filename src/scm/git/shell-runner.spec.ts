@@ -1,3 +1,4 @@
+import { describe, expect, test } from "@jest/globals";
 import Transport from "winston-transport";
 import * as winston from "winston";
 
@@ -42,32 +43,30 @@ describe("Shell Runner", () => {
     runner = new ShellRunner(".", testLogger);
   });
 
-  test("run", (done) => {
-    runner.run("echo test").then((result) => {
-      expect(result).toStrictEqual({
-        stdout: "test\n",
-        stderr: "",
-      });
-
-      const events = testTransport.events.map((e) => {
-        return { message: e.message, level: e.level };
-      });
-      expect(events).toStrictEqual([
-        {
-          message: "echo test [.]",
-          level: "debug",
-        },
-        {
-          message: "echo test [.] STDOUT: test",
-          level: "debug",
-        },
-        {
-          message: "echo test [.] STDERR: <EMPTY>",
-          level: "debug",
-        },
-      ]);
-      done();
+  test("run", async () => {
+    const result = await runner.run("echo test");
+    expect(result).toStrictEqual({
+      stdout: "test\n",
+      stderr: "",
     });
+
+    const events = testTransport.events.map((e) => {
+      return { message: e.message, level: e.level };
+    });
+    expect(events).toStrictEqual([
+      {
+        message: "echo test [.]",
+        level: "debug",
+      },
+      {
+        message: "echo test [.] STDOUT: test",
+        level: "debug",
+      },
+      {
+        message: "echo test [.] STDERR: <EMPTY>",
+        level: "debug",
+      },
+    ]);
   });
 
   test("run stderr", () => {
@@ -79,35 +78,22 @@ describe("Shell Runner", () => {
     });
   });
 
-  test("run error", (done) => {
-    runner.run('bash -c "exit 1"').then(
-      () => {
-        done("unexpected success");
-      },
-      (error) => {
-        expect(error.code).toStrictEqual(1);
-        expect(error.message).toStrictEqual(
-          'Command failed: bash -c "exit 1"\n',
-        );
-        done();
-      },
-    );
+  test("run error", async () => {
+    await expect(runner.run('bash -c "exit 1"')).rejects.toMatchObject({
+      code: 1,
+      message: 'Command failed: bash -c "exit 1"\n',
+    });
   });
 
-  test("multiline output", (done) => {
-    runner.run('bash -c "echo line 1 && echo line 2"').then(
-      (result) => {
-        expect(result.stdout).toStrictEqual("line 1\nline 2\n");
+  test("multiline output", async () => {
+    const result = await runner.run('bash -c "echo line 1 && echo line 2"');
+    expect(result.stdout).toStrictEqual("line 1\nline 2\n");
 
-        const messages = testTransport.events.map((event) => event.message);
-        expect(messages).toStrictEqual([
-          'bash -c "echo line 1 && echo line 2" [.]',
-          'bash -c "echo line 1 && echo line 2" [.] STDOUT: \nline 1\nline 2',
-          'bash -c "echo line 1 && echo line 2" [.] STDERR: <EMPTY>',
-        ]);
-        done();
-      },
-      (error) => done.fail(error),
-    );
+    const messages = testTransport.events.map((event) => event.message);
+    expect(messages).toStrictEqual([
+      'bash -c "echo line 1 && echo line 2" [.]',
+      'bash -c "echo line 1 && echo line 2" [.] STDOUT: \nline 1\nline 2',
+      'bash -c "echo line 1 && echo line 2" [.] STDERR: <EMPTY>',
+    ]);
   });
 });

@@ -1,10 +1,11 @@
+import { jest } from "@jest/globals";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
-import { BranchReportLine, BranchReportStatus } from "./branch-reports";
+import { BranchReportLine, BranchReportStatus } from "./branch-reports.js";
 
-import { NickelProject } from "../nickel-project";
-import { OldBranchesReportAction } from "./old-branches";
+import { NickelProject } from "../nickel-project.js";
+import { OldBranchesReportAction } from "./old-branches.js";
 
 describe("Old Branches Report", () => {
   let project: NickelProject;

@@ -1,5 +1,5 @@
-import * as path from "path";
-import * as process from "process";
+import path from "path";
+import { cwd } from "node:process";
 
 import { ReportSeparator, ReportingItem } from "./nickel-report.js";
 
@@ -65,7 +65,7 @@ function projectPathSelector(paths: string[]): NickelSelector {
       const project = item as NickelProject;
       const matchingPaths = paths
         .map((p) => path.normalize(p))
-        .map((p) => (path.isAbsolute(p) ? p : path.resolve(process.cwd(), p)))
+        .map((p) => (path.isAbsolute(p) ? p : path.resolve(cwd(), p)))
         .filter((p) => project.path.startsWith(p));
 
       return Promise.resolve({

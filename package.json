@@ -29,6 +29,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
+    "@jest/globals": "^30.4.1",
     "@types/jest": "^30.0.0",
     "@types/tmp": "^0.2.6",
     "eslint": "^10.8.1",
@@ -44,7 +45,7 @@
   },
   "dependencies": {
     "@types/node": "^26.2.0",
-    "chalk": "^4.1.2",
+    "chalk": "^6.0.0",
     "commander": "^15.0.0",
     "winston": "^3.19.0"
   },

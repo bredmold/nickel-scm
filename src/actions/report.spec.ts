@@ -1,8 +1,9 @@
-import { EMPTY_PROJECT, NickelProject } from "../nickel-project";
+import { jest } from "@jest/globals";
+import { EMPTY_PROJECT, NickelProject } from "../nickel-project.js";
 
-import { ReportLine } from "../nickel-report";
-import { RepositoryReportAction } from "./report";
-import { TableColumn } from "../nickel-table";
+import { ReportLine } from "../nickel-report.js";
+import { RepositoryReportAction } from "./report.js";
+import { TableColumn } from "../nickel-table.js";
 
 describe("Report Action", () => {
   let project: NickelProject;

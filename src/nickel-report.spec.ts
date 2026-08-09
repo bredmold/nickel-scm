@@ -1,4 +1,4 @@
-import ch from "chalk";
+import { Chalk } from "chalk";
 
 import {
   CellAlignment,
@@ -53,7 +53,7 @@ describe("Nickel Report", () => {
   });
 
   test("Named separator", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const rows: ReportingItem[] = [
       new ReportLine({ test: "a" }),
       new ReportSeparator("george"),
@@ -72,7 +72,7 @@ describe("Nickel Report", () => {
   });
 
   test("Automatic highlighting", () => {
-    const chalk = new ch.Instance({ level: 1 });
+    const chalk = new Chalk({ level: 1 });
     const rows = [
       new ReportLine({ test: SyncStatus.Success }),
       new ReportLine({ test: SyncStatus.Failure }),

@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import { ChalkInstance } from "chalk";
 
 export class RowConfig {
   constructor(
@@ -116,7 +116,7 @@ export class NickelTable {
   constructor(
     readonly columns: TableColumn[],
     readonly rows: TableRow[],
-    private readonly chalk: chalk.Chalk,
+    private readonly chalk: ChalkInstance,
   ) {
     const titleWidths = this.columns.map((col) => col.title.length);
     this.columnWidths = this.buildColumnWidths(titleWidths, 0);
