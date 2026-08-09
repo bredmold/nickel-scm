@@ -1,19 +1,18 @@
-import { jest } from "@jest/globals";
+import { vitest, describe, beforeEach, test, expect } from "vitest";
 import type { NickelProject as NickelProjectType } from "./nickel-project.js";
 import type { ReportSeparator as ReportSeparatorType } from "./nickel-report.js";
+import { cwd } from "node:process";
+import { nickelSelector, selectItems } from "./nickel-selector.js";
+import { NickelProject } from "./nickel-project.js";
+import { ReportSeparator } from "./nickel-report.js";
 
-jest.unstable_mockModule("node:process", () => ({
+vitest.mock("node:process", () => ({
   default: globalThis.process,
-  cwd: jest.fn(),
+  cwd: vitest.fn(),
 }));
 
-const { cwd } = await import("node:process");
-const { nickelSelector, selectItems } = await import("./nickel-selector.js");
-const { NickelProject } = await import("./nickel-project.js");
-const { ReportSeparator } = await import("./nickel-report.js");
-
 describe("Nickel Selector", () => {
-  const mockCwd = jest.mocked(cwd);
+  const mockCwd = vitest.mocked(cwd);
 
   let project: NickelProjectType;
   let separator: ReportSeparatorType;
@@ -162,7 +161,7 @@ describe("Nickel Selector", () => {
     });
 
     test("active branch selector positive match", async () => {
-      project.repository.branch = jest.fn(() => Promise.resolve("master"));
+      project.repository.branch = vitest.fn(() => Promise.resolve("master"));
 
       const selector = nickelSelector({
         projects: [],
@@ -180,7 +179,9 @@ describe("Nickel Selector", () => {
     });
 
     test("active branch selector negative match", async () => {
-      project.repository.branch = jest.fn(() => Promise.resolve("not-master"));
+      project.repository.branch = vitest.fn(() =>
+        Promise.resolve("not-master"),
+      );
 
       const selector = nickelSelector({
         projects: [],

@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vitest, describe, beforeEach, test, expect } from "vitest";
 import { GitRepository, RemoteBranch } from "./git-repository.js";
 
 import { ShellRunner } from "./shell-runner.js";
@@ -14,7 +14,7 @@ describe("Git Repository", () => {
   });
 
   test("pull", () => {
-    runner.run = jest.fn(() => {
+    runner.run = vitest.fn(() => {
       return Promise.resolve({
         stdout: [
           "Updating 5c575bb..0ac6634",
@@ -36,7 +36,7 @@ describe("Git Repository", () => {
   });
 
   test("pull with prune", () => {
-    runner.run = jest.fn((cmd: string) => {
+    runner.run = vitest.fn((cmd: string) => {
       expect(cmd).toMatch(/ --prune/);
 
       return Promise.resolve({
@@ -57,7 +57,7 @@ describe("Git Repository", () => {
   });
 
   test("status", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: [
           "# branch.oid bdb09a93b8fcc5ce559287304f9e904f6464fcd5",
@@ -81,9 +81,9 @@ describe("Git Repository", () => {
     });
   });
 
-  test("selectBranch", (done) => {
+  test("selectBranch", async () => {
     let actualCommand = "";
-    runner.run = jest.fn((command: string) => {
+    runner.run = vitest.fn((command: string) => {
       actualCommand = command;
       return Promise.resolve({
         stdout: [
@@ -94,18 +94,13 @@ describe("Git Repository", () => {
       });
     });
 
-    repository.selectBranch("testBranch").then(
-      () => {
-        expect(actualCommand).toBe("git checkout testBranch");
-        done();
-      },
-      (e) => done(e),
-    );
+    await repository.selectBranch("testBranch");
+    expect(actualCommand).toBe("git checkout testBranch");
   });
 
-  test("deleteLocalBranch", (done) => {
+  test("deleteLocalBranch", async () => {
     let actualCommand = "";
-    runner.run = jest.fn((command: string) => {
+    runner.run = vitest.fn((command: string) => {
       actualCommand = command;
       return Promise.resolve({
         stdout: [
@@ -117,17 +112,12 @@ describe("Git Repository", () => {
       });
     });
 
-    repository.deleteLocalBranch("testBranch").then(
-      () => {
-        expect(actualCommand).toBe("git branch -d testBranch");
-        done();
-      },
-      (e) => done(e),
-    );
+    await repository.deleteLocalBranch("testBranch");
+    expect(actualCommand).toBe("git branch -d testBranch");
   });
 
   test("prune", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: [
           "Pruning origin",
@@ -144,7 +134,7 @@ describe("Git Repository", () => {
   });
 
   test("branch", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: "test-branch\n",
         stderr: "",
@@ -155,7 +145,7 @@ describe("Git Repository", () => {
   });
 
   test("commit", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: "15be9b216cbaaeb16706bcf3d6eb2031b325c5f4\n",
         stderr: "",
@@ -166,7 +156,7 @@ describe("Git Repository", () => {
   });
 
   test("remoteMergedBranch", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: ["  origin/HEAD -> origin/master", "  origin/test-branch"].join(
           "\n",
@@ -181,7 +171,7 @@ describe("Git Repository", () => {
   });
 
   test("committerDate", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: "2020-03-11T20:25:07+00:00\n",
         stderr: "",
@@ -203,7 +193,7 @@ describe("Git Repository", () => {
   });
 
   test("allBranches", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: [
           "  master",
@@ -221,7 +211,7 @@ describe("Git Repository", () => {
   });
 
   test("fetch", () => {
-    runner.run = jest.fn(() =>
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: "",
         stderr: [
@@ -250,23 +240,16 @@ describe("Git Repository", () => {
     });
   });
 
-  test("removeRemoteBranch", (done) => {
-    runner.run = jest.fn(() =>
+  test("removeRemoteBranch", async () => {
+    runner.run = vitest.fn(() =>
       Promise.resolve({
         stdout: "",
         stderr: "",
       }),
     );
 
-    repository.removeRemoteBranch("origin", "test").then(
-      () => {
-        expect(runner.run).toHaveBeenCalledWith(
-          "git push --delete origin test",
-        );
-        done();
-      },
-      (e) => done.fail(e),
-    );
+    await repository.removeRemoteBranch("origin", "test");
+    expect(runner.run).toHaveBeenCalledWith("git push --delete origin test");
   });
 });
 

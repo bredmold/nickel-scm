@@ -7,7 +7,7 @@ import * as vm from "vm";
 import { CommandLine, parseCommandLine } from "./command-line.js";
 
 import { CommanderError } from "commander";
-import { ConfigContext } from "./config-context.js";
+import { ConfigContext } from "./config/config-context.js";
 import { NickelInstigator } from "./nickel-instigator.js";
 import { logger } from "./logger.js";
 import { selectItems } from "./nickel-selector.js";

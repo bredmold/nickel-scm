@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { describe, beforeEach, test, expect, vitest } from "vitest";
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project.js";
 
 import { ReportLine } from "../nickel-report.js";
@@ -45,7 +45,7 @@ describe("Report Action", () => {
   });
 
   test("act", () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",

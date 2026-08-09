@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vitest, describe, beforeEach, afterEach, test, expect } from "vitest";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
@@ -34,7 +34,7 @@ describe("Guided Remove", () => {
   });
 
   test("Empty report", async () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",
@@ -45,7 +45,7 @@ describe("Guided Remove", () => {
       }),
     );
 
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
@@ -67,7 +67,7 @@ describe("Guided Remove", () => {
   });
 
   test("One branch, to be kept", async () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",
@@ -78,7 +78,7 @@ describe("Guided Remove", () => {
       }),
     );
 
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
@@ -109,7 +109,7 @@ describe("Guided Remove", () => {
   });
 
   test("One branch, to delete", async () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",
@@ -120,13 +120,13 @@ describe("Guided Remove", () => {
       }),
     );
 
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
     );
 
-    project.repository.removeRemoteBranch = jest.fn((remote, branch) => {
+    project.repository.removeRemoteBranch = vitest.fn((remote, branch) => {
       const branchName = `${remote}/${branch}`;
       if (branchName === "origin/nope") {
         return Promise.resolve({
@@ -164,7 +164,7 @@ describe("Guided Remove", () => {
   });
 
   test("Fetch result show name change", async () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",
@@ -177,7 +177,7 @@ describe("Guided Remove", () => {
 
     // Local and remote branch names differ on case
     // This happens commonly on client systems with case-insensitive filesystems
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [
           {
@@ -196,7 +196,7 @@ describe("Guided Remove", () => {
       }),
     );
 
-    project.repository.removeRemoteBranch = jest.fn((remote, branch) => {
+    project.repository.removeRemoteBranch = vitest.fn((remote, branch) => {
       const branchName = `${remote}/${branch}`;
       if (branchName === "origin/Feature/test") {
         return Promise.resolve({

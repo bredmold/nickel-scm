@@ -1,4 +1,4 @@
-import { expect, test, describe } from "@jest/globals";
+import { describe, test, expect } from "vitest";
 import { Chalk } from "chalk";
 
 import {

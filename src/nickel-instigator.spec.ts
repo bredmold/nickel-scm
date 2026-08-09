@@ -1,3 +1,4 @@
+import { describe, beforeEach, test, expect } from "vitest";
 import { ReportLine, ReportSeparator } from "./nickel-report.js";
 
 import { NickelAction } from "./actions/nickel-action.js";

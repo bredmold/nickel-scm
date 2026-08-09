@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { describe, beforeEach, afterEach, test, expect, vitest } from "vitest";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
@@ -31,17 +31,17 @@ describe("Old Branches Report", () => {
   });
 
   test("No old branches", async () => {
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
     );
 
-    project.repository.remoteBranches = jest.fn(() =>
+    project.repository.remoteBranches = vitest.fn(() =>
       Promise.resolve(["origin/master"]),
     );
 
-    project.repository.committerDate = jest.fn(() => {
+    project.repository.committerDate = vitest.fn(() => {
       const now = new Date();
       const commitTs = now.getTime() - 1000 * 3600 * 24;
       return Promise.resolve(new Date(commitTs));
@@ -61,17 +61,17 @@ describe("Old Branches Report", () => {
   });
 
   test("One old branch", () => {
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
     );
 
-    project.repository.remoteBranches = jest.fn(() =>
+    project.repository.remoteBranches = vitest.fn(() =>
       Promise.resolve(["origin/master", "origin/old"]),
     );
 
-    project.repository.committerDate = jest.fn((branch) => {
+    project.repository.committerDate = vitest.fn((branch) => {
       const ageInDays = branch === "origin/old" ? 30 : 1;
       const now = new Date();
       const commitTs = now.getTime() - 1000 * 3600 * 24 * ageInDays;

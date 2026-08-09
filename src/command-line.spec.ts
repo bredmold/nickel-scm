@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { CommanderError } from "commander";
 import { GuidedBranchRemovalAction } from "./actions/guided-remove.js";
 import { MergedBranchesReportAction } from "./actions/merged-branches.js";

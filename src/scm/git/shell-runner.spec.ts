@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test, beforeEach } from "vitest";
 import Transport from "winston-transport";
 import * as winston from "winston";
 

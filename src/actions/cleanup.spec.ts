@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vitest, describe, beforeEach, test, expect } from "vitest";
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
 import { RepositoryCleanupAction } from "./cleanup.js";
@@ -20,8 +20,8 @@ describe("Cleanup Action", () => {
     action = new RepositoryCleanupAction();
   });
 
-  test("act", (done) => {
-    project.repository.status = jest.fn(() =>
+  test("act", async () => {
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "test",
@@ -33,49 +33,44 @@ describe("Cleanup Action", () => {
     );
 
     let selectedBranch = "";
-    project.repository.selectBranch = jest.fn((branch: string) => {
+    project.repository.selectBranch = vitest.fn((branch: string) => {
       selectedBranch = branch;
       return Promise.resolve(true);
     });
 
-    project.repository.pull = jest.fn(() =>
+    project.repository.pull = vitest.fn(() =>
       Promise.resolve({
         updatedFiles: [],
       }),
     );
 
     let deletedBranch = "";
-    project.repository.deleteLocalBranch = jest.fn((branch: string) => {
+    project.repository.deleteLocalBranch = vitest.fn((branch: string) => {
       deletedBranch = branch;
       return Promise.resolve(true);
     });
 
     let pruned = "";
-    project.repository.prune = jest.fn((origin: string) => {
+    project.repository.prune = vitest.fn((origin: string) => {
       pruned = origin;
       return Promise.resolve([]);
     });
 
-    action.act(project).then(
-      (line) => {
-        expect(selectedBranch).toStrictEqual("master");
-        expect(deletedBranch).toStrictEqual("test");
-        expect(pruned).toStrictEqual("origin");
-        expect(line).toStrictEqual(
-          new ReportLine({
-            Project: "test",
-            Branch: "test",
-            Status: "clean-success",
-          }),
-        );
-        done();
-      },
-      (e) => done(e),
+    const line = await action.act(project);
+    expect(selectedBranch).toStrictEqual("master");
+    expect(deletedBranch).toStrictEqual("test");
+    expect(pruned).toStrictEqual("origin");
+    expect(line).toStrictEqual(
+      new ReportLine({
+        Project: "test",
+        Branch: "test",
+        Status: "clean-success",
+      }),
     );
   });
 
   test("skipped", () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",
@@ -96,7 +91,7 @@ describe("Cleanup Action", () => {
   });
 
   test("dirty", () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: ["a"],
         branch: "test",

@@ -1,10 +1,11 @@
+import { describe, expect, test, beforeEach } from "vitest";
 import * as path from "path";
 import * as process from "process";
 
 import { ConfigContext, DirectoryContext } from "./config-context.js";
 
-import { NickelProject } from "./nickel-project.js";
-import { ReportSeparator } from "./nickel-report.js";
+import { NickelProject } from "../nickel-project.js";
+import { ReportSeparator } from "../nickel-report.js";
 
 describe("DirectoryContext", () => {
   let context: DirectoryContext;

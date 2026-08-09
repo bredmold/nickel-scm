@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vitest, describe, beforeEach, afterEach, test, expect } from "vitest";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
@@ -31,13 +31,13 @@ describe("Merged Branche Report", () => {
   });
 
   test("No updated branches", () => {
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
     );
 
-    project.repository.remoteMergedBranches = jest.fn(() =>
+    project.repository.remoteMergedBranches = vitest.fn(() =>
       Promise.resolve([]),
     );
 
@@ -54,13 +54,13 @@ describe("Merged Branche Report", () => {
   });
 
   test("One updated branch", () => {
-    project.repository.fetch = jest.fn(() =>
+    project.repository.fetch = vitest.fn(() =>
       Promise.resolve({
         updatedBranches: [],
       }),
     );
 
-    project.repository.remoteMergedBranches = jest.fn(() =>
+    project.repository.remoteMergedBranches = vitest.fn(() =>
       Promise.resolve(["origin/master", "origin/merged"]),
     );
 

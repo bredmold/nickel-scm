@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vitest, describe, beforeEach, test, expect } from "vitest";
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project.js";
 import { RepositorySyncAction, SyncStatus } from "./sync.js";
 
@@ -43,7 +43,7 @@ describe("Sync Action", () => {
   });
 
   test("act", () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: [],
         branch: "master",
@@ -54,7 +54,7 @@ describe("Sync Action", () => {
       }),
     );
 
-    project.repository.pull = jest.fn(() =>
+    project.repository.pull = vitest.fn(() =>
       Promise.resolve({
         updatedFiles: [],
       }),
@@ -71,7 +71,7 @@ describe("Sync Action", () => {
   });
 
   test("dirty", () => {
-    project.repository.status = jest.fn(() =>
+    project.repository.status = vitest.fn(() =>
       Promise.resolve({
         modifiedFiles: ["a"],
         branch: "master",
