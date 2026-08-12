@@ -43,8 +43,8 @@ export class OldBranchesReportAction implements NickelAction {
     return new OldBranchesReport(project, this.age).report();
   }
 
-  post(reports: ReportLine[]): void {
-    new BranchReportWriter(
+  async post(reports: ReportLine[]): Promise<void> {
+    await new BranchReportWriter(
       <BranchReportLine[]>reports,
       this.reportFile,
     ).writeReport();

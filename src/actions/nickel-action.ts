@@ -15,7 +15,7 @@ export interface NickelAction {
    *
    * @param reports List of all reports generated
    */
-  post(reports: ReportLine[]): void;
+  post(reports: ReportLine[]): Promise<void>;
 
   /**
    * Generic empty report in case the project was skipped

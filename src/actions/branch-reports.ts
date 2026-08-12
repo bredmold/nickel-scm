@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import { writeFile } from "fs/promises";
 
 import { ReportLine } from "../nickel-report.js";
 import { logger } from "../logger.js";
@@ -32,7 +32,7 @@ export class BranchReportWriter {
     private readonly reportFile: string,
   ) {}
 
-  writeReport(): void {
+  async writeReport(): Promise<void> {
     const processed: BranchReportDetails[] = [];
     this.reports.forEach((report) => {
       report.candidateBranches.forEach((branch) => {
@@ -47,6 +47,6 @@ export class BranchReportWriter {
     const reportText = JSON.stringify(processed, null, 1);
 
     logger.info(`Generating branch report to file: ${this.reportFile}`);
-    fs.writeFileSync(this.reportFile, reportText);
+    await writeFile(this.reportFile, reportText);
   }
 }

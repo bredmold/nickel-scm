@@ -90,8 +90,8 @@ describe("Old Branches Report", () => {
     );
   });
 
-  test("Report writer", () => {
-    action.post([
+  test("Report writer", async () => {
+    await action.post([
       new BranchReportLine(
         {
           Project: "test",

@@ -2,16 +2,16 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-import { NickelProject, NickelProjectConfig } from "../nickel-project.js";
-import { ReportSeparator, ReportingItem } from "../nickel-report.js";
+import { NickelProject, NickelProjectConfig } from "./nickel-project.js";
+import { ReportSeparator, ReportingItem } from "./nickel-report.js";
 
-import { logger } from "../logger.js";
+import { logger } from "./logger.js";
 
 type ConfigItem = string | string[];
 type OptionalConfiguration = { [index: string]: ConfigItem } | null;
 
 /**
- * Normalize a path based on well known rules
+ * Normalize a path based on well-known rules
  *
  * @param userPath The user-supplied path to resolve
  * @returns Normalized path
@@ -52,7 +52,7 @@ abstract class PathContext {
   }
 
   /**
-   * Optionally update the default branch, and then return it.
+   * Optionally, update the default branch and then return it.
    *
    * If a default branch has been set for this level, it is returned.
    * If there is no default branch, then the parent context is examined.
@@ -92,7 +92,7 @@ abstract class PathContext {
    *
    * If a commit prefix has been set for this level, it is returned.
    * If there is no commit prefix, then the parent context is examined.
-   * If there is not commit prefix, and no parent, the default is 12
+   * If there is no commit prefix, and no parent, the default is 12
    *
    * @param commitPrefix Optional commit prefix value
    */
@@ -162,7 +162,7 @@ export class DirectoryContext extends PathContext {
    * @returns whether or not to generate a separator for this context
    */
   separator(separator?: boolean): boolean {
-    if (separator) this._separator = separator;
+    if (typeof separator === "boolean") this._separator = separator;
     return this._separator;
   }
 
@@ -184,7 +184,7 @@ export class DirectoryContext extends PathContext {
   }
 
   /**
-   * Create a child context from the current context, based on a sub-directory
+   * Create a child context from the current context, based on a subdirectory
    *
    * @param name The name of the final path component in the new context (directory name)
    * @param contextFn Callback function for further user configuration

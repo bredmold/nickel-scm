@@ -1,5 +1,3 @@
-import * as chalk from "chalk";
-
 import {
   CellAlignment,
   NickelTable,

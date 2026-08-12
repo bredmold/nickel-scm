@@ -35,7 +35,7 @@ export class RepositoryReportAction implements NickelAction {
     });
   }
 
-  post(): void {
-    // Empty
+  post(): Promise<void> {
+    return Promise.resolve();
   }
 }

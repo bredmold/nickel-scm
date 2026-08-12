@@ -76,8 +76,8 @@ describe("Merged Branche Report", () => {
     );
   });
 
-  test("Write the report", () => {
-    action.post([
+  test("Write the report", async () => {
+    await action.post([
       new BranchReportLine(
         {
           Project: "test",

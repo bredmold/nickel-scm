@@ -8,7 +8,6 @@ import { RepositoryCleanupAction } from "./actions/cleanup.js";
 import { RepositoryReportAction } from "./actions/report.js";
 import { RepositorySyncAction } from "./actions/sync.js";
 import { SelectorConfig } from "./nickel-selector.js";
-import { logger } from "./logger.js";
 
 import pkg from "../package.json" with { type: "json" };
 
@@ -48,7 +47,6 @@ export function parseCommandLine(args: string[]): CommandLine {
     .command("sync")
     .description("Sync all projects")
     .action(() => {
-      logger.debug("cmd=sync");
       action = new RepositorySyncAction();
     });
 
@@ -56,7 +54,6 @@ export function parseCommandLine(args: string[]): CommandLine {
     .command("report")
     .description("Local repository report (no network interaction)")
     .action(() => {
-      logger.debug("cmd=report");
       action = new RepositoryReportAction();
     });
 
@@ -64,7 +61,6 @@ export function parseCommandLine(args: string[]): CommandLine {
     .command("cleanup")
     .description("Retire unused branches")
     .action(() => {
-      logger.debug("cmd=cleanup");
       action = new RepositoryCleanupAction();
     });
 
@@ -73,7 +69,6 @@ export function parseCommandLine(args: string[]): CommandLine {
     .argument("<reportFile>", "Branch report to generate")
     .description("Generate a merged branches report")
     .action((reportFile: string) => {
-      logger.debug(`cmd=mergedBranches reportFile=${reportFile}`);
       action = new MergedBranchesReportAction(reportFile);
     });
 
@@ -82,7 +77,6 @@ export function parseCommandLine(args: string[]): CommandLine {
     .argument("<reportFile>", "Report file to consume")
     .description("Remove branches based on a branch report")
     .action((reportFile: string) => {
-      logger.debug(`cmd=guidedRemove reportFile=${reportFile}`);
       action = new GuidedBranchRemovalAction(reportFile);
     });
 
@@ -96,7 +90,6 @@ export function parseCommandLine(args: string[]): CommandLine {
         .argParser((age) => parseInt(age)),
     )
     .action((reportFile: string, age: number) => {
-      logger.debug(`cmd=oldBranches reportFile=${reportFile} age=${age}`);
       if (isNaN(age)) throw "Invalid age";
       action = new OldBranchesReportAction(reportFile, age);
     });

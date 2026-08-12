@@ -76,8 +76,8 @@ export class MergedBranchesReportAction implements NickelAction {
     }
   }
 
-  post(reports: ReportLine[]): void {
-    new BranchReportWriter(
+  async post(reports: ReportLine[]): Promise<void> {
+    await new BranchReportWriter(
       <BranchReportLine[]>reports,
       this.reportFile,
     ).writeReport();

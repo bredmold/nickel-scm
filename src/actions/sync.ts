@@ -66,7 +66,7 @@ export class RepositorySyncAction implements NickelAction {
     }
   }
 
-  post(): void {
-    // Empty
+  post(): Promise<void> {
+    return Promise.resolve();
   }
 }

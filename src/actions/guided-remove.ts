@@ -52,8 +52,8 @@ export class GuidedBranchRemovalAction implements NickelAction {
     return new GuidedBranchRemoval(project, this.reportFile).prune();
   }
 
-  post(): void {
-    // Empty
+  post(): Promise<void> {
+    return Promise.resolve();
   }
 }
 

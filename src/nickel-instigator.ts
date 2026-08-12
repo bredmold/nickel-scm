@@ -20,9 +20,9 @@ export class NickelInstigator {
         const item = selectedItem.item;
         if (item instanceof NickelProject) {
           if (selectedItem.selected) {
-            return action.act(<NickelProject>item);
+            return action.act(item);
           } else {
-            return Promise.resolve(action.skipReport(<NickelProject>item));
+            return Promise.resolve(action.skipReport(item));
           }
         } else {
           // Assume it's a separator
@@ -38,7 +38,7 @@ export class NickelInstigator {
     const reportLines = reports.filter(
       (report) => report instanceof ReportLine,
     );
-    action.post(reportLines as ReportLine[]);
+    await action.post(reportLines as ReportLine[]);
     logger.info(`${timer.elapsed() / 1000}s elapsed`);
   }
 }

@@ -4,35 +4,13 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vm from "vm";
 
-import { CommandLine, parseCommandLine } from "./command-line.js";
+import { parseCommandLine } from "./command-line.js";
 
 import { CommanderError } from "commander";
-import { ConfigContext } from "./config/config-context.js";
+import { ConfigContext } from "./config-context.js";
 import { NickelInstigator } from "./nickel-instigator.js";
 import { logger } from "./logger.js";
 import { selectItems } from "./nickel-selector.js";
-
-logger.level = "warn";
-
-const options: CommandLine = (() => {
-  try {
-    return parseCommandLine(process.argv);
-  } catch (e) {
-    if (e instanceof CommanderError) {
-      process.exit(e.exitCode);
-    } else {
-      logger.error(e);
-      process.exit(1);
-    }
-  }
-})();
-
-logger.level = options.logLevel;
-logger.info(`Log level is ${logger.level}`);
-
-/*
-Parse the configuration file
- */
 
 /**
  * This searches in three locations for the configuration script
@@ -45,7 +23,7 @@ Parse the configuration file
  * @returns Config script as a string
  * @throws If the configuration script can't be located
  */
-function findConfigScript(configScriptOption?: string): string {
+function findConfigScript(configScriptOption: string | undefined): string {
   const home = process.env["HOME"];
   const defaultSearchPath = [
     home + path.sep + ".nickel.js",
@@ -73,6 +51,20 @@ function findConfigScript(configScriptOption?: string): string {
 }
 
 async function main() {
+  /*
+  Parse the command line and initialize logging
+   */
+  logger.level = "warn";
+
+  const options = parseCommandLine(process.argv);
+
+  logger.level = options.logLevel;
+  logger.info(`Log level is ${logger.level}`);
+
+  /*
+  Read the configuration script
+   */
+
   const configScriptPath = findConfigScript(options.configScript);
   const configScriptContent = fs.readFileSync(configScriptPath, {
     encoding: "utf-8",
@@ -97,12 +89,18 @@ async function main() {
   await instigator.doIt(options.action);
 }
 
-main().then(
-  () => {
-    logger.debug("Done");
-  },
-  (e) => {
-    logger.error(e);
-    process.exit(1);
-  },
-);
+if (import.meta.main) {
+  main().then(
+    () => {
+      logger.debug("Done");
+    },
+    (e) => {
+      if (e instanceof CommanderError) {
+        process.exit(e.exitCode);
+      } else {
+        logger.error(e);
+        process.exit(1);
+      }
+    },
+  );
+}

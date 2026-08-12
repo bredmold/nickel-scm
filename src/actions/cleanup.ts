@@ -64,7 +64,7 @@ export class RepositoryCleanupAction implements NickelAction {
     }
   }
 
-  post(): void {
-    // Empty
+  post(): Promise<void> {
+    return Promise.resolve();
   }
 }
