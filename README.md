@@ -27,7 +27,7 @@ Configuration is done using a JS source file with some pre-defined calls availab
 2. `${HOME}/.nickel.js`
 3. `${HOME}/nickel.js`
 
-#### Original Config as Code
+#### The Old Way
 
 The content of this file is a series of project declarations. For example:
 
@@ -55,7 +55,7 @@ The first line declares where the projects live. If you have projects in multipl
 root can be changed in the middle of the file and will be picked up by subsequent calls to
 `project(...)`.
 
-#### Updated Config as Code
+#### The New Way
 
 ```javascript
 projectRoot("c:/Dev", root => {
@@ -84,34 +84,6 @@ projectRoot("c:/Dev", root => {
     ops.git("ops-project");
   });
 });
-```
-
-#### Managed Configuration
-
-TODO write out reasons to use this option, and show examples of management commands.
-```json
-{
-  "version": 1,
-  "roots": [
-    {
-      "path": "C:/Dev",
-      "defaultBranch": "main",
-      "pruneOnFetch": true,
-      "projectDirs": [
-        {
-          "path": "group1",
-          "separator": true,
-          "label": "Group 1",
-          "git": [
-            "thing-base",
-            "thing-commons",
-            "thing-service"
-          ]
-        }
-      ]
-    }
-  ]
-}
 ```
 
 ## Run
