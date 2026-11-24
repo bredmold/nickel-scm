@@ -3,7 +3,6 @@ import { EMPTY_PROJECT, NickelProject } from "../nickel-project.js";
 
 import { ReportLine } from "../nickel-report.js";
 import { RepositoryReportAction } from "./report.js";
-import { TableColumn } from "../nickel-table.js";
 
 describe("Report Action", () => {
   let project: NickelProject;
@@ -36,11 +35,11 @@ describe("Report Action", () => {
       ),
     );
     expect(action.columns).toStrictEqual([
-      new TableColumn("Project"),
-      new TableColumn("Branch"),
-      new TableColumn("# Mod"),
-      new TableColumn("Commit"),
-      new TableColumn("Marks"),
+      { title: "Project" },
+      { title: "Branch" },
+      { title: "# Mod" },
+      { title: "Commit" },
+      { title: "Marks" },
     ]);
   });
 

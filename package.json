@@ -30,6 +30,7 @@
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
     "@types/tmp": "^0.2.6",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^10.8.1",
     "import-sort-style-eslint": "^6.0.0",
     "prettier": "^3.9.6",
@@ -40,6 +41,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "@nickel/table": "^1.0.0",
     "@types/node": "^26.2.0",
     "chalk": "^6.0.0",
     "commander": "^15.0.0",
@@ -50,5 +52,8 @@
       "style": "eslint",
       "parser": "typescript"
     }
-  }
+  },
+  "workspaces": [
+    "packages/table"
+  ]
 }

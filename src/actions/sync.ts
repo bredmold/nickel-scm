@@ -1,16 +1,10 @@
 import { NickelAction } from "./nickel-action.js";
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
 import { logger } from "../logger.js";
 
-export enum SyncStatus {
-  New = "sync-new",
-  Success = "sync-success",
-  Failure = "sync-fail",
-  Dirty = "sync-dirty",
-  Skipped = "sync-skipped",
-}
+export type SyncStatus =
+  "sync-new" | "sync-success" | "sync-fail" | "sync-dirty" | "sync-skipped";
 
 export class RepositorySyncAction implements NickelAction {
   skipReport(project: NickelProject): ReportLine {
@@ -19,16 +13,16 @@ export class RepositorySyncAction implements NickelAction {
         Project: project.name,
         Updated: "0",
         Branch: "",
-        Status: SyncStatus.Skipped,
+        Status: "sync-skipped",
       },
       false,
     );
   }
   readonly columns = [
-    new TableColumn("Project"),
-    new TableColumn("Branch"),
-    new TableColumn("Updated"),
-    new TableColumn("Status"),
+    { title: "Project" },
+    { title: "Branch" },
+    { title: "Updated" },
+    { title: "Status" },
   ];
 
   async act(project: NickelProject): Promise<ReportLine> {
@@ -49,20 +43,20 @@ export class RepositorySyncAction implements NickelAction {
       const status = await project.repository.status();
       const branch = status.branch;
       if (status.modifiedFiles.length > 0) {
-        return line(branch, [], SyncStatus.Dirty);
+        return line(branch, [], "sync-dirty");
       } else {
         try {
           const pullResult = await project.repository.pull();
           const updatedFiles = pullResult.updatedFiles;
-          return line(branch, updatedFiles, SyncStatus.Success);
+          return line(branch, updatedFiles, "sync-success");
         } catch (e) {
           logger.error(e);
-          return line(branch, [], SyncStatus.Failure);
+          return line(branch, [], "sync-fail");
         }
       }
     } catch (e) {
       logger.error(e);
-      return line("", [], SyncStatus.Failure);
+      return line("", [], "sync-fail");
     }
   }
 

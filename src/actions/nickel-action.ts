@@ -1,6 +1,6 @@
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
+import { TableColumn } from "@nickel/table/dist/src/table.js";
 
 export interface NickelAction {
   /**

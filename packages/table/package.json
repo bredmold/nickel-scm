@@ -1,0 +1,27 @@
+{
+  "name": "@nickel/table",
+  "version": "1.0.0",
+  "description": "Nickel table rendering package",
+  "keywords": [
+    "nickel",
+    "table"
+  ],
+  "license": "MIT",
+  "author": "bredmold@gmail.com",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "vitest --run",
+    "format": "prettier --write '**/*.ts'"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.11",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "chalk": "^6.0.0"
+  }
+}

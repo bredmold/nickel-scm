@@ -1,18 +1,12 @@
-import { describe, test, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 import { Chalk } from "chalk";
 
-import {
-  CellAlignment,
-  NickelTable,
-  TableCell,
-  TableColumn,
-  TableRow,
-} from "./nickel-table.js";
+import { NickelTable, TableCell, TableRow } from "./table.js";
 
 describe("Nickel Table", () => {
   test("Simplest table", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("a")];
+    const columns = [{ title: "a" }];
     const rows = [new TableRow([new TableCell("b")])];
     const table = new NickelTable(columns, rows, chalk);
 
@@ -30,7 +24,7 @@ describe("Nickel Table", () => {
 
   test("2x2 Table", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("a"), new TableColumn("b")];
+    const columns = [{ title: "a" }, { title: "b" }];
     const rows = [
       new TableRow([new TableCell("c"), new TableCell("d")]),
       new TableRow([new TableCell("e"), new TableCell("f")]),
@@ -53,7 +47,7 @@ describe("Nickel Table", () => {
 
   test("Table with separator row", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("a"), new TableColumn("b")];
+    const columns = [{ title: "a" }, { title: "b" }];
     const rows = [
       new TableRow([new TableCell("c"), new TableCell("d")]),
       new TableRow([new TableCell(""), new TableCell("")], "sep"),
@@ -78,7 +72,7 @@ describe("Nickel Table", () => {
 
   test("Separator row with content", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("a"), new TableColumn("b")];
+    const columns = [{ title: "a" }, { title: "b" }];
     const rows = [
       new TableRow([new TableCell("c"), new TableCell("d")]),
       new TableRow([new TableCell("g"), new TableCell("h")], "sep"),
@@ -103,12 +97,9 @@ describe("Nickel Table", () => {
 
   test("Table with left aligned and right aligned cells", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("one"), new TableColumn("two")];
+    const columns = [{ title: "one" }, { title: "two" }];
     const rows = [
-      new TableRow([
-        new TableCell("c", CellAlignment.Left),
-        new TableCell("d", CellAlignment.Right),
-      ]),
+      new TableRow([new TableCell("c", "left"), new TableCell("d", "right")]),
     ];
     const table = new NickelTable(columns, rows, chalk);
 
@@ -127,7 +118,7 @@ describe("Nickel Table", () => {
 
   test("Invalid row length", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("one"), new TableColumn("two")];
+    const columns = [{ title: "one" }, { title: "two" }];
     const rows = [new TableRow([new TableCell("c")])];
 
     expect(() => new NickelTable(columns, rows, chalk)).toThrow("Invalid row");
@@ -135,11 +126,11 @@ describe("Nickel Table", () => {
 
   test("Cell with chalk content", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("one"), new TableColumn("two")];
+    const columns = [{ title: "one" }, { title: "two" }];
     const rows = [
       new TableRow([
-        new TableCell(chalk.green("c"), CellAlignment.Left),
-        new TableCell("d", CellAlignment.Right),
+        new TableCell(chalk.green("c"), "left"),
+        new TableCell("d", "right"),
       ]),
     ];
     const table = new NickelTable(columns, rows, chalk);
@@ -159,9 +150,9 @@ describe("Nickel Table", () => {
 
   test("First row is a separator", () => {
     const chalk = new Chalk({ level: 1 });
-    const columns = [new TableColumn("one")];
+    const columns = [{ title: "one" }];
     const rows = [
-      new TableRow([new TableCell("s", CellAlignment.Left)], "sep"),
+      new TableRow([new TableCell("s", "left")], "sep"),
       new TableRow([new TableCell("a")]),
     ];
     const table = new NickelTable(columns, rows, chalk);

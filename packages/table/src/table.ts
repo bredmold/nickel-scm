@@ -1,12 +1,10 @@
 import { ChalkInstance } from "chalk";
 
-export class RowConfig {
-  constructor(
-    readonly left: string,
-    readonly right: string,
-    readonly sep: string,
-    readonly pad: string,
-  ) {}
+export interface RowConfig {
+  readonly left: string;
+  readonly right: string;
+  readonly sep: string;
+  readonly pad: string;
 }
 
 /**
@@ -20,31 +18,27 @@ export class RowConfig {
  *
  * Other configuration tags are perfectly acceptable
  */
-export class TableConfig {
-  [index: string]: RowConfig;
-}
+type TableConfigKey = "first" | "last" | "sep" | "data";
+export type TableConfig = Record<TableConfigKey, RowConfig>;
 
-const CONFIG = {
-  first: new RowConfig("╔═", "═╗", "═╤═", "═"),
-  last: new RowConfig("╚═", "═╝", "═╧═", "═"),
-  sep: new RowConfig("╟─", "─╢", "─┼─", "─"),
-  data: new RowConfig("║ ", " ║", " │ ", " "),
+const CONFIG: TableConfig = {
+  first: { left: "╔═", right: "═╗", sep: "═╤═", pad: "═" },
+  last: { left: "╚═", right: "═╝", sep: "═╧═", pad: "═" },
+  sep: { left: "╟─", right: "─╢", sep: "─┼─", pad: "─" },
+  data: { left: "║ ", right: " ║", sep: " │ ", pad: " " },
 };
 
 /**
  * Model a table column, including all relevant data
  */
-export class TableColumn {
-  constructor(readonly title: string) {}
+export interface TableColumn {
+  readonly title: string;
 }
 
 /**
  * Cell alignment - supports left, and right
  */
-export enum CellAlignment {
-  Left,
-  Right,
-}
+export type CellAlignment = "left" | "right";
 
 // eslint-disable-next-line no-control-regex
 const ANSI_PATTERN = /\u001b\[\d+m/;
@@ -57,7 +51,7 @@ export class TableCell {
 
   constructor(
     private readonly data: string,
-    private readonly align: CellAlignment = CellAlignment.Right,
+    private readonly align: CellAlignment = "right",
   ) {
     this.size = this.lengthInternal();
   }
@@ -70,9 +64,7 @@ export class TableCell {
    */
   render(width: number, pad: string): string {
     const padding = pad.repeat(width - this.size);
-    return this.align === CellAlignment.Left
-      ? this.data + padding
-      : padding + this.data;
+    return this.align === "left" ? this.data + padding : padding + this.data;
   }
 
   private lengthInternal(): number {
@@ -89,13 +81,13 @@ export class TableCell {
 export class TableRow {
   constructor(
     readonly cells: TableCell[],
-    readonly tag: string = "data",
+    readonly tag: TableConfigKey = "data",
   ) {}
 
   render(
     columnWidths: number[],
     tableConfig: TableConfig,
-    override: string | null = null,
+    override: TableConfigKey | null = null,
   ): string {
     const tag = override ? override : this.tag;
     const rowConfig = tableConfig[tag];
@@ -130,7 +122,7 @@ export class NickelTable {
   render(config: TableConfig = CONFIG): string {
     const emptyRow = new TableRow(
       this.columns.map(() => new TableCell("")),
-      "empty",
+      "data",
     );
     const headerRow = new TableRow(
       this.columns.map((col) => new TableCell(this.chalk.bold(col.title))),

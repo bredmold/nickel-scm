@@ -2,10 +2,7 @@ import { vitest, describe, beforeEach, afterEach, test, expect } from "vitest";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
-import {
-  GuidedBranchRemovalAction,
-  GuidedBranchRemovalStatus,
-} from "./guided-remove.js";
+import { GuidedBranchRemovalAction } from "./guided-remove.js";
 
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
@@ -58,7 +55,7 @@ describe("Guided Remove", () => {
       new ReportLine({
         Project: "test",
         Branch: "master",
-        Status: GuidedBranchRemovalStatus.Skipped,
+        Status: "guided-merge-skip",
         "# Kept": "0",
         "# Removed": "0",
         "# Failed": "0",
@@ -100,7 +97,7 @@ describe("Guided Remove", () => {
       new ReportLine({
         Project: "test",
         Branch: "master",
-        Status: GuidedBranchRemovalStatus.Skipped,
+        Status: "guided-merge-skip",
         "# Kept": "1",
         "# Removed": "0",
         "# Failed": "0",
@@ -155,7 +152,7 @@ describe("Guided Remove", () => {
       new ReportLine({
         Project: "test",
         Branch: "master",
-        Status: GuidedBranchRemovalStatus.Success,
+        Status: "guided-merge-success",
         "# Kept": "0",
         "# Removed": "1",
         "# Failed": "0",
@@ -225,7 +222,7 @@ describe("Guided Remove", () => {
       new ReportLine({
         Project: "test",
         Branch: "master",
-        Status: GuidedBranchRemovalStatus.Success,
+        Status: "guided-merge-success",
         "# Kept": "0",
         "# Removed": "1",
         "# Failed": "0",

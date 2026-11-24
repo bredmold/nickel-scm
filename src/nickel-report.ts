@@ -1,14 +1,5 @@
-import {
-  CellAlignment,
-  NickelTable,
-  TableCell,
-  TableColumn,
-  TableRow,
-} from "./nickel-table.js";
-
-import { CleanupStatus } from "./actions/cleanup.js";
-import { SyncStatus } from "./actions/sync.js";
 import { Chalk } from "chalk";
+import { NickelTable, TableCell, TableColumn, TableRow } from "@nickel/table";
 
 /**
  * Returns a collection of name/value pairs
@@ -88,7 +79,7 @@ export class NickelReport {
     const sectionText = sep.name.match(/^\s*$/)
       ? ""
       : ` ${this.chalk.italic.bold(sep.name)} `;
-    const head = new TableCell(sectionText, CellAlignment.Left);
+    const head = new TableCell(sectionText, "left");
     const tail = this.columns.slice(1).map(() => new TableCell(""));
     return new TableRow([head].concat(tail), "sep");
   }
@@ -103,14 +94,11 @@ export class NickelReport {
       let value = row.get(column.title);
 
       // Value transformations
-      if (value === SyncStatus.Success || value === CleanupStatus.Success) {
+      if (value === "sync-success" || value === "clean-success") {
         value = this.chalk.green(value);
-      } else if (
-        value === SyncStatus.Failure ||
-        value == CleanupStatus.Failure
-      ) {
+      } else if (value === "sync-fail" || value == "clean-failure") {
         value = this.chalk.red(value);
-      } else if (value === SyncStatus.Dirty || value === CleanupStatus.Dirty) {
+      } else if (value === "sync-dirty" || value === "clean-dirty") {
         value = this.chalk.bgYellow.black(value);
       }
 

@@ -1,9 +1,8 @@
 import { vitest, describe, beforeEach, test, expect } from "vitest";
 import { EMPTY_PROJECT, NickelProject } from "../nickel-project.js";
-import { RepositorySyncAction, SyncStatus } from "./sync.js";
+import { RepositorySyncAction } from "./sync.js";
 
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
 
 describe("Sync Action", () => {
   let project: NickelProject;
@@ -29,16 +28,16 @@ describe("Sync Action", () => {
           Project: EMPTY_PROJECT.name,
           Updated: "0",
           Branch: "",
-          Status: SyncStatus.Skipped,
+          Status: "sync-skipped",
         },
         false,
       ),
     );
     expect(action.columns).toStrictEqual([
-      new TableColumn("Project"),
-      new TableColumn("Branch"),
-      new TableColumn("Updated"),
-      new TableColumn("Status"),
+      { title: "Project" },
+      { title: "Branch" },
+      { title: "Updated" },
+      { title: "Status" },
     ]);
   });
 

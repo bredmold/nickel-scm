@@ -1,7 +1,7 @@
 import { NickelAction } from "./nickel-action.js";
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
+import { TableColumn } from "@nickel/table/dist/src/table.js";
 
 export class RepositoryReportAction implements NickelAction {
   skipReport(project: NickelProject): ReportLine {
@@ -17,11 +17,11 @@ export class RepositoryReportAction implements NickelAction {
     );
   }
   readonly columns: TableColumn[] = [
-    new TableColumn("Project"),
-    new TableColumn("Branch"),
-    new TableColumn("# Mod"),
-    new TableColumn("Commit"),
-    new TableColumn("Marks"),
+    { title: "Project" },
+    { title: "Branch" },
+    { title: "# Mod" },
+    { title: "Commit" },
+    { title: "Marks" },
   ];
 
   async act(project: NickelProject): Promise<ReportLine> {

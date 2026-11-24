@@ -7,7 +7,6 @@ import {
 import { NickelAction } from "./nickel-action.js";
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
 import { logger } from "../logger.js";
 
 /**
@@ -34,9 +33,9 @@ export class OldBranchesReportAction implements NickelAction {
   }
 
   readonly columns = [
-    new TableColumn("Project"),
-    new TableColumn("Status"),
-    new TableColumn("# Candidates"),
+    { title: "Project" },
+    { title: "Status" },
+    { title: "# Candidates" },
   ];
 
   act(project: NickelProject): Promise<ReportLine> {

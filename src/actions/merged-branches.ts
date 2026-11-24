@@ -7,7 +7,6 @@ import {
 import { NickelAction } from "./nickel-action.js";
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
 import { logger } from "../logger.js";
 
 export class MergedBranchesReportAction implements NickelAction {
@@ -26,9 +25,9 @@ export class MergedBranchesReportAction implements NickelAction {
   }
 
   readonly columns = [
-    new TableColumn("Project"),
-    new TableColumn("Status"),
-    new TableColumn("# Candidates"),
+    { title: "Project" },
+    { title: "Status" },
+    { title: "# Candidates" },
   ];
 
   async act(project: NickelProject): Promise<ReportLine> {

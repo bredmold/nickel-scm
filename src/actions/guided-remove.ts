@@ -10,17 +10,15 @@ import { BranchReportDetails } from "./branch-reports.js";
 import { NickelAction } from "./nickel-action.js";
 import { NickelProject } from "../nickel-project.js";
 import { ReportLine } from "../nickel-report.js";
-import { TableColumn } from "../nickel-table.js";
 import { logger } from "../logger.js";
 
-export enum GuidedBranchRemovalStatus {
-  New = "guided-merge-new",
-  Success = "guided-merge-success",
-  Failure = "guided-merge-failure",
-  Skipped = "guided-merge-skip",
-  Dirty = "guided-merge-dirty",
-  Working = "guided-merge-working",
-}
+export type GuidedBranchRemovalStatus =
+  | "guided-merge-new"
+  | "guided-merge-success"
+  | "guided-merge-failure"
+  | "guided-merge-skip"
+  | "guided-merge-dirty"
+  | "guided-merge-working";
 
 export class GuidedBranchRemovalAction implements NickelAction {
   constructor(readonly reportFile: string) {}
@@ -30,7 +28,7 @@ export class GuidedBranchRemovalAction implements NickelAction {
       {
         Project: project.name,
         Branch: "",
-        Status: GuidedBranchRemovalStatus.Skipped,
+        Status: "guided-merge-skip",
         "# Kept": "0",
         "# Removed": "0",
         "# Failed": "0",
@@ -40,12 +38,12 @@ export class GuidedBranchRemovalAction implements NickelAction {
   }
 
   readonly columns = [
-    new TableColumn("Project"),
-    new TableColumn("Branch"),
-    new TableColumn("Status"),
-    new TableColumn("# Kept"),
-    new TableColumn("# Removed"),
-    new TableColumn("# Failed"),
+    { title: "Project" },
+    { title: "Branch" },
+    { title: "Status" },
+    { title: "# Kept" },
+    { title: "# Removed" },
+    { title: "# Failed" },
   ];
 
   act(project: NickelProject): Promise<ReportLine> {
@@ -147,12 +145,12 @@ class GuidedBranchRemoval {
 
       try {
         if (status.modifiedFiles.length > 0) {
-          return line(branch, [], [], GuidedBranchRemovalStatus.Dirty);
+          return line(branch, [], [], "guided-merge-dirty");
         } else if (status.branch !== this.project.defaultBranch) {
-          return line(branch, [], [], GuidedBranchRemovalStatus.Working);
+          return line(branch, [], [], "guided-merge-working");
         } else if (this.branchesToRemove.length < 1) {
           logger.debug(`${this.project.name}: No branches to remove`);
-          return line(branch, [], [], GuidedBranchRemovalStatus.Skipped);
+          return line(branch, [], [], "guided-merge-skip");
         } else {
           const fetchResult = await this.project.repository.fetch();
 
@@ -182,16 +180,16 @@ class GuidedBranchRemoval {
             branch,
             removedBranches,
             notRemovedBranches,
-            GuidedBranchRemovalStatus.Success,
+            "guided-merge-success",
           );
         }
       } catch (e) {
         logger.error(e);
-        return line(branch, [], [], GuidedBranchRemovalStatus.Failure);
+        return line(branch, [], [], "guided-merge-failure");
       }
     } catch (e) {
       logger.error(e);
-      return line("", [], [], GuidedBranchRemovalStatus.Failure);
+      return line("", [], [], "guided-merge-failure");
     }
   }
 

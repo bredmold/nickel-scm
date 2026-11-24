@@ -2,27 +2,20 @@ import { describe, beforeEach, test, expect } from "vitest";
 import { Chalk } from "chalk";
 
 import {
-  CellAlignment,
-  TableCell,
-  TableColumn,
-  TableRow,
-} from "./nickel-table.js";
-import {
   NickelReport,
   ReportLine,
   ReportSeparator,
   ReportingItem,
 } from "./nickel-report.js";
 
-import { CleanupStatus } from "./actions/cleanup.js";
-import { SyncStatus } from "./actions/sync.js";
+import { TableCell, TableColumn, TableRow } from "@nickel/table";
 
 describe("Nickel Report", () => {
   let columns: TableColumn[];
   let report: NickelReport;
 
   beforeEach(() => {
-    columns = [new TableColumn("test")];
+    columns = [{ title: "test" }];
     report = new NickelReport(columns);
   });
 
@@ -48,7 +41,7 @@ describe("Nickel Report", () => {
     const table = report.buildReport(rows);
     expect(table.rows).toStrictEqual([
       new TableRow([new TableCell(" a")]),
-      new TableRow([new TableCell("", CellAlignment.Left)], "sep"),
+      new TableRow([new TableCell("", "left")], "sep"),
       new TableRow([new TableCell(" b")]),
     ]);
   });
@@ -65,7 +58,7 @@ describe("Nickel Report", () => {
     expect(table.rows).toStrictEqual([
       new TableRow([new TableCell(" a")]),
       new TableRow(
-        [new TableCell(` ${chalk.italic.bold("george")} `, CellAlignment.Left)],
+        [new TableCell(` ${chalk.italic.bold("george")} `, "left")],
         "sep",
       ),
       new TableRow([new TableCell(" b")]),
@@ -75,12 +68,12 @@ describe("Nickel Report", () => {
   test("Automatic highlighting", () => {
     const chalk = new Chalk({ level: 1 });
     const rows = [
-      new ReportLine({ test: SyncStatus.Success }),
-      new ReportLine({ test: SyncStatus.Failure }),
-      new ReportLine({ test: SyncStatus.Dirty }),
-      new ReportLine({ test: CleanupStatus.Success }),
-      new ReportLine({ test: CleanupStatus.Failure }),
-      new ReportLine({ test: CleanupStatus.Dirty }),
+      new ReportLine({ test: "sync-success" }),
+      new ReportLine({ test: "sync-fail" }),
+      new ReportLine({ test: "sync-dirty" }),
+      new ReportLine({ test: "clean-success" }),
+      new ReportLine({ test: "clean-failure" }),
+      new ReportLine({ test: "clean-dirty" }),
     ];
 
     const table = report.buildReport(rows);

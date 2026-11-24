@@ -5,7 +5,6 @@ import { NickelAction } from "./actions/nickel-action.js";
 import { NickelInstigator } from "./nickel-instigator.js";
 import { NickelProject } from "./nickel-project.js";
 import { SelectedItem } from "./nickel-selector.js";
-import { TableColumn } from "./nickel-table.js";
 
 describe("Nickel Instigator", () => {
   let items: SelectedItem[];
@@ -37,7 +36,7 @@ describe("Nickel Instigator", () => {
   test("doTheThing", async () => {
     let actCount = 0;
     const action = new (class implements NickelAction {
-      readonly columns = [new TableColumn("test")];
+      readonly columns = [{ title: "test" }];
       readonly command = "test";
       readonly description = "test";
       skipReport(project: NickelProject) {
@@ -61,7 +60,7 @@ describe("Nickel Instigator", () => {
 
   test("skipped project", async () => {
     const action = new (class implements NickelAction {
-      readonly columns = [new TableColumn("test")];
+      readonly columns = [{ title: "test" }];
       readonly command = "test";
       readonly description = "test";
       skipReport(project: NickelProject) {
