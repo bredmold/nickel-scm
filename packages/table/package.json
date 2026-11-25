@@ -1,6 +1,6 @@
 {
   "name": "@bredmold/table",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nickel table rendering package",
   "repository": {
     "type": "git",
