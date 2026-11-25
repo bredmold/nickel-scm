@@ -1,5 +1,5 @@
 import { Chalk } from "chalk";
-import { NickelTable, TableCell, TableColumn, TableRow } from "@nickel/table";
+import { NickelTable, TableCell, TableColumn, TableRow } from "@bredmold/table";
 
 /**
  * Returns a collection of name/value pairs

@@ -1,7 +1,11 @@
 {
-  "name": "@nickel/table",
-  "version": "1.0.0",
+  "name": "@bredmold/table",
+  "version": "0.1.0",
   "description": "Nickel table rendering package",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bredmold/nickel.git"
+  },
   "keywords": [
     "nickel",
     "table"

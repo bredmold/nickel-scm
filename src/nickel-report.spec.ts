@@ -8,7 +8,7 @@ import {
   ReportingItem,
 } from "./nickel-report.js";
 
-import { TableCell, TableColumn, TableRow } from "@nickel/table";
+import { TableCell, TableColumn, TableRow } from "@bredmold/table";
 
 describe("Nickel Report", () => {
   let columns: TableColumn[];
